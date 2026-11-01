@@ -60,14 +60,18 @@
   function sheet(app) {
     var set = app.set, o = SP.store.settings(set.id), cards = set.kind === 'cards';
     var p = SP.store.progress(set.id), n = SP.core.rounds.build(app.items, o, p, set).length;
-    // D-19 Practice: Smart (default) / Whole set / one entry per section (procedures). An old saved
-    // section option shows as that section (rounds.plan reads it).
-    var cur = SP.core.rounds.plan(app.items, o, p, set).practice;
-    var opt = function (v, label) { return '<option value="' + U.esc(v) + '"' + (cur === v ? ' selected' : '') + '>' + U.esc(label) + '</option>'; };
-    var practice = '<label class="sk-field">Practice<select data-opt="practice">' + opt('smart', 'Smart') + opt('whole', 'Whole set') +
-      (cards ? '' : (set.sections || []).map(function (s) { return opt(s.id, s.title || s.id); }).join('')) + '</select></label>';
+    // D-22 Scope: Smart (default) / Whole set / Custom (procedures). An old saved section option reads
+    // as Custom (rounds.practiceOf), with that section's steps.
+    var cur = SP.core.rounds.practiceOf(o);
+    var sel = SP.core.scope.selected(o, app.items);
+    var customLine = sel.length ? sel.length + ' steps · ' + SP.core.scope.format(sel, app.items) : 'Pick steps';
+    var edit = '<button data-ui="button" data-kind="ghost" class="sk-link" data-act="scopeEdit">Edit selection ›</button>';
+    var scope = '<section class="stack g0"><h2 class="sk-h2">Scope</h2><div class="sk-radios" role="radiogroup" aria-label="Scope">' +
+      U.radio('practice', 'smart', 'Smart', cards ? '7 at a time, then the whole set' : 'Scene by scene, then the whole set', cur === 'smart') +
+      U.radio('practice', 'whole', 'Whole set', '', cur === 'whole') +
+      (cards ? '' : U.radio('practice', 'custom', 'Custom', customLine, cur === 'custom', edit)) + '</div></section>';
     return '<div class="sk-scrim" data-act="closeSheet"></div><section class="sk-sheet" role="dialog" aria-label="Options">' +
-      '<div class="sk-sheet-h"><h2>Options</h2>' + U.iconBtn('close', 'Close', 'closeSheet') + '</div>' + practice +
+      '<div class="sk-sheet-h"><h2>Options</h2>' + U.iconBtn('close', 'Close', 'closeSheet') + '</div>' + scope +
       '<div class="stack g0">' +
       (cards ? '' : U.toggle('starred', 'Starred steps only', o.starred, 'The ones you can’t miss')) +
       U.toggle('weakFirst', 'Weak first', o.weakFirst) +
@@ -81,14 +85,16 @@
   var actions = {
     flipPreview: function (app) { app.update({ pvFlip: !app.state.pvFlip }); },
     pv: function (app, el) { app.update({ pv: Math.max(0, (app.state.pv || 0) + Number(el.dataset.id)), pvFlip: false }); },
-    edit: function (app) { SP.screens.edit.start(app, app.set, false); }
+    edit: function (app) { SP.screens.edit.start(app, app.set, false); },
+    // T-23: the custom scope editor, returning to this screen (inside a round too: the round is kept)
+    scopeEdit: function (app) { app.update({ screen: 'scope', scopeFrom: app.state.screen, sheet: null }); }
   };
 
   // Options change live: saved per set, and the current round is rebuilt from them.
   function onOption(app, el) {
     var o = SP.store.settings(app.set.id);
     o[el.dataset.opt] = el.type === 'checkbox' ? el.checked : el.value;
-    if (el.dataset.opt === 'practice') delete o.section;   // the pre-D-19 Section option gives way
+    if (el.dataset.opt === 'practice') delete o.section;   // the old section option gives way (D-22)
     SP.store.saveSettings(app.set.id, o);
     if (app.state.round) SP.screens.round.refilter(app);
     app.render();

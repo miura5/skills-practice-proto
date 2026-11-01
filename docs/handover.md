@@ -3,8 +3,8 @@
 Last updated 2026-11-01 by the D-19 batch chat (build manager). No agent is running.
 
 ## Where things stand
-- Live: v0.5.0 at https://claude.ai/artifact/UUj5psocojXR1xkK2QVAbh (same link every release; version 14).
-- Tests: `node tests/core.test.js` passes 126.
+- Live: v0.6.0 at https://claude.ai/artifact/UUj5psocojXR1xkK2QVAbh (same link every release; version 14).
+- Tests: `node tests/core.test.js` passes 152.
 - Shipped today (v0.5.0): chunked learning, D-19 + D-21, tasks T-14..T-17 all ticked.
   - Chunks: card groups of 7; procedure scenes (Med Admin 9 chunks, NG tube 9). Smart rounds go
     Learn -> Link (last 3 steps of the previous chunk) -> Run (whole set) from progress.
@@ -15,14 +15,19 @@ Last updated 2026-11-01 by the D-19 batch chat (build manager). No agent is runn
 - Earlier today: v0.4.2 and before (D-10..D-18). Account saving set up; not yet confirmed with real data
   (list data/users/me via ArtifactData).
 
-## How the batch ran (D-20)
+## v0.6.0 (D-22, D-23; T-18..T-23)
+Scene Picker pop-up + scene colours, round header = scene only, segbar v2 (equal, green), Continue after
+Smart rounds, Options Scope (Smart / Whole set / Custom) and the Custom scope screen (core/scope.js).
+Ran as 3 Haiku lanes; anchors verified before launch; merged and smoke-tested together.
+
+## How the D-19 batch ran (D-20)
 T-14 first, then three lane agents in git worktrees with file ownership; the build manager merged and
 reviewed each lane, fixed small drift (raw radius -> --r-pill, study.css header list), smoke-tested the
 combined build in Chromium (390px, no console errors), and republished once. Lesson: check that lane
 anchors really landed in every shared file before launching lanes (the tests anchor did not).
 
 ## Open for Matt
-- Scene Picker is a native select (iOS wheel), not Proprietary's popover chip. Ask Matt if he wants the popover.
+- Range rule to confirm with Matt: a bare "15" means 15a..15q.
 - Smart + Starred only can give an empty round when the current chunk has no starred steps (toast). Possible
   follow-up: skip to the next chunk with starred steps.
 - A copy of Med Admin or NG tube that Matt edited before v0.5.0 has no scenes (his saved copy wins). Reset in

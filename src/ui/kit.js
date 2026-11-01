@@ -204,7 +204,23 @@
 
 
   // ---- T-23 helpers (Lane C) ----
+  // radio: one row of the Options Scope list (D-22). The label is the tap target (title, sub-line, radio
+  // on the right); extra is markup under the row (the Custom row's Edit selection button).
+  function radio(name, value, title, sub, checked, extra) {
+    return '<div class="sk-radio-row"><label class="sk-radio"><span class="sk-radio-t"><b>' + esc(title) + '</b>' +
+      (sub ? '<small>' + esc(sub) + '</small>' : '') + '</span>' +
+      '<input type="radio" name="' + esc(name) + '" value="' + esc(value) + '" data-opt="' + esc(name) + '"' + (checked ? ' checked' : '') + '><i aria-hidden="true"></i></label>' +
+      (extra || '') + '</div>';
+  }
+  // scopeRow: one row of the custom scope editor (sk-scope). kind 'sec' (a section) or 'step'; state
+  // 'on' | 'mixed' | 'off' drives the tri-state box. Clicks route as data-act scopeSec / scopeStep.
+  function scopeRow(kind, id, state, body) {
+    var aria = state === 'mixed' ? 'mixed' : state === 'on' ? 'true' : 'false';
+    return '<button type="button" role="checkbox" aria-checked="' + aria + '" class="sk-scope-row" data-kind="' + kind + '" data-act="' +
+      (kind === 'sec' ? 'scopeSec' : 'scopeStep') + '" data-id="' + esc(id) + '">' +
+      '<span class="sk-scope-mark" data-s="' + state + '" aria-hidden="true"></span>' + body + '</button>';
+  }
 
 
-  SP.ui = { carousel: carousel, carouselBind: carouselBind, carouselMove: carouselMove, esc: esc, marked: marked, icon: icon, iconBtn: iconBtn, mastery: mastery, setRow: setRow, practice: practice, art: art, flip: flip, session: session, tabbar: tabbar, toggle: toggle, tags: tags, tagIntent: tagIntent, tagsFocus: tagsFocus, segbar: segbar, picker: picker, sceneTone: sceneTone };
+  SP.ui = { carousel: carousel, carouselBind: carouselBind, carouselMove: carouselMove, esc: esc, marked: marked, icon: icon, iconBtn: iconBtn, mastery: mastery, setRow: setRow, practice: practice, art: art, flip: flip, session: session, tabbar: tabbar, toggle: toggle, tags: tags, tagIntent: tagIntent, tagsFocus: tagsFocus, segbar: segbar, picker: picker, sceneTone: sceneTone, radio: radio, scopeRow: scopeRow };
 })(window.SP);

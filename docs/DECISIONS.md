@@ -134,12 +134,12 @@ Matt hands it to a new chat by attaching the repo; CLAUDE.md sets the role.
 - [x] T-15 Data + Edit: scene tags in set data; sk-tags tag input (Study kit, generic); Proprietary Picker per section; seed Med Admin + NG tube scenes from the old prototype (D-19). Batch 2 of 4. Done 2026-11-01 (Lane A).
 - [x] T-16 Rounds + screens: Smart rounds, segmented session bar (Study kit), scene in the prompt, Options Practice Smart / Whole set / Section, Results "Next: <chunk>" (D-19). Batch 3 of 4. Done 2026-11-01 (Lane B).
 - [x] T-17 Grading simplification: strict order; remove the nearby-step stage and the stored strict/before/anytime rules; update tests (D-19). Batch 4 of 4. Done 2026-11-01 (Lane C).
-- [ ] T-18 Proprietary pop-up Picker for scenes (phone + PC) + per-scene colours (D-22). Lane A.
-- [ ] T-19 Round header shows the scene in Learn/Link only; prompt prefix removed (D-22). Lane B.
-- [ ] T-20 sk-segbar: equal segments, fill per own steps, green, count pill (D-22). Lane B.
-- [ ] T-21 Results after Smart: Continue: <next chunk> + Back to set (D-22). Lane B.
-- [ ] T-22 Options "Scope": Smart / Whole set / Custom (D-22). Lane C.
-- [ ] T-23 Custom scope editor sk-scope + core/scope.js + tests (D-22). Lane C.
+- [x] T-18 Proprietary pop-up Picker for scenes (phone + PC) + per-scene colours (D-22). Done 2026-11-01 (Lane A).
+- [x] T-19 Round header shows the scene in Learn/Link only; prompt prefix removed (D-22). Done 2026-11-01 (Lane B).
+- [x] T-20 sk-segbar: equal segments, fill per own steps, green, count pill (D-22). Done 2026-11-01 (Lane B).
+- [x] T-21 Results after Smart: Continue: <next chunk> + Back to set (D-22). Done 2026-11-01 (Lane B).
+- [x] T-22 Options "Scope": Smart / Whole set / Custom (D-22). Done 2026-11-01 (Lane C).
+- [x] T-23 Custom scope editor sk-scope + core/scope.js + tests (D-22). Done 2026-11-01 (Lane C).
 
 ## D-10 build notes (2026-11-01)
 - Bands: 100% Right; 60%+ row stays open with blanks; 34-59% Shaky; under 34% Missed.
@@ -275,3 +275,12 @@ Build notes on choices the D-19 design left open:
   where you came from. Range parsing/formatting is pure (core/scope.js) with tests.
 Lanes: A = T-18 (edit.js, app.js); B = T-19..T-21 (round.js, next.js, type.js, segbar); C = T-22..T-23
 (set.js, rounds.js, core/scope.js, screens/scope.js, index.html). Agents run on Haiku (Matt).
+
+## D-23 · Round polish + Scope shipped (2026-11-01, v0.6.0; T-18..T-23, lanes on Haiku)
+Build notes:
+- Picker (kit U.picker, generic): Proprietary chip + .popover menu on the native popover attribute, placed
+  under its chip; a bottom sheet under 600px. Scene colours --scene-1..6 (+ -bg) by tag order, mod 6.
+- The round header line is always drawn (blank when no scene) so nothing moves between items.
+- Continue always starts a Smart round in the same mode, whatever Scope is saved.
+- Scope: an old Section option now reads as Custom with that section's steps. In ranges a bare number
+  means its lettered steps (15 = 15a..15q). index.html gained <meta charset="utf-8"> (fixes "Â·" locally).

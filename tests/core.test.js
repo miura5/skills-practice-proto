@@ -1,6 +1,6 @@
 // Run: node tests/core.test.js  (no dependencies). Every grading bug gets a line here (D-05).
 global.SP = { core: {}, content: { list: [], add(s) { this.list.push(s); } } };
-['text', 'sets', 'keys', 'grade', 'progress', 'chunks', 'rounds'].forEach((f) => require('../src/core/' + f + '.js'));
+['text', 'sets', 'keys', 'grade', 'progress', 'chunks', 'scope', 'rounds'].forEach((f) => require('../src/core/' + f + '.js'));
 ['procedures/med-admin', 'procedures/ngt', 'cards/pharm-antibiotics', 'cards/lab-values'].forEach((f) => require('../content/' + f + '.js'));
 const { sets, grade, progress, rounds, chunks } = SP.core;
 let pass = 0, fail = 0;
@@ -191,7 +191,7 @@ ok('t16 build smart (default) = first chunk', t16Ids(rounds.build(t16Items, {}, 
 ok('t16 build smart = link steps + current chunk', t16Ids(rounds.build(t16Items, { practice: 'smart' }, t16A, t16Proc)) === 'a1,a2,b1,b2,b3');
 ok('t16 build whole = all items in order', t16Ids(rounds.build(t16Items, { practice: 'whole' }, t16A, t16Proc)) === t16Ids(t16Items));
 ok('t16 build section = that section', t16Ids(rounds.build(t16Items, { practice: 'c' }, {}, t16Proc)) === 'c1,c2');
-ok('t16 old section option still means that section', t16Ids(rounds.build(t16Items, { section: 'b' }, {}, t16Proc)) === 'b1,b2,b3' && rounds.practiceOf({ section: 'b', practice: 'smart' }) === 'b');
+ok('t16 old section option still means that section (now Custom, D-22)', t16Ids(rounds.build(t16Items, { section: 'b' }, {}, t16Proc)) === 'b1,b2,b3' && rounds.practiceOf({ section: 'b', practice: 'smart' }) === 'custom');
 ok('t16 old section all = smart', rounds.practiceOf({ section: 'all' }) === 'smart' && t16Ids(rounds.build(t16Items, { section: 'all' }, {}, t16Proc)) === 'a1,a2');
 ok('t16 unknown section falls back to smart', rounds.plan(t16Items, { practice: 'gone' }, {}, t16Proc).practice === 'smart' && t16Ids(rounds.build(t16Items, { section: 'gone' }, {}, t16Proc)) === 'a1,a2');
 ok('t16 smart + starred only', t16Ids(rounds.build(t16Items, { starred: true }, t16A, t16Proc)) === 'b2');
@@ -229,6 +229,39 @@ ok('t21 continue label = next chunk, Whole set in Run', chunks.smart(t16Proc, t1
 
 
 // ---- T-22..T-23 tests (Lane C) ----
+const { scope: S } = SP.core;
+const nums = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '13a', '13b', '13c', '13d'];
+for (let n = 14; n <= 32; n++) nums.push(String(n));
+const sx = nums.map((num, k) => ({ id: 'x' + num, num, section: k < 7 ? 'a' : k < 13 ? 'b' : 'c', star: num === '9' }));
+const sxText = '1, 8–12, 15–32';
+const sxPick = ['1', '8', '9', '10', '11', '12', ...Array.from({ length: 18 }, (_, i) => String(15 + i))].map((n) => 'x' + n);
+ok('scope parse: en dash ranges and single numbers', S.parse(sxText, sx).join() === sxPick.join());
+ok('scope format: runs collapse to en-dash ranges', S.format(sxPick, sx) === sxText);
+ok('scope format: a single step is its number', S.format(['x13b'], sx) === '13b' && S.format([], sx) === '');
+ok('scope parse: hyphen, spaces and reversed range', S.parse('8-12', sx).join() === 'x8,x9,x10,x11,x12' && S.parse('12 – 8', sx).length === 5);
+ok('scope parse: step numbers 13a..13d', S.parse('13a–13c', sx).join() === 'x13a,x13b,x13c' && S.parse('13d', sx).join() === 'x13d');
+ok('scope parse: ranges span set order across sections', S.parse('6–9', sx).join() === 'x6,x7,x8,x9' && S.parse('6–9', sx).length === 4);
+ok('scope parse: bad input and unknown numbers ignored', S.parse('', sx).length === 0 && S.parse('!!, ,;', sx).length === 0 &&
+  S.parse('99, zz, 5–99', sx).length === 0 && S.parse('1, 99, 2', sx).join() === 'x1,x2');
+ok('scope parse: unknown range end drops only that range', S.parse('1, 3–99', sx).join() === 'x1');
+ok('scope round trip: parse(format(ids)) = ids', S.parse(S.format(sxPick, sx), sx).join() === sxPick.join());
+const sxMed = sets.items(set('med-admin')), medNums = sxMed.map((i) => i.num);
+ok('scope med admin: nums include 13a..13d', ['13a', '13b', '13c', '13d'].every((n) => medNums.indexOf(n) >= 0));
+const medPick = sxMed.filter((i, k) => k === 0 || (k >= 7 && k <= 11) || (k >= 14 && k <= 31)).map((i) => i.id);
+ok('scope med admin: round trip on real steps', S.parse(S.format(medPick, sxMed), sxMed).join() === medPick.join());
+ok('scope med admin: a bare number takes its lettered steps (15 = 15a..15q)', S.parse('15', sxMed).length === 17 && S.parse('15', sxMed)[0] === sxMed.find((i) => i.num === '15a').id);
+ok('scope med admin: 15–32 starts at 15a, ends at 32', S.parse('15–32', sxMed).length === 63 && S.parse('15a-32', sxMed).length === 63);
+ok('scope med admin: 1, 8–12, 15–32 = 69 steps, formats as 1, 8–12, 15a–32', S.parse('1, 8–12, 15–32', sxMed).length === 69 && S.format(S.parse('1, 8–12, 15–32', sxMed), sxMed) === '1, 8–12, 15a–32');
+ok('scope med admin: 13a–13d = four steps', S.parse('13a–13d', sxMed).map((id) => sxMed.find((i) => i.id === id).num).join() === '13a,13b,13c,13d');
+ok('scope custom build: set order, unknown ids dropped', rounds.build(sx, { practice: 'custom', custom: ['x9', 'x3', 'zz'] }).map((i) => i.id).join() === 'x3,x9');
+ok('scope custom build: empty = no items', rounds.build(sx, { practice: 'custom', custom: [] }).length === 0 && rounds.build(sx, { practice: 'custom' }).length === 0);
+ok('scope custom build: starred still filters', rounds.build(sx, { practice: 'custom', custom: ['x9', 'x3'], starred: true }).map((i) => i.id).join() === 'x9');
+ok('scope custom: stage null, practiceOf custom', rounds.practiceOf({ practice: 'custom' }) === 'custom' && rounds.plan(t16Items, { practice: 'custom', custom: ['a1'] }, t16A, t16Proc).stage === null);
+ok('scope custom: a custom list beats an old section (practice custom)', S.selected({ practice: 'custom', section: 'b', custom: ['x1'] }, sx).join() === 'x1');
+ok('scope old section -> custom with that section step ids', rounds.practiceOf({ section: 'a' }) === 'custom' && S.selected({ section: 'a' }, sx).join() === 'x1,x2,x3,x4,x5,x6,x7');
+ok('scope old practice id -> custom; unknown section still falls back to smart', rounds.practiceOf({ practice: 'b' }) === 'custom' && rounds.plan(t16Items, { section: 'gone' }, {}, t16Proc).practice === 'smart');
+ok('scope old section as custom: builds that section', rounds.build(sx, { section: 'c' }).map((i) => i.id).join() === ['x13a', 'x13b', 'x13c', 'x13d'].concat(Array.from({ length: 19 }, (_, i) => 'x' + (14 + i))).join());
+ok('scope legacy: none for practice whole/smart/custom', S.legacy({ practice: 'whole' }) === null && S.legacy({ practice: 'smart', section: 'all' }) === null && S.legacy({}) === null);
 
 
 console.log(pass + ' passed, ' + fail + ' failed');
