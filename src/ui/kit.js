@@ -117,10 +117,52 @@
   }
 
   // ---- T-15 helpers (Lane A) ----
+  // sk-tags (D-19): a generic tag input. Badges are Proprietary chips; tapping one edits it in place
+  // (editingId), x removes it. o = {label, placeholder}. Taps route as data-act tagEdit / tagRemove.
+  function tags(name, list, editingId, o) {
+    o = o || {};
+    var n = esc(name), at = ' data-tags="' + n + '" data-id="';
+    return '<div class="sk-field"><label for="sk-tags-' + n + '">' + esc(o.label || name) + '</label><div class="sk-tags">' +
+      list.map(function (t) {
+        var l = esc(t.label), id = esc(t.id);
+        if (t.id === editingId) {
+          return '<input id="sk-tags-' + n + '-edit" class="sk-tags-in sk-tags-edit"' + at + id + '" value="' + l + '" size="' +
+            Math.max(4, String(t.label).length + 1) + '" aria-label="Rename ' + l + '" autocomplete="off" enterkeyhint="done">';
+        }
+        return '<span data-ui="chip" class="sk-tag"><button type="button" class="sk-tag-l" data-act="tagEdit"' + at + id + '" aria-label="Rename ' + l + '">' + l + '</button>' +
+          '<button type="button" class="sk-tag-x" data-act="tagRemove"' + at + id + '" aria-label="Remove ' + l + '">' + icon('close') + '</button></span>';
+      }).join('') +
+      '<input id="sk-tags-' + n + '" class="sk-tags-in" data-tags="' + n + '" placeholder="' + esc(o.placeholder || '') + '" autocomplete="off" enterkeyhint="done">' +
+      '</div></div>';
+  }
+  // Turns a keydown, input or focusout on an sk-tags input into an intent, or null:
+  // {type: add | commit | pull | cancel, name, id (the tag being edited), value, blur}.
+  function tagIntent(e) {
+    var t = e.target;
+    if (!t || !t.classList || !t.classList.contains('sk-tags-in')) return null;
+    var id = t.dataset.id || '', v = t.value, it = function (type, value) {
+      return { type: type, name: t.dataset.tags, id: id, value: value == null ? v : value, blur: e.type === 'focusout' };
+    };
+    var done = id ? 'commit' : 'add';
+    if (e.type === 'focusout') return id || v.trim() ? it(done) : null;
+    if (e.type === 'input') return v.indexOf(',') >= 0 ? it(done, v.split(',')[0]) : null;   // soft keyboards that hide the key
+    if (e.type !== 'keydown' || e.isComposing) return null;
+    if (e.key === ',' || e.key === 'Enter') return it(done);
+    if (e.key === 'Backspace' && !v) return it(id ? 'commit' : 'pull', '');
+    if (e.key === 'Escape' && id) return it('cancel');
+    return null;
+  }
+  // After a redraw: focus the tag being edited (caret at the end) or the new-tag input.
+  function tagsFocus(name, editing) {
+    var el = document.getElementById('sk-tags-' + name + (editing ? '-edit' : ''));
+    if (!el) return;
+    el.focus({ preventScroll: true });
+    el.setSelectionRange(el.value.length, el.value.length);
+  }
 
 
   // ---- T-16 helpers (Lane B) ----
 
 
-  SP.ui = { carousel: carousel, carouselBind: carouselBind, carouselMove: carouselMove, esc: esc, marked: marked, icon: icon, iconBtn: iconBtn, mastery: mastery, setRow: setRow, practice: practice, art: art, flip: flip, session: session, tabbar: tabbar, toggle: toggle };
+  SP.ui = { carousel: carousel, carouselBind: carouselBind, carouselMove: carouselMove, esc: esc, marked: marked, icon: icon, iconBtn: iconBtn, mastery: mastery, setRow: setRow, practice: practice, art: art, flip: flip, session: session, tabbar: tabbar, toggle: toggle, tags: tags, tagIntent: tagIntent, tagsFocus: tagsFocus };
 })(window.SP);
