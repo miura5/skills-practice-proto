@@ -1,24 +1,27 @@
-// core/rounds: which items a round asks, from the set's Options (D-07) and the Smart plan (D-19).
-// Practice: 'smart' (default: the current chunk from core/chunks, link steps first, or the whole set
-// in Run), 'whole' (every item), or a section id (that section). Starred only, skip learned and weak
-// first still apply; shuffle applies to card sets only (procedures keep strict order).
+// core/rounds: which items a round asks, from the set's Options (D-07), the Smart plan (D-19) and the
+// Scope (D-22). Practice: 'smart' (default: the current chunk from core/chunks, link steps first, or
+// the whole set in Run), 'whole' (every item), or 'custom' (the steps picked in the scope editor,
+// core/scope). An old saved section option (pre-D-22) means 'custom' with that section's steps.
+// Starred only, skip learned and weak first still apply; shuffle applies to card sets only.
 (function (SP) {
   'use strict';
   var DEFAULTS = { practice: 'smart', starred: false, weakFirst: false, skipLearned: false, shuffle: false };
+  var S = SP.core.scope;
 
-  // The Practice choice, reading old saves: a stored section:'<id>' (before D-19) still means that section.
+  // The Practice choice. An old section option (stored section:'<id>', or an unknown practice id) reads
+  // as 'custom': that section's steps (core/scope.legacy).
   function practiceOf(opts) {
     var o = opts || {};
-    if (o.section && o.section !== 'all') return o.section;
-    return o.practice || 'smart';
+    if (S.legacy(o)) return 'custom';
+    return o.practice === 'whole' || o.practice === 'custom' ? o.practice : 'smart';
   }
 
   // The round's plan: { practice, stage, chunk, label, ids, link }. stage is 'learn' | 'link' | 'run'
-  // for Smart and null otherwise; chunk is the chunk id (null in Run). A section that no longer
+  // for Smart and null otherwise; chunk is the chunk id (null in Run). An old section that no longer
   // exists falls back to Smart; Smart without a set asks the whole list.
   function plan(items, opts, progress, set) {
-    var pr = practiceOf(opts);
-    if (pr !== 'smart' && pr !== 'whole' && !(items || []).some(function (it) { return it.section === pr; })) pr = 'smart';
+    var pr = practiceOf(opts), sec = S.legacy(opts);
+    if (sec && !(items || []).some(function (it) { return it.section === sec; })) pr = 'smart';
     if (pr !== 'smart' || !set) return { practice: pr, stage: null, chunk: null, label: null, ids: null, link: [] };
     var s = SP.core.chunks.smart(set, progress || {});
     return { practice: 'smart', stage: s.stage, chunk: s.chunk ? s.chunk.id : null, label: s.label, ids: s.ids, link: s.link };
@@ -35,8 +38,11 @@
       var by = {};
       items.forEach(function (it) { by[it.id] = it; });
       list = pl.ids.map(function (id) { return by[id]; }).filter(Boolean);
-    } else if (pl.practice === 'smart' || pl.practice === 'whole') list = items.slice();
-    else list = items.filter(function (it) { return it.section === pl.practice; });
+    } else if (pl.practice === 'custom') {
+      var picked = {};
+      S.selected(o, items).forEach(function (id) { picked[id] = true; });
+      list = items.filter(function (it) { return picked[it.id]; });
+    } else list = items.slice();
     list = list.filter(function (it) {
       if (o.starred && !it.star) return false;
       if (o.skipLearned && (p[it.id] || {}).state === 'learned') return false;
@@ -108,5 +114,5 @@
     return m;
   }
 
-  SP.core.rounds = { build: build, plan: plan, practiceOf: practiceOf, basisOf: basisOf, DEFAULTS: DEFAULTS, snapshot: snapshot, restore: restore, pick: pick, modeOf: modeOf };
+  SP.core.rounds = { build: build, selected: S.selected, plan: plan, practiceOf: practiceOf, basisOf: basisOf, DEFAULTS: DEFAULTS, snapshot: snapshot, restore: restore, pick: pick, modeOf: modeOf };
 })((typeof window !== 'undefined' ? window : globalThis).SP);

@@ -325,3 +325,39 @@
 
 
 /* ---------- T-23: sk-scope, custom scope editor (Lane C) ---------- */
+/* Scope radios (Options, D-22): label left, radio right, a hairline between rows. Tokens only. */
+.sk-radios{display:flex;flex-direction:column}
+.sk-radio-row{display:flex;flex-direction:column;align-items:flex-start;border-top:var(--hairline) solid var(--line)}
+.sk-radio-row:first-child{border-top:0}
+.sk-radio{display:flex;align-items:center;gap:12px;width:100%;min-height:52px;box-sizing:border-box;padding:8px 0;cursor:pointer}
+.sk-radio-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;font-size:var(--fs-3)}
+.sk-radio-t small{font-size:var(--fs-1);color:var(--quiet)}
+.sk-radio input{position:absolute;opacity:0;width:1px;height:1px}
+.sk-radio i{width:22px;height:22px;border-radius:99px;flex:none;box-shadow:inset 0 0 0 1.5px var(--line2);position:relative;transition:box-shadow var(--dur-2)}
+.sk-radio input:checked + i{box-shadow:inset 0 0 0 1.5px var(--her)}
+.sk-radio input:checked + i::after{content:'';position:absolute;inset:5px;border-radius:99px;background:var(--her)}
+.sk-radio input:focus-visible + i{outline:2px solid var(--focus);outline-offset:2px}
+.study [data-ui='button'].sk-link{height:36px;min-height:36px;padding:0 var(--sp-1);margin-left:0;color:var(--her);background:none;box-shadow:none}
+.study [data-ui='button'].sk-link:hover{background:none;color:var(--text)}
+/* the editor */
+.sk-scope{display:flex;flex-direction:column;gap:var(--sp-4)}
+.sk-scope-range{display:flex;align-items:flex-end;gap:var(--sp-2)}
+.sk-scope-field{flex:1;min-width:0}
+.sk-scope-chips{display:flex;flex-wrap:wrap;gap:var(--sp-2)}
+.sk-scope-count{margin-left:auto;font-variant-numeric:tabular-nums}
+.sk-scope-list{display:flex;flex-direction:column;gap:var(--sp-1)}
+.sk-scope-group{display:flex;flex-direction:column;border-top:var(--hairline) solid var(--line)}
+.sk-scope-row{display:flex;align-items:center;gap:var(--sp-3);width:100%;min-height:var(--tap);padding:var(--sp-2) var(--sp-1);box-sizing:border-box;border:0;background:none;color:var(--text);font:inherit;font-size:var(--fs-3);text-align:left;cursor:pointer;border-radius:var(--r-md)}
+.sk-scope-row:focus-visible{outline:2px solid var(--focus);outline-offset:-2px}
+.sk-scope-row[data-kind='sec']{font-weight:600;min-height:52px}
+.sk-scope-row[data-kind='sec'] .sk-scope-t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sk-scope-row[data-kind='step']{padding-left:var(--sp-6)}
+.sk-scope-t{min-width:0;flex:1;line-height:1.4}
+.sk-scope-n{flex:none;min-width:30px;font-size:var(--fs-1);font-weight:600;color:var(--faint);font-variant-numeric:tabular-nums}
+.sk-scope-steps{display:flex;flex-direction:column}
+.sk-scope-mark{flex:none;width:22px;height:22px;box-sizing:border-box;border-radius:6px;box-shadow:inset 0 0 0 1.5px var(--faint);position:relative;transition:background var(--dur-2)}
+.sk-scope-mark[data-s='on']{background:var(--her);box-shadow:none}
+.sk-scope-mark[data-s='on']::after{content:'';position:absolute;left:7px;top:3px;width:5px;height:10px;border:solid var(--on-her);border-width:0 2px 2px 0;transform:rotate(45deg)}
+.sk-scope-mark[data-s='mixed']{background:var(--accent-bg);box-shadow:inset 0 0 0 1.5px var(--her)}
+.sk-scope-mark[data-s='mixed']::after{content:'';position:absolute;left:4px;right:4px;top:9px;height:2px;border-radius:2px;background:var(--her)}
+.sk-scope .sk-star{color:var(--her)}
