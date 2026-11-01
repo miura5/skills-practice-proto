@@ -134,6 +134,12 @@ Matt hands it to a new chat by attaching the repo; CLAUDE.md sets the role.
 - [x] T-15 Data + Edit: scene tags in set data; sk-tags tag input (Study kit, generic); Proprietary Picker per section; seed Med Admin + NG tube scenes from the old prototype (D-19). Batch 2 of 4. Done 2026-11-01 (Lane A).
 - [x] T-16 Rounds + screens: Smart rounds, segmented session bar (Study kit), scene in the prompt, Options Practice Smart / Whole set / Section, Results "Next: <chunk>" (D-19). Batch 3 of 4. Done 2026-11-01 (Lane B).
 - [x] T-17 Grading simplification: strict order; remove the nearby-step stage and the stored strict/before/anytime rules; update tests (D-19). Batch 4 of 4. Done 2026-11-01 (Lane C).
+- [ ] T-18 Proprietary pop-up Picker for scenes (phone + PC) + per-scene colours (D-22). Lane A.
+- [ ] T-19 Round header shows the scene in Learn/Link only; prompt prefix removed (D-22). Lane B.
+- [ ] T-20 sk-segbar: equal segments, fill per own steps, green, count pill (D-22). Lane B.
+- [ ] T-21 Results after Smart: Continue: <next chunk> + Back to set (D-22). Lane B.
+- [ ] T-22 Options "Scope": Smart / Whole set / Custom (D-22). Lane C.
+- [ ] T-23 Custom scope editor sk-scope + core/scope.js + tests (D-22). Lane C.
 
 ## D-10 build notes (2026-11-01)
 - Bands: 100% Right; 60%+ row stays open with blanks; 34-59% Shaky; under 34% Missed.
@@ -250,3 +256,22 @@ Build notes on choices the D-19 design left open:
 - Grading (D-10 superseded in part): no nearby stage, no stored strict/before/anytime rules. 1876 sampled
   answers that never hit the old nearby stage grade the same as before.
 - Fixed in passing: finishing a round logged a TypeError (the store redraw ran on the mode screen with no item).
+
+## D-22 · Round polish + Scope (Matt, 2026-11-01; T-18..T-23)
+- Scene picker: Proprietary's pop-up Picker (chip + .popover menu) on phone and PC, not a native select.
+  Each scene tag gets its own colour: Study kit tokens --scene-1..--scene-6 (light + dark), by tag order;
+  the chips in sk-tags, the Picker chip and its menu rows show the colour.
+- Round header: the "Set · Mode" line is gone. Procedures in a Smart round in Learn or Link show the scene
+  (chunk) name there instead; otherwise no line, with no layout jump. The prompt drops its scene prefix.
+- sk-segbar (Study kit, changed): equal-width segments, one per chunk; each fills by its own steps
+  (a 1-step chunk is a full-width segment that fills when done); green (--ok); the count pill stays.
+- Results after a Smart round: "Continue: <next chunk>" (primary, starts that round in the same mode) and
+  "Back to set". Practice again stays for non-Smart rounds.
+- Options: the "Practice" select becomes "Scope", radio rows: Smart · Whole set · Custom (procedures only).
+  Custom shows "<n> steps · 1, 8–12, 15–32" and "Edit selection ›".
+- Custom scope (new Study kit sk-scope, a sub-screen): range field + Apply, All / None / Starred only chips,
+  section rows with tri-state checkboxes and step rows (number, star, cue). Saved in the set's settings as
+  {practice:'custom', custom:[ids]}; reachable from the set's Options and the in-round Options; Back returns
+  where you came from. Range parsing/formatting is pure (core/scope.js) with tests.
+Lanes: A = T-18 (edit.js, app.js); B = T-19..T-21 (round.js, next.js, type.js, segbar); C = T-22..T-23
+(set.js, rounds.js, core/scope.js, screens/scope.js, index.html). Agents run on Haiku (Matt).
