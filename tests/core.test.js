@@ -58,11 +58,11 @@ ok('step 2 from hint key words = right, hinted', h2.result === 'right' && h2.hin
 ok('hinted right caps at familiar', progress.apply(progress.apply(null, h2.result, 'hint'), 'right', 'hint').state === 'familiar');
 ok('check the dose lands on 13c', grade(m('13c'), 'check the dose', medSet).result === 'right');
 const n13 = grade(m('13d'), 'check the dose', medSet);
-ok('check the dose on 13d = nearby 13c', n13.result === 'nearby' && n13.nearby.id === '13c');
+ok('check the dose on 13d = missed (strict order, D-19)', n13.result === 'missed' && !('nearby' in n13));
 ok('25n: safety device accepted (loose)', grade(m('25n'), 'deploy the safety device and put it in the sharps', medSet).result === 'right');
 ok('26l: safety cap accepted (loose)', grade(m('26l'), 'deploy safety cap, sharps container', medSet).result === 'right');
 const w = grade(m('26d'), 'wipe site with alcohol', medSet);
-ok('wipe site with alcohol on 26d = nearby 26e', w.result === 'nearby' && w.nearby.id === '26e');
+ok('wipe site with alcohol on 26d = missed (strict order, D-19)', w.result === 'missed' && !('nearby' in w));
 ok('wipe site with alcohol on 26e = not missed', grade(m('26e'), 'wipe site with alcohol', medSet).result !== 'missed');
 ok('loose: step 9 wording', grade(m('9'), 'one patient at a time, no distractions', medSet).result === 'right');
 ok('require: 23 needs gloves', grade(m('23'), 'hand hygiene', medSet).missing.indexOf('clean gloves') >= 0);
@@ -140,5 +140,25 @@ ok('of: finds the chunk, null when missing', C.of(proc, 'd2').id === 'scene:room
   ok('real ' + id + ': one chunk per section (no scenes yet)', cs.length === secs.length && cs.every((c, i) => c.id === 'sec:' + secs[i].id && c.sections.length === 1));
   ok('real ' + id + ': chunk ids = all items', cs.reduce((a, c) => a.concat(c.ids), []).join() === sets.items(s).map((i) => i.id).join());
 });
+
+// ---- T-17 tests (Lane C: strict grading) ----
+const g13 = grade(m('13d'), m('13c').answer, medSet), g26 = grade(m('26d'), m('26e').answer, medSet);
+ok("strict: 13c's exact text on 13d = missed, no nearby field", g13.result === 'missed' && !('nearby' in g13));
+ok("strict: 26e's exact text on 26d = missed, no nearby field", g26.result === 'missed' && !('nearby' in g26));
+ok('strict: no step ever grades nearby (neighbour text, both sets)', ['med-admin', 'ngt'].every((id) => {
+  const s = set(id), its = sets.items(s);
+  return its.every((it, i) => [its[i - 1], its[i + 1]].filter(Boolean).every((o) => {
+    const g = grade(it, o.answer, s); return g.result !== 'nearby' && !('nearby' in g);
+  }));
+}));
+const t17Out = (g) => [g.result, g.share.toFixed(3), g.found.join('|'), g.missing.join('|')].join(' ');
+ok('strict: right unchanged', t17Out(grade(m('26d'), 'inspect skin, masses or tenderness, rotate', medSet)) === 'right 1.000 inspect skin|masses or tenderness|rotate ');
+ok('strict: open unchanged', t17Out(grade(m('26d'), 'inspect skin and rotate', medSet)) === 'open 0.667 inspect skin|rotate masses or tenderness');
+ok('strict: shaky unchanged', t17Out(grade(m('26e'), 'relax', medSet)) === 'shaky 0.500 relax antiseptic swab');
+ok('strict: missed unchanged', t17Out(grade(m('26d'), 'rotate', medSet)) === 'missed 0.333 rotate inspect skin|masses or tenderness');
+ok('strict: grading blocks have no order rules', ['med-admin', 'ngt'].every((id) => ['strict', 'before', 'anytime'].every((k) => !(k in (set(id).grading || {})))));
+ok('strict: loose + require kept', Object.keys(medSet.grading.loose).length === 9 && Object.keys(medSet.grading.require).length > 0
+  && grade(m('26l'), 'deploy safety cap, sharps container', medSet).result === 'right' && grade(m('23'), 'hand hygiene', medSet).missing.indexOf('clean gloves') >= 0);
+ok('strict: synonym still counts', grade(i8, 'put the pulse ox on', ngt).result === 'right');
 console.log(pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);
