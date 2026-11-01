@@ -32,20 +32,15 @@ anchors really landed in every shared file before launching lanes (the tests anc
 - A copy of Med Admin or NG tube that Matt edited before v0.5.0 has no scenes (his saved copy wins). Reset in
   Edit brings the built-in scenes back, or he adds tags himself.
 
-## How we work (CLAUDE.md Roles)
-- Every request or bug becomes a backlog task in DECISIONS.md, an agent codes it, the build manager
-  reviews the diff for drift before shipping: Proprietary (ds/proprietary.css) untouched; all looks
-  in Study kit sk- components with tokens (ds/study.css); no static inline styles in screens (only
-  computed values like gauge widths); content / core / screens / app split; tests for core logic.
-- Republish: Artifact publish with url = live link, file_path index.html, root = repo, files = every
-  changed file. Read the live artifact first if this chat hasn't published it (the tool refuses otherwise).
-- file:// and python http.server pages show "Â·" for "·" (no charset there); the live artifact is fine.
+## How we work
+CLAUDE.md "A batch" and "Shipping" are the workflow (design -> lanes -> Haiku agents in worktrees ->
+merge + review -> ship). Don't repeat it here.
 
 ## Things Matt said that matter
 - Strict order always; hints are the help. Learners can reorder steps in Edit if they want.
 - Chunking should feel natural (from progress), not a toggle; Options keeps an override.
 - All styling through the two layers (Proprietary + Study kit). sk-tags may later move to Proprietary.
-- Lanes are fine: up to 2-3 agents in parallel when files don't overlap (D-20).
+- Every batch: design into decisions/tasks, 2-3 lanes, Haiku agents, build manager reviews and ships.
 - Revalidation is Wed 11/4.
 - Old prototype (reference only): https://claude.ai/artifact/JCf1xzWxc33pHtw6RWHwUn
 - Rebuild outline: https://claude.ai/artifact/YTKc8MPEFekfaNYdC7vydp
