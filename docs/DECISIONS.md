@@ -123,7 +123,7 @@ Matt hands it to a new chat by attaching the repo; CLAUDE.md sets the role.
 - [x] T-04 Type it: keep the current row in view above the phone keyboard (D-13). Shipped 2026-11-01 as v0.3.1.
 - [x] T-05 Type it layout without scrolling (D-14). Shipped 2026-11-01 as v0.3.2 (Matt: works on iPhone).
 - [x] T-06 Smooth transition to the next item: procedures slide vertically (Next Step, Type it), card sets slide horizontally (Flashcards, Type it) (D-15). Shipped 2026-11-01 as v0.3.3.
-- [ ] T-07 Study kit clean-up (inline styles into sk- classes) + ladder colours: Learned green, Familiar clear yellow, Weak red (D-16). In progress.
+- [x] T-07 Study kit clean-up + ladder colours (D-16). Shipped 2026-11-01 as v0.3.4.
 
 ## D-10 build notes (2026-11-01)
 - Bands: 100% Right; 60%+ row stays open with blanks; 34-59% Shaky; under 34% Missed.
@@ -156,3 +156,11 @@ one compact line below it (result, hinted, Missing: max 2 lines); older answers 
 Decision: enter-only CSS animation (240ms, --ease-out) on each advance. Procedures: up 24px + fade.
 Cards: in from the right 32px + fade. round.enter() decides (index changed, 200ms window to survive
 the store's redraw). No slide-out, so input stays instant. Reduced motion: fade only.
+
+## D-16 · Study kit clean-up and ladder colours (2026-11-01, v0.3.4)
+Drift found: T-03/T-05 added a few inline styles in screens; older v0.1.0 ones too. All static
+inline styles now live in sk- classes (ds/study.css) or layout helpers (src/app.css). Only computed
+values stay inline (gauge widths, --sk-flip-h). Hard-coded #fff -> var(--on-her).
+Ladder tokens in the Study theme: --learned = --ok (green), --familiar = lch(80% 78 92) light /
+lch(84% 72 95) dark (yellow, was brown --fam), --weak = --bad (red, was --warn).
+Right/Shaky/Missed keep ok/warn/bad. Rule from now on: no static inline styles in screens.

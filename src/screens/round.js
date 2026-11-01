@@ -71,20 +71,20 @@
     var mins = Math.max(1, Math.round(((r.t1 || Date.now()) - r.t0) / 60000));
     var TAG = { right: 'Right', shaky: 'Shaky', missed: 'Missed' };
     var changed = r.res.filter(function (x) { return (p[x.id] || {}).state !== r.before[x.id]; });
-    var stat = function (k, label, tone) { return '<div class="sk-stat" style="--x:var(--' + tone + ');--x-bg:var(--' + tone + '-bg)"><b>' + n(k) + '</b><span>' + label + '</span></div>'; };
+    var stat = function (k, label, tone) { return '<div class="sk-stat" data-tone="' + tone + '"><b>' + n(k) + '</b><span>' + label + '</span></div>'; };
     var row = function (x) {
       var it = app.byId[x.id];
-      return '<li class="sk-row" data-result="' + x.result + '"><span class="n">' + U.esc(it.num) + '</span><span style="flex:1">' + U.esc(cards ? it.front : (it.cue || it.answer)) + '</span><span class="tag">' + TAG[x.result] + (x.hinted ? ' <span class="sk-hinted">hinted</span>' : '') + '</span></li>';
+      return '<li class="sk-row" data-result="' + x.result + '"><span class="n">' + U.esc(it.num) + '</span><span class="grow">' + U.esc(cards ? it.front : (it.cue || it.answer)) + '</span><span class="tag">' + TAG[x.result] + (x.hinted ? ' <span class="sk-hinted">hinted</span>' : '') + '</span></li>';
     };
     return '<main class="screen">' +
-      '<header class="sk-top"><div class="grow stack" style="gap:6px"><span class="sk-meta">' + U.esc(app.set.title) + ' · ' + modeName(app) + ' · ' + mins + ' min</span><h1>Round done</h1></div></header>' +
+      '<header class="sk-top"><div class="grow stack"><span class="sk-meta">' + U.esc(app.set.title) + ' · ' + modeName(app) + ' · ' + mins + ' min</span><h1>Round done</h1></div></header>' +
       '<div class="sk-stats">' + stat('right', 'Right', 'ok') + stat('shaky', 'Shaky', 'warn') + stat('missed', 'Missed', 'bad') + '</div>' +
       (changed.length ? '<section class="stack"><h2 class="sk-h2">What changed</h2><ul class="sk-wheel">' + changed.map(function (x) {
-        return '<li class="sk-row"><span class="n">' + U.esc(app.byId[x.id].num) + '</span><span style="flex:1">' + U.esc(cards ? app.byId[x.id].front : (app.byId[x.id].cue || app.byId[x.id].answer)) + '</span><span class="sk-meta">' + r.before[x.id] + ' → ' + p[x.id].state + '</span></li>';
+        return '<li class="sk-row"><span class="n">' + U.esc(app.byId[x.id].num) + '</span><span class="grow">' + U.esc(cards ? app.byId[x.id].front : (app.byId[x.id].cue || app.byId[x.id].answer)) + '</span><span class="sk-meta">' + r.before[x.id] + ' → ' + p[x.id].state + '</span></li>';
       }).join('') + '</ul></section>' : '') +
       '<section class="stack"><h2 class="sk-h2">Every answer</h2><ol class="sk-wheel">' + r.res.map(row).join('') + '</ol></section>' +
-      '<div class="stack" style="gap:8px"><button data-ui="button" data-kind="primary" data-act="again" style="height:52px">Practice again</button>' +
-      '<button data-ui="button" data-kind="neutral" data-act="toSet" style="height:52px">Back to set</button></div></main>';
+      '<div class="stack g8"><button data-ui="button" data-kind="primary" data-act="again" class="sk-tall">Practice again</button>' +
+      '<button data-ui="button" data-kind="neutral" data-act="toSet" class="sk-tall">Back to set</button></div></main>';
   }
 
   function modeName(app) {

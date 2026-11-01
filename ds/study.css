@@ -5,8 +5,15 @@
    Layer 2, Study kit (this file):
      1. a Study THEME: new VALUES for Proprietary's colour tokens, light and dark (the prototype's LCH),
         plus a roomier density: --ts 1.12 and bigger radii. It sets values only, never component rules.
-     2. six study components, prefixed sk-, built only from Proprietary tokens:
-        sk-top, sk-practice, sk-flip, sk-session, sk-wheel, sk-grade (+ sk-stat on Results).
+     2. study components, prefixed sk-, built only from Proprietary tokens:
+        sk-h2, sk-meta (+ .sk-flush), sk-faint, sk-top, sk-practice, sk-art, sk-flip (+ sk-face, sk-pager),
+        sk-session (+ sk-count), sk-wheel (+ sk-row, sk-last, sk-clamp, sk-input, sk-q), sk-grade, sk-stats/sk-stat,
+        sk-tabbar, sk-set (+ sk-ico, sk-set-b), sk-resume, sk-jump, sk-bar, sk-key, sk-legend, sk-item (+ sk-dot,
+        sk-star, sk-sec), sk-scrim, sk-sheet, sk-switch, sk-field, sk-edit, sk-check, sk-note, sk-toast, sk-big,
+        sk-fill, sk-blank, sk-nearby, sk-hinted, sk-title, sk-say, sk-enter (T-06 motion);
+        button modifiers sk-pill (+ .sm), sk-pad, sk-tall, sk-danger.
+     The theme's mastery ladder tokens: --learned (green, = --ok), --familiar (yellow), --weak (red, = --bad).
+     Results (Right / Shaky / Missed) keep --ok / --warn / --bad.
    ===================================================================================================== */
 
 /* ---------- 1. Study theme ---------- */
@@ -24,7 +31,9 @@
   --text:lch(13% 2 280); --quiet:lch(45% 4 280); --faint:lch(50% 4 280); --focus:lch(20% 2 280 / .55);
   --her:lch(47% 48 282); --on-her:lch(100% 0 0); --accent-bg:lch(93% 9 282); --art:lch(95% 6 282);
   --ok:lch(50% 45 145); --ok-bg:lch(94% 12 145); --warn:lch(55% 50 75); --warn-bg:lch(95% 12 85);
-  --bad:lch(50% 55 30); --bad-bg:lch(95% 8 30); --fam:lch(52% 55 45);
+  --bad:lch(50% 55 30); --bad-bg:lch(95% 8 30);
+  /* the mastery ladder: Learned green, Familiar yellow, Weak red */
+  --learned:var(--ok); --familiar:lch(80% 78 92); --weak:var(--bad);
   --sk-shadow:0 1px 2px lch(13% 2 280 / .06),0 8px 28px lch(13% 2 280 / .06);
   color-scheme:light;
 }
@@ -34,7 +43,8 @@
   --text:lch(95% 1 280); --quiet:lch(68% 3 280); --faint:lch(62% 3 280); --focus:lch(92% 1 280 / .55);
   --her:lch(58% 48 282); --on-her:lch(100% 0 0); --accent-bg:lch(20% 14 282); --art:lch(19% 10 282);
   --ok:lch(66% 45 145); --ok-bg:lch(21% 14 145); --warn:lch(76% 45 80); --warn-bg:lch(21% 12 80);
-  --bad:lch(66% 50 30); --bad-bg:lch(22% 14 30); --fam:lch(66% 50 48);
+  --bad:lch(66% 50 30); --bad-bg:lch(22% 14 30);
+  --learned:var(--ok); --familiar:lch(84% 72 95); --weak:var(--bad);
   --sk-shadow:none;
   color-scheme:dark;
 }
@@ -49,9 +59,13 @@
 .study .gauge > [data-tone='bad']{background:var(--bad)}
 .sk-h2{margin:0;font-size:var(--fs-5);font-weight:600;letter-spacing:-.01em}
 .sk-meta{font-size:var(--fs-2);color:var(--quiet)}
+.sk-meta.sk-flush{margin:0}
+.sk-h2 .sk-meta{font-weight:400}
+.sk-faint{color:var(--faint)}
 
 /* ---------- 2a. sk-top: page header, title + one quiet meta line + actions ---------- */
 .sk-top{display:flex;align-items:flex-start;gap:var(--sp-2)}
+.sk-top > .stack{gap:6px}
 .sk-top h1{margin:0;font-size:24px;font-weight:700;letter-spacing:-.02em;line-height:1.15}
 
 /* ---------- 2b. sk-practice: a mode card with its illustration ---------- */
@@ -80,7 +94,7 @@
 /* ---------- 2d. sk-session: ✕, round meter with its count, theme ---------- */
 .sk-session{display:flex;align-items:center;gap:var(--sp-2);height:56px}
 .sk-session .gauge{flex:1;height:8px;border-radius:99px}
-.sk-count{font:600 var(--fs-1)/1 var(--sans);font-variant-numeric:tabular-nums;color:#fff;background:var(--ok);padding:4px 8px;border-radius:99px}
+.sk-count{font:600 var(--fs-1)/1 var(--sans);font-variant-numeric:tabular-nums;color:var(--on-her);background:var(--ok);padding:4px 8px;border-radius:99px}
 
 /* ---------- 2e. sk-wheel: Type it's focus list ---------- */
 .sk-wheel{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
@@ -106,7 +120,7 @@
 /* ---------- 2f. sk-grade: Missed / Shaky / Got it ---------- */
 .sk-grade{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--sp-2)}
 .sk-grade > button{height:58px;border:0;border-radius:var(--r-lg);background:var(--surface);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--x) 55%,var(--line2));color:var(--text);font:600 var(--fs-4) var(--sans);cursor:pointer}
-.sk-grade > button[data-tone='ok']{background:var(--ok);color:#fff;box-shadow:none}
+.sk-grade > button[data-tone='ok']{background:var(--ok);color:var(--on-her);box-shadow:none}
 .sk-grade > button:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 
 /* ---------- Results: sk-stat ---------- */
@@ -114,6 +128,7 @@
 .sk-stat{display:flex;flex-direction:column;align-items:center;gap:2px;padding:16px 8px;border-radius:var(--r-lg);background:var(--x-bg)}
 .sk-stat b{font-size:28px;font-weight:700;color:var(--x);font-variant-numeric:tabular-nums}
 .sk-stat span{font-size:var(--fs-1);color:var(--quiet)}
+.sk-stat[data-tone='ok']{--x:var(--ok);--x-bg:var(--ok-bg)} .sk-stat[data-tone='warn']{--x:var(--warn);--x-bg:var(--warn-bg)} .sk-stat[data-tone='bad']{--x:var(--bad);--x-bg:var(--bad-bg)}
 
 /* ---------- 2g. sk-tabbar: Home / Library ---------- */
 .sk-tabbar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));height:76px;padding:6px 24px 18px;box-sizing:border-box;background:var(--surface);box-shadow:0 -1px 0 var(--line)}
@@ -157,13 +172,16 @@
 
 
 /* ---------- added for the working prototype ---------- */
-.study .gauge > [data-tone='fam']{background:var(--fam)}
+.study .gauge > [data-tone='learned']{background:var(--learned)}
+.study .gauge > [data-tone='familiar']{background:var(--familiar)}
+.study .gauge > [data-tone='weak']{background:var(--weak)}
+.study .art-arrow{stroke:var(--on-her)}
 .sk-art .art-face{fill:var(--art)} .sk-art .art-back{fill:var(--surface)}
 .sk-key{background:none;color:inherit;font-weight:600;text-decoration:underline;text-decoration-color:color-mix(in srgb,var(--her) 55%,transparent);text-underline-offset:3px}
 
 /* sk-legend: the ladder's counts under a mastery meter */
 .sk-legend{display:flex;gap:14px;font-size:var(--fs-1);color:var(--quiet)}
-.sk-legend i{display:inline-block;width:8px;height:8px;border-radius:99px;margin-right:6px;background:var(--x)}
+.sk-legend i{display:inline-block;width:8px;height:8px;border-radius:99px;margin-right:6px;background:var(--line2)}
 
 /* sk-item: one step or card in a set's list */
 .sk-item{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:var(--r-lg);background:var(--surface);box-shadow:0 0 0 1px var(--line);font-size:var(--fs-3);line-height:1.45}
@@ -171,8 +189,8 @@
 .sk-item .b{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
 .sk-item .b b{font-weight:600}
 .sk-dot{width:8px;height:8px;border-radius:99px;flex:none;margin-top:7px;background:var(--line2)}
-.sk-dot[data-s='weak']{background:var(--warn)} .sk-dot[data-s='familiar']{background:var(--fam)} .sk-dot[data-s='learned']{background:var(--ok)}
-.sk-star{color:var(--fam);font-size:var(--fs-1);font-weight:700}
+:is(.sk-dot,.sk-legend i)[data-s='weak']{background:var(--weak)} :is(.sk-dot,.sk-legend i)[data-s='familiar']{background:var(--familiar)} :is(.sk-dot,.sk-legend i)[data-s='learned']{background:var(--learned)}
+.sk-star{color:var(--familiar);font-size:var(--fs-1);font-weight:700}
 .sk-sec{margin:14px 0 2px;font-size:var(--fs-1);font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--faint)}
 
 /* sk-sheet: a bottom sheet over a scrim (Proprietary's Sheet, drawn open by the app) */
@@ -187,7 +205,7 @@
 .sk-switch small{font-size:var(--fs-1);color:var(--quiet)}
 .sk-switch input{position:absolute;opacity:0;width:1px;height:1px}
 .sk-switch i{width:44px;height:26px;border-radius:99px;background:var(--line2);position:relative;flex:none;transition:background var(--dur-2)}
-.sk-switch i::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:99px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2);transition:transform var(--dur-2)}
+.sk-switch i::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:99px;background:var(--on-her);box-shadow:0 1px 2px rgba(0,0,0,.2);transition:transform var(--dur-2)}
 .sk-switch input:checked + i{background:var(--her)} .sk-switch input:checked + i::after{transform:translateX(18px)}
 .sk-switch input:focus-visible + i{outline:2px solid var(--focus);outline-offset:2px}
 .sk-field{display:flex;flex-direction:column;gap:6px;font-size:var(--fs-2);color:var(--quiet)}
@@ -224,3 +242,18 @@
 @media (prefers-reduced-motion: reduce) {
   .study [data-enter].sk-enter, .study .sk-wheel[data-enter] > li { animation: sk-enter-fade var(--dur-2) linear both !important; animation-delay: 0s !important; }
 }
+
+/* T-07: button modifiers and small pieces that used to be inline styles */
+.study [data-ui='button'].sk-pill{border-radius:99px;padding:0 22px}
+.study [data-ui='button'].sk-pill.sm{padding:0 14px}
+.study [data-ui='button'].sk-pill.icon{padding:0}
+.study [data-ui='button'].sk-pad{padding:0 22px}
+.study [data-ui='button'].sk-tall{height:52px;min-height:52px}
+.study [data-ui='button'].sk-danger{color:var(--bad)}
+.sk-jump > [data-ui='button']{align-self:flex-start}
+.study .sk-resume [data-ui='button'].sk-pill{height:48px;min-height:48px}
+.sk-title{margin:0;font-size:26px;font-weight:700;letter-spacing:-.02em}
+.sk-say{margin:0;height:58px;display:flex;align-items:center;justify-content:center}
+.sk-q{align-items:baseline;gap:12px}
+.sk-q .n{color:var(--her)}
+.sk-q b{font-size:var(--fs-4)}

@@ -12,14 +12,14 @@
     var saved = SP.core.rounds.restore(SP.store.round(last.id), SP.core.sets.items(last));
     var recents = sets.filter(function (s) { return s.id !== last.id; }).slice(0, 4);
     return '<main class="screen">' +
-      '<header class="sk-top"><div class="grow stack" style="gap:6px"><span class="sk-meta">' + hello + ', Matt</span><h1>Study</h1></div>' +
+      '<header class="sk-top"><div class="grow stack"><span class="sk-meta">' + hello + ', Matt</span><h1>Study</h1></div>' +
       U.iconBtn('theme', 'Switch light or dark', 'theme') + '</header>' +
       '<section class="stack"><h2 class="sk-h2">Jump back in</h2>' +
       '<div class="sk-jump"><span class="sk-meta">' + (last.kind === 'cards' ? 'Card set' : 'Procedure') + '</span>' +
       '<b>' + U.esc(last.title) + '</b>' + U.mastery(t) +
       '<span class="sk-meta">' + t.learned + ' of ' + t.total + ' learned · ' + t.weak + ' weak' +
       (saved ? ' · round ' + saved.i + ' of ' + saved.ids.length + ' saved' : '') + '</span>' +
-      '<button data-ui="button" data-kind="primary" data-act="' + (saved ? 'resumeLast' : 'open') + '" data-id="' + U.esc(last.id) + '" style="align-self:flex-start;padding:0 22px;border-radius:99px">' + (saved ? 'Resume round' : 'Continue') + '</button></div></section>' +
+      '<button data-ui="button" data-kind="primary" data-act="' + (saved ? 'resumeLast' : 'open') + '" data-id="' + U.esc(last.id) + '" class="sk-pill">' + (saved ? 'Resume round' : 'Continue') + '</button></div></section>' +
       '<section class="stack"><div class="row"><h2 class="sk-h2 grow">Recents</h2><button data-ui="button" data-kind="ghost" data-act="tab" data-id="library">See all</button></div>' +
       recents.map(function (s) { return U.setRow(s, app.tally(s)); }).join('') + '</section>' +
       '</main>' + U.tabbar('home');

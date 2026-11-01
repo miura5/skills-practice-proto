@@ -11,5 +11,11 @@ body{background:var(--sk-desk, #e9e9ef)}
 .grow{flex:1}
 .two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .center{text-align:center}
+.vcenter{display:flex;flex-direction:column;justify-content:center}
+.self-center{align-self:center}
+.row.end{align-items:flex-end}
+.w72{width:72px}
+.g0{gap:0}.g2{gap:2px}.g8{gap:8px}.g10{gap:10px}.g12{gap:12px}.g20{gap:20px}
+.screen.snug{padding-top:8px}
 .sr{position:absolute;left:-9999px}
 .doc{white-space:pre-wrap;font:13px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--surface);padding:16px;border-radius:var(--r-lg);box-shadow:0 0 0 1px var(--line);overflow-x:auto}

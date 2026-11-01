@@ -31,11 +31,11 @@
     return '<button data-ui="button" class="icon" aria-label="' + esc(label) + '" data-act="' + act + '"' + (extra || '') + '>' + icon(name) + '</button>';
   }
 
-  // Meter with the ladder's colours: learned (ok), familiar (fam), weak (warn)
+  // Meter with the ladder's colours: learned (green), familiar (yellow), weak (red): the Study theme's ladder tokens
   function mastery(t, cls) {
     var pc = function (n) { return t.total ? (100 * n / t.total).toFixed(1) : 0; };
     return '<span class="gauge ' + (cls || '') + '" role="img" aria-label="' + t.learned + ' learned of ' + t.total + '">' +
-      '<i data-tone="ok" style="width:' + pc(t.learned) + '%"></i><i data-tone="fam" style="width:' + pc(t.familiar) + '%"></i><i data-tone="warn" style="width:' + pc(t.weak) + '%"></i></span>';
+      '<i data-tone="learned" style="width:' + pc(t.learned) + '%"></i><i data-tone="familiar" style="width:' + pc(t.familiar) + '%"></i><i data-tone="weak" style="width:' + pc(t.weak) + '%"></i></span>';
   }
 
   function setRow(s, t) {
@@ -47,7 +47,7 @@
   }
 
   var ART = {
-    flip: '<svg viewBox="0 0 120 72" aria-hidden="true"><rect x="10" y="20" width="56" height="42" rx="6" class="art-back" transform="rotate(-8 38 41)"/><rect x="28" y="8" width="58" height="44" rx="6" class="art-face" stroke="currentColor" stroke-width="2.5"/><text x="57" y="38" text-anchor="middle" font-size="20" font-weight="700" fill="currentColor" font-family="system-ui">?</text><circle cx="92" cy="54" r="12" fill="currentColor"/><path d="M86 54h11M93 49l5 5-5 5" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    flip: '<svg viewBox="0 0 120 72" aria-hidden="true"><rect x="10" y="20" width="56" height="42" rx="6" class="art-back" transform="rotate(-8 38 41)"/><rect x="28" y="8" width="58" height="44" rx="6" class="art-face" stroke="currentColor" stroke-width="2.5"/><text x="57" y="38" text-anchor="middle" font-size="20" font-weight="700" fill="currentColor" font-family="system-ui">?</text><circle cx="92" cy="54" r="12" fill="currentColor"/><path d="M86 54h11M93 49l5 5-5 5" class="art-arrow" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     type: '<svg viewBox="0 0 120 72" aria-hidden="true"><rect x="16" y="6" width="88" height="24" rx="6" class="art-face" stroke="currentColor" stroke-width="2.5"/><rect x="24" y="15" width="40" height="6" rx="3" fill="currentColor"/><rect x="70" y="12" width="2" height="12" fill="currentColor"/><g class="art-back"><rect x="16" y="38" width="15" height="10" rx="2"/><rect x="35" y="38" width="15" height="10" rx="2"/><rect x="54" y="38" width="15" height="10" rx="2"/><rect x="73" y="38" width="15" height="10" rx="2"/><rect x="92" y="38" width="12" height="10" rx="2"/><rect x="30" y="54" width="60" height="10" rx="2"/></g></svg>'
   };
   function practice(title, desc, art, act) {

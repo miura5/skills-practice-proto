@@ -32,19 +32,19 @@
             return '<div class="sk-edit"><div class="sk-edit-h"><b>Step</b>' +
               '<label class="sk-check"><input type="checkbox" data-edit="' + p + 'star"' + (st.star ? ' checked' : '') + '>Starred</label>' +
               U.iconBtn('trash', 'Remove step', 'delItem', ' data-id="' + si + '.' + j + '"') + '</div>' +
-              '<div class="row" style="align-items:flex-end"><div style="width:72px">' + field('No.', p + 'num', st.num) + '</div><div class="grow">' + field('Cue', p + 'cue', st.cue) + '</div></div>' +
+              '<div class="row end"><div class="w72">' + field('No.', p + 'num', st.num) + '</div><div class="grow">' + field('Cue', p + 'cue', st.cue) + '</div></div>' +
               field('Step · put [brackets] around the key words', p + 'text', st.text, true) + '</div>';
           }).join('') +
           '<button data-ui="button" data-kind="neutral" data-act="addItem" data-id="' + si + '">' + U.icon('plus') + 'Add step to ' + U.esc(s.title || 'this section') + '</button></section>';
       }).join('') + '<button data-ui="button" data-kind="ghost" data-act="addSection">' + U.icon('plus') + 'Add section</button>';
     var danger = !live ? '' : live.builtin
       ? (live.edited ? '<button data-ui="button" data-kind="ghost" data-act="remove">' + (app.state.confirm ? 'Tap again to reset to the original' : 'Reset to the original') + '</button>' : '')
-      : '<button data-ui="button" data-kind="ghost" data-act="remove" style="color:var(--bad)">' + (app.state.confirm ? 'Tap again to delete this set' : 'Delete set') + '</button>';
+      : '<button data-ui="button" data-kind="ghost" data-act="remove" class="sk-danger">' + (app.state.confirm ? 'Tap again to delete this set' : 'Delete set') + '</button>';
     return '<main class="screen tight">' +
       '<div class="sk-bar">' + U.iconBtn('close', 'Cancel', 'cancelEdit') + '<b>' + (app.state.draftNew ? 'New ' : 'Edit ') + (cards ? 'card set' : 'procedure') + '</b>' +
-      '<button data-ui="button" data-kind="primary" data-act="save" style="padding:0 20px;border-radius:99px">Save</button></div>' +
+      '<button data-ui="button" data-kind="primary" data-act="save" class="sk-pill">Save</button></div>' +
       field('Title', 'title', d.title) +
-      (live && live.builtin && !live.edited ? '<p class="sk-meta" style="margin:0">This is a built-in set. Saving keeps your copy; you can reset it later.</p>' : '') +
+      (live && live.builtin && !live.edited ? '<p class="sk-meta sk-flush">This is a built-in set. Saving keeps your copy; you can reset it later.</p>' : '') +
       body + danger + '</main>';
   }
 

@@ -38,7 +38,7 @@
     var pc = Math.round(100 * r.i / r.ids.length);
     return '<div class="sk-resume"><div class="row"><b class="grow">' + mode + ' round</b><span class="sk-meta">' + r.i + ' of ' + r.ids.length + '</span></div>' +
       '<div class="gauge" role="progressbar" aria-label="Round progress" aria-valuenow="' + pc + '" aria-valuemin="0" aria-valuemax="100"><i data-tone="ok" style="width:' + pc + '%"></i></div>' +
-      '<div class="row" style="gap:8px"><button data-ui="button" data-kind="primary" data-act="resume" class="grow" style="height:48px;border-radius:99px">Resume round</button>' +
+      '<div class="row"><button data-ui="button" data-kind="primary" data-act="resume" class="grow sk-pill">Resume round</button>' +
       '<button data-ui="button" data-kind="ghost" data-act="startOver" data-id="' + r.mode + '">Start over</button></div></div>';
   }
 
@@ -48,16 +48,16 @@
     return '<main class="screen tight">' +
       '<div class="sk-bar">' + U.iconBtn('back', 'Back', 'back') + '<b></b>' +
       '<button data-ui="button" data-kind="ghost" data-act="edit">' + U.icon('edit') + 'Edit</button>' +
-      '<button data-ui="button" data-kind="neutral" data-act="options" style="border-radius:99px;padding:0 14px">' + U.icon('options') + 'Options</button></div>' +
-      '<header class="stack" style="gap:10px"><h1 style="margin:0;font-size:26px;font-weight:700;letter-spacing:-.02em">' + U.esc(set.title) + '</h1>' +
+      '<button data-ui="button" data-kind="neutral" data-act="options" class="sk-pill sm">' + U.icon('options') + 'Options</button></div>' +
+      '<header class="stack g10"><h1 class="sk-title">' + U.esc(set.title) + '</h1>' +
       U.mastery(t, 'sk-big') +
-      '<div class="sk-legend"><span><i style="--x:var(--ok)"></i>Learned ' + t.learned + '</span><span><i style="--x:var(--fam)"></i>Familiar ' + t.familiar + '</span><span><i style="--x:var(--warn)"></i>Weak ' + t.weak + '</span></div></header>' +
+      '<div class="sk-legend"><span><i data-s="learned"></i>Learned ' + t.learned + '</span><span><i data-s="familiar"></i>Familiar ' + t.familiar + '</span><span><i data-s="weak"></i>Weak ' + t.weak + '</span></div></header>' +
       '<section class="stack"><div class="row"><h2 class="sk-h2 grow">Practice</h2><span class="sk-meta">' + inRound + ' of ' + items.length + ' in a round</span></div>' + resumeCard(app) + '<div class="two">' +
       U.practice(cards ? 'Flashcards' : 'Next Step', cards ? 'See the front, recall it, flip to check' : 'Say the next step, reveal, grade yourself', 'flip', 'startNext') +
       U.practice('Type it', cards ? 'Type the back from memory' : 'Type the steps from memory', 'type', 'startType') +
       '</div></section>' +
-      '<section class="stack"><h2 class="sk-h2">' + (cards ? 'Cards' : 'Full skill') + ' <span class="sk-meta" style="font-weight:400">· ' + items.length + (cards ? ' cards' : ' steps') + '</span></h2>' + previewCard(app, items) + '</section>' +
-      '<section class="stack" style="gap:8px"><h2 class="sk-h2">' + (cards ? 'All cards' : 'Steps') + '</h2>' + list(app, items) + '</section>' +
+      '<section class="stack"><h2 class="sk-h2">' + (cards ? 'Cards' : 'Full skill') + ' <span class="sk-meta">· ' + items.length + (cards ? ' cards' : ' steps') + '</span></h2>' + previewCard(app, items) + '</section>' +
+      '<section class="stack g8"><h2 class="sk-h2">' + (cards ? 'All cards' : 'Steps') + '</h2>' + list(app, items) + '</section>' +
       '</main>';
   }
 
@@ -68,13 +68,13 @@
       (set.sections || []).map(function (s) { return '<option value="' + U.esc(s.id) + '"' + (o.section === s.id ? ' selected' : '') + '>' + U.esc(s.title) + '</option>'; }).join('') + '</select></label>';
     return '<div class="sk-scrim" data-act="closeSheet"></div><section class="sk-sheet" role="dialog" aria-label="Options">' +
       '<div class="sk-sheet-h"><h2>Options</h2>' + U.iconBtn('close', 'Close', 'closeSheet') + '</div>' + sections +
-      '<div class="stack" style="gap:0">' +
+      '<div class="stack g0">' +
       (cards ? '' : U.toggle('starred', 'Starred steps only', o.starred, 'The ones you can’t miss')) +
       U.toggle('weakFirst', 'Weak first', o.weakFirst) +
       U.toggle('skipLearned', 'Skip learned', o.skipLearned) +
       U.toggle('shuffle', 'Shuffle', o.shuffle, cards ? '' : 'Off keeps the checklist order') + '</div>' +
-      '<p class="sk-meta" style="margin:0">' + n + ' of ' + app.items.length + ' in a round. Changes apply to the round you’re in.</p>' +
-      '<button data-ui="button" data-kind="primary" data-act="closeSheet" style="height:52px">Done</button></section>';
+      '<p class="sk-meta sk-flush">' + n + ' of ' + app.items.length + ' in a round. Changes apply to the round you’re in.</p>' +
+      '<button data-ui="button" data-kind="primary" data-act="closeSheet" class="sk-tall">Done</button></section>';
   }
 
   var actions = {

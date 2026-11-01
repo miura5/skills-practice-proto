@@ -7,12 +7,12 @@
     var f = app.state.filter || 'all';
     var sets = SP.store.all().filter(function (s) { return f === 'all' || s.kind === f; });
     var seg = function (id, label) { return '<button aria-pressed="' + (f === id) + '" data-act="filter" data-id="' + id + '">' + label + '</button>'; };
-    return '<main class="screen" style="gap:20px">' +
-      '<header class="sk-top"><div class="grow stack" style="gap:6px"><span class="sk-meta">' + SP.store.all().length + ' sets · saved to your ' + SP.store.backend() + '</span><h1>Library</h1></div>' +
-      '<button data-ui="button" data-kind="primary" class="icon" aria-label="New set" data-act="newSet" style="border-radius:99px">' + U.icon('plus') + '</button></header>' +
+    return '<main class="screen g20">' +
+      '<header class="sk-top"><div class="grow stack"><span class="sk-meta">' + SP.store.all().length + ' sets · saved to your ' + SP.store.backend() + '</span><h1>Library</h1></div>' +
+      '<button data-ui="button" data-kind="primary" aria-label="New set" data-act="newSet" class="icon sk-pill">' + U.icon('plus') + '</button></header>' +
       '<div data-ui="segmented" role="group" aria-label="Show">' + seg('all', 'All') + seg('cards', 'Card sets') + seg('procedure', 'Procedures') + '</div>' +
-      '<div class="stack" style="gap:10px">' + (sets.length ? sets.map(function (s) { return U.setRow(s, app.tally(s)); }).join('') : '<p class="sk-meta center">Nothing here yet.</p>') + '</div>' +
-      '<button data-ui="button" data-kind="ghost" data-act="go" data-id="about" style="align-self:center">How this prototype is built</button>' +
+      '<div class="stack g10">' + (sets.length ? sets.map(function (s) { return U.setRow(s, app.tally(s)); }).join('') : '<p class="sk-meta center">Nothing here yet.</p>') + '</div>' +
+      '<button data-ui="button" data-kind="ghost" data-act="go" data-id="about" class="self-center">How this prototype is built</button>' +
       '</main>' + U.tabbar('library');
   }
 
@@ -24,7 +24,7 @@
       '<div class="sk-sheet-h"><h2>New set</h2>' + U.iconBtn('close', 'Close', 'closeSheet') + '</div>' +
       '<div data-ui="segmented" role="group" aria-label="Kind">' + seg('cards', 'Card set') + seg('procedure', 'Procedure') + '</div>' +
       '<label class="sk-field">Title<input id="newTitle" autocomplete="off" placeholder="' + (k === 'cards' ? 'e.g. Muscles lab' : 'e.g. Sterile dressing') + '"></label>' +
-      '<button data-ui="button" data-kind="primary" data-act="createSet" style="height:52px">Create and add ' + (k === 'cards' ? 'cards' : 'steps') + '</button></section>';
+      '<button data-ui="button" data-kind="primary" data-act="createSet" class="sk-tall">Create and add ' + (k === 'cards' ? 'cards' : 'steps') + '</button></section>';
   }
 
   var actions = {

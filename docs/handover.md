@@ -1,6 +1,6 @@
 # Handover
 
-Last updated 2026-11-01 by the chat that shipped v0.3.3. No chat is managing right now.
+Last updated 2026-11-01 by the chat that shipped v0.3.4. No chat is managing right now.
 
 ## Where things stand
 - v0.2.0 is live at https://claude.ai/artifact/UUj5psocojXR1xkK2QVAbh (same link). It adds Grading v2 (D-10, T-01):
@@ -10,6 +10,8 @@ Last updated 2026-11-01 by the chat that shipped v0.3.3. No chat is managing rig
 - v0.3.2 (D-14, T-05): Type it draws the current row first, last answer as a compact line below.
   D-13's scroll pin failed on iPhone. Matt confirmed v0.3.2 works on iPhone.
 - v0.3.3 (D-15, T-06): items slide in (procedures up, cards from the right). Needs Matt's check.
+- v0.3.4 (D-16, T-07): Study kit clean-up; ladder Learned green, Familiar yellow, Weak red.
+- Matt: all styling goes through the two layers (Proprietary + Study kit). No inline styles.
 - Matt says v0.2.0 grading looks good.
 - Tests: `node tests/core.test.js` passes 45.
 - Not yet clicked through in a real browser. Matt is the first to try it.

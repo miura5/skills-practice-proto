@@ -18,7 +18,7 @@
     return '<main class="screen tight">' +
       '<div class="sk-bar">' + U.iconBtn('back', 'Back', 'tab', ' data-id="library"') + '<b>How this prototype is built</b></div>' +
       '<div data-ui="segmented" role="group" aria-label="Document">' + tab('docs/DECISIONS.md', 'Decisions') + tab('docs/README.md', 'Codebase') + '</div>' +
-      '<p class="sk-meta" style="margin:0">Version ' + SP.version + ' · data saved to your ' + SP.store.backend() + '.</p>' +
+      '<p class="sk-meta sk-flush">Version ' + SP.version + ' · data saved to your ' + SP.store.backend() + '.</p>' +
       '<div class="doc">' + U.esc(cache[file]) + '</div></main>';
   }
 
