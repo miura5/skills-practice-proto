@@ -163,13 +163,13 @@
 
 
   // ---- T-16 helpers (Lane B) ----
-  // sk-segbar: the chunked session bar (D-19). segs: [{label, size, fill 0..1}], one per chunk, sized by
-  // its item count; at: the current chunk. One progressbar for the round, named by the current chunk.
+  // sk-segbar: the chunked session bar (D-19, v2 in D-22). segs: [{label, fill 0..1}], one equal-width
+  // segment per chunk; at: the current chunk. One progressbar for the round, named by the current chunk.
   function segbar(segs, at, done, total) {
     var cur = segs[at] || {};
     return '<div class="sk-segbar" role="progressbar" aria-label="' + esc(cur.label) + ', part ' + (at + 1) + ' of ' + segs.length + '" aria-valuenow="' + done + '" aria-valuemin="0" aria-valuemax="' + total + '">' +
       segs.map(function (s, k) {
-        return '<span class="sk-seg"' + (k === at ? ' data-current="true"' : '') + ' title="' + esc(s.label) + '" style="flex:' + s.size + '"><i style="width:' + (100 * s.fill).toFixed(1) + '%"></i></span>';
+        return '<span class="sk-seg"' + (k === at ? ' data-current="true"' : '') + ' title="' + esc(s.label) + '"><i style="width:' + (100 * s.fill).toFixed(1) + '%"></i></span>';
       }).join('') + '</div>';
   }
 

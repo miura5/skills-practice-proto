@@ -39,7 +39,7 @@
       var u = app.byId[id];
       return '<li class="sk-row" data-d="' + (k ? 'far' : 'near') + '"><span class="n">' + U.esc(u.num) + '</span><span class="grow sk-faint">' + (cards ? U.esc(u.front) : '· · ·') + '</span></li>';
     }).join('');
-    var lead = cards ? 'Card ' + it.num : R.scene(app, it) + (it.prev ? 'After: ' + (it.prev.cue || it.prev.answer) : 'Start of the checklist');
+    var lead = cards ? 'Card ' + it.num : (it.prev ? 'After: ' + (it.prev.cue || it.prev.answer) : 'Start of the checklist');
     var hint = r.hint ? '<span class="sk-meta">Key words: ' + U.esc(it.keys.map(function (k) { return k.split(' ')[0] + '…'; }).join(', ')) + '</span>' : '';
     var open = r.open;
     var box = open
@@ -49,7 +49,7 @@
     var enter = R.enter(seen, r, cards);
     return R.bar(app) +
       '<main class="screen g12 snug">' +
-      '<span class="sk-meta center">' + U.esc(app.set.title) + ' · Type it</span>' +
+      R.header(app, it) +
       '<ol class="sk-wheel"' + enter + '>' +
       '<li class="sk-row focus">' +
       '<div class="row sk-q"><span class="n">' + U.esc(it.num) + '</span>' +

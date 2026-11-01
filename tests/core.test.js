@@ -222,6 +222,10 @@ ok('t16 no nearby in restored rounds', !('nearby' in t16Old) && !('nearby' in t1
 
 
 // ---- T-19..T-21 tests (Lane B) ----
+// T-19: a link step names its own chunk (the previous one), a learn step its own.
+ok('t19 link step labels with its own chunk', chunks.of(t16Proc, 'a1').label === 'Prep' && chunks.of(t16Proc, 'b1').label === 'Med room');
+// T-21: Continue names the next Smart chunk; in Run it is Whole set.
+ok('t21 continue label = next chunk, Whole set in Run', chunks.smart(t16Proc, t16A).label === 'Med room' && chunks.smart(t16Proc, t16All).label === 'Whole set');
 
 
 // ---- T-22..T-23 tests (Lane C) ----

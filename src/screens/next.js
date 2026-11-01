@@ -10,11 +10,11 @@
     var enter = R.enter(seen, r, cards);
     return R.bar(app) +
       '<main class="screen g20 snug">' +
-      '<span class="sk-meta center">' + U.esc(app.set.title) + ' · ' + R.modeName(app) + '</span>' +
+      R.header(app, it) +
       '<div class="grow vcenter">' +
       '<div class="sk-enter"' + enter + '>' + U.flip({
         act: 'flipCard', flipped: r.flip, h: 380,
-        lead: cards ? 'Card ' + it.num : R.scene(app, it) + (it.prev ? 'After: ' + (it.prev.cue || it.prev.answer) : 'Start of the checklist'),
+        lead: cards ? 'Card ' + it.num : (it.prev ? 'After: ' + (it.prev.cue || it.prev.answer) : 'Start of the checklist'),
         ask: cards ? it.front : 'What’s next?',
         label: cards ? it.front : 'Step ' + it.num + (it.star ? ' ★' : ''), answer: it.answer
       }) + '</div></div>' +

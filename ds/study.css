@@ -309,19 +309,15 @@
 .sk-tags input.sk-tags-edit:focus{box-shadow:inset 0 0 0 1.5px var(--her)}
 
 
-/* ---------- T-16: sk-segbar, the chunked session bar (Lane B) ---------- */
-/* One segment per chunk, sized by its item count (flex set by U.segbar). Learned chunks are full in the
-   ladder's --learned; the current chunk fills in the accent (--her) as the round goes; the rest are track. */
-.sk-segbar{flex:1;min-width:0;display:flex;align-items:center;gap:3px;height:8px}
-.sk-seg{display:block;min-width:4px;height:100%;border-radius:var(--r-pill);background:var(--line);overflow:hidden}
-.sk-seg > i{display:block;height:100%;background:var(--learned);transition:width var(--dur-3) var(--ease-out)}
-.sk-seg[data-current]{height:12px}
-.sk-seg[data-current] > i{background:var(--her)}
-
 /* ---------- T-18: scene colours + Picker popover (Lane A) ---------- */
 
 
 /* ---------- T-19..T-20: round header, sk-segbar v2 (Lane B) ---------- */
+/* sk-segbar (D-22): one equal-width segment per chunk, track var(--line), fill var(--ok), pill ends.
+   Every segment is the same height; the current one only carries data-current (for a11y hooks). */
+.sk-segbar{flex:1;min-width:0;display:flex;align-items:center;gap:3px;height:8px}
+.sk-seg{display:block;flex:1 1 0;min-width:0;height:100%;border-radius:var(--r-pill);background:var(--line);overflow:hidden}
+.sk-seg > i{display:block;height:100%;width:0;border-radius:var(--r-pill);background:var(--ok);transition:width var(--dur-3) var(--ease-out)}
 
 
 /* ---------- T-23: sk-scope, custom scope editor (Lane C) ---------- */

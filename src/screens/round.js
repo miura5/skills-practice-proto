@@ -13,8 +13,9 @@
     app.focus('#answer');
   }
 
-  function fresh(app, mode) {
-    var set = app.set, p = SP.store.progress(set.id), o = SP.store.settings(set.id);
+  // over (optional): settings to use instead of the set's saved Options (Continue forces Smart).
+  function fresh(app, mode, over) {
+    var set = app.set, p = SP.store.progress(set.id), o = over || SP.store.settings(set.id);
     var list = SP.core.rounds.build(app.items, o, p, set);
     if (!list.length) return app.toast('No items match these Options. Open Options to widen the round.');
     var before = {};
@@ -56,26 +57,30 @@
     return r && app.byId[r.ids[r.i]];
   }
 
-  // D-19: the session bar. A Smart round in Learn or Link gets one segment per chunk: earlier chunks
-  // full, the current one filling with the round, later ones full only if already learned.
-  // Run, non-Smart and old saved rounds get the plain bar.
+  // D-19/D-22: the session bar. A Smart round in Learn or Link gets one equal segment per chunk.
+  // Earlier chunks are full; the current one fills with the round's answers in that chunk (link steps
+  // do not count); later ones fill by their own learned share. Run, non-Smart and old rounds: plain bar.
   function bar(app) {
     var r = app.state.round, C = SP.core.chunks, chunks = r.chunk && r.stage !== 'run' ? C.list(app.set) : [], at = -1;
     chunks.forEach(function (c, k) { if (c.id === r.chunk) at = k; });
     if (at < 0) return U.session(r.i, r.ids.length);
+    var cur = chunks[at], inCur = {}, got = 0;
+    cur.ids.forEach(function (id) { inCur[id] = true; });
+    (r.res || []).forEach(function (x) { if (inCur[x.id]) got += 1; });
     var segs = C.segments(chunks, SP.store.progress(app.set.id)).map(function (s, k) {
-      return { label: s.label, size: s.total, fill: k === at ? r.i / r.ids.length : k < at || s.ready === s.total ? 1 : 0 };
+      var fill = k < at ? 1 : k === at ? Math.min(1, got / cur.ids.length) : s.ready / s.total;
+      return { label: s.label, fill: fill };
     });
     return U.session(r.i, r.ids.length, U.segbar(segs, at, r.i, r.ids.length));
   }
 
-  // D-19: a procedure's prompt names the item's chunk ("Med room · ") in Learn and Link, and in
-  // rounds saved before D-19 (no stage); not in Run or non-Smart rounds.
-  function scene(app, it) {
-    var r = app.state.round;
-    if (app.set.kind === 'cards' || r.stage === 'run' || r.stage === null) return '';
-    var c = SP.core.chunks.of(app.set, it.id);
-    return c ? c.label + ' · ' : '';
+  // D-19/D-22: the round header line on the mode screens. Procedures in a Smart round in Learn or Link
+  // (and rounds saved before D-19, which have no stage) name the item's chunk; otherwise the line is
+  // empty. It is always drawn (a non-breaking space when empty), so the layout does not move.
+  function header(app, it) {
+    var r = app.state.round, c = null;
+    if (app.set.kind !== 'cards' && (r.stage === undefined || r.stage === 'learn' || r.stage === 'link')) c = SP.core.chunks.of(app.set, it.id);
+    return '<span class="sk-meta center">' + (c ? U.esc(c.label) : '&nbsp;') + '</span>';
   }
 
   // how: 'type' (unprompted), 'hint' (typed after a hint), 'next' (self-graded)
@@ -123,8 +128,10 @@
         return '<li class="sk-row"><span class="n">' + U.esc(app.byId[x.id].num) + '</span><span class="grow">' + U.esc(cards ? app.byId[x.id].front : (app.byId[x.id].cue || app.byId[x.id].answer)) + '</span><span class="sk-meta">' + r.before[x.id] + ' → ' + p[x.id].state + '</span></li>';
       }).join('') + '</ul></section>' : '') +
       '<section class="stack"><h2 class="sk-h2">Every answer</h2><ol class="sk-wheel">' + r.res.map(row).join('') + '</ol></section>' +
-      '<div class="stack g8">' + (r.stage ? '<p class="sk-meta sk-flush center">Next: ' + U.esc(SP.core.chunks.smart(app.set, p).label) + '</p>' : '') +
-      '<button data-ui="button" data-kind="primary" data-act="again" class="sk-tall">Practice again</button>' +
+      '<div class="stack g8">' +
+      (r.stage
+        ? '<button data-ui="button" data-kind="primary" data-act="continue" class="sk-tall">Continue: ' + U.esc(SP.core.chunks.smart(app.set, p).label) + '</button>'
+        : '<button data-ui="button" data-kind="primary" data-act="again" class="sk-tall">Practice again</button>') +
       '<button data-ui="button" data-kind="neutral" data-act="toSet" class="sk-tall">Back to set</button></div></main>';
   }
 
@@ -139,6 +146,8 @@
     startNext: function (app) { start(app, 'next'); },
     startType: function (app) { start(app, 'type'); },
     again: function (app) { fresh(app, app.state.round.mode); },
+    // D-22: after a Smart round, a fresh Smart round in the same mode (whatever Scope is saved).
+    continue: function (app) { fresh(app, app.state.round.mode, Object.assign({}, SP.store.settings(app.set.id), { practice: 'smart', section: null })); },
     // Options sheet, in a round: drop the saved round and begin a fresh one in the same mode.
     startOver: function (app) { var m = app.state.round.mode; SP.store.clearRound(app.set.id); app.state.round = null; fresh(app, m); },
     resume: function (app) { if (!resume(app)) app.toast('That round can’t be picked up any more.'); },
@@ -146,5 +155,5 @@
     toSet: function (app) { app.update({ screen: 'set', round: null }); }
   };
 
-  SP.screens.round = { start: start, fresh: fresh, resume: resume, current: current, enter: enter, bar: bar, scene: scene, record: record, refilter: refilter, render: results, modeName: modeName, actions: actions };
+  SP.screens.round = { start: start, fresh: fresh, resume: resume, current: current, enter: enter, bar: bar, header: header, record: record, refilter: refilter, render: results, modeName: modeName, actions: actions };
 })(window.SP);
