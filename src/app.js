@@ -54,6 +54,9 @@
     },
     back: function (a) { a.update({ screen: 'library', round: null }); },
     theme: function (a) { SP.store.saveMeta({ theme: theme() === 'dark' ? 'light' : 'dark' }); a.render(); },
+    carPrev: function (a, el) { SP.ui.carouselMove(root, el.dataset.id, -1); },
+    carNext: function (a, el) { SP.ui.carouselMove(root, el.dataset.id, 1); },
+    carGo: function (a, el) { SP.ui.carouselMove(root, el.dataset.id, 0, Number(el.dataset.n)); },
     options: function (a) { a.update({ sheet: 'options' }); },
     closeSheet: function (a) { a.update({ sheet: null }); if (a.state.screen === 'type') a.focus('#answer'); }
   };

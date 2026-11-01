@@ -79,5 +79,11 @@ ok('round restores at the same item', back.i === 2 && back.ids.length === 5 && b
 const cut = rounds.restore(snap, ngtItems.filter((i) => i.id !== live.ids[0] && i.id !== live.ids[3]));
 ok('round restore drops removed items and clamps i', cut.i === 1 && cut.ids.length === 3 && cut.res.length === 1);
 ok('round restore: nothing left = null', rounds.restore(snap, ngtItems.filter((i) => live.ids.slice(2).indexOf(i.id) < 0)) === null && rounds.restore(null, ngtItems) === null);
+
+// one round per set, any mode (T-08)
+const cont = rounds.pick(snap, ngtItems, 'next');
+ok('pick: another mode continues the same round', cont.mode === 'next' && cont.i === 2 && cont.ids.join() === snap.ids.join() && cont.res.length === 2);
+ok('pick: no saved round = fresh (null)', rounds.pick(null, ngtItems, 'type') === null);
+ok('modeOf: one mode / mixed', rounds.modeOf({ mode: 'type', res: [{ mode: 'type' }] }) === 'type' && rounds.modeOf({ mode: 'next', res: [{ mode: 'type' }, { mode: 'next' }] }) === 'mixed' && rounds.modeOf({ mode: 'next', res: [] }) === 'next');
 console.log(pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);

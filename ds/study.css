@@ -8,7 +8,8 @@
      2. study components, prefixed sk-, built only from Proprietary tokens:
         sk-h2, sk-meta (+ .sk-flush), sk-faint, sk-top, sk-practice, sk-art, sk-flip (+ sk-face, sk-pager),
         sk-session (+ sk-count), sk-wheel (+ sk-row, sk-last, sk-clamp, sk-input, sk-q), sk-grade, sk-stats/sk-stat,
-        sk-tabbar, sk-set (+ sk-ico, sk-set-b), sk-resume, sk-jump, sk-bar, sk-key, sk-legend, sk-item (+ sk-dot,
+        sk-tabbar, sk-set (+ sk-ico, sk-set-b), sk-inround, sk-jump (+ sk-jump-art), sk-carousel (+ sk-track, sk-slide,
+        sk-car-prev/-next, sk-dots), sk-bar, sk-key, sk-legend, sk-item (+ sk-dot,
         sk-star, sk-sec), sk-scrim, sk-sheet, sk-switch, sk-field, sk-edit, sk-check, sk-note, sk-toast, sk-big,
         sk-fill, sk-blank, sk-nearby, sk-hinted, sk-title, sk-say, sk-enter (T-06 motion);
         button modifiers sk-pill (+ .sm), sk-pad, sk-tall, sk-danger.
@@ -149,10 +150,8 @@
 .sk-set-b span{font-size:var(--fs-1);color:var(--quiet)}
 .sk-set .gauge{width:56px;height:6px;border-radius:99px;flex:none}
 
-/* ---------- 2h2. sk-resume: the round left part-way, on a set's page (T-03) ---------- */
-.sk-resume{display:flex;flex-direction:column;gap:10px;padding:16px;border-radius:var(--r-xl);background:var(--surface);box-shadow:0 0 0 2px var(--her),var(--sk-shadow)}
-.sk-resume b{font-size:var(--fs-4);font-weight:600}
-.sk-resume .gauge{height:8px;border-radius:99px}
+/* ---------- 2h2. sk-inround: quiet note that the mode cards continue a saved round (T-09) ---------- */
+.sk-inround{align-self:flex-start;margin-top:-4px;padding:4px 10px;border-radius:99px;background:var(--accent-bg);color:var(--her);font-size:var(--fs-1);font-weight:600}
 
 /* ---------- 2i. sk-jump: "Jump back in" ---------- */
 .sk-jump{display:flex;flex-direction:column;gap:14px;padding:20px;border-radius:var(--r-card);background:var(--surface);box-shadow:0 0 0 1px var(--line),var(--sk-shadow);position:relative;overflow:hidden}
@@ -251,9 +250,32 @@
 .study [data-ui='button'].sk-tall{height:52px;min-height:52px}
 .study [data-ui='button'].sk-danger{color:var(--bad)}
 .sk-jump > [data-ui='button']{align-self:flex-start}
-.study .sk-resume [data-ui='button'].sk-pill{height:48px;min-height:48px}
 .sk-title{margin:0;font-size:26px;font-weight:700;letter-spacing:-.02em}
 .sk-say{margin:0;height:58px;display:flex;align-items:center;justify-content:center}
 .sk-q{align-items:baseline;gap:12px}
 .sk-q .n{color:var(--her)}
 .sk-q b{font-size:var(--fs-4)}
+
+/* ---------- T-10: sk-carousel, a horizontal row of large cards (Home's Jump back in) ----------
+   Scroll-snap track (native swipe), slides ~85% wide so the next one peeks. Arrow buttons only on
+   hover-capable fine pointers, dots under the row. app.js routes carPrev / carNext / carGo. */
+.sk-carousel{position:relative;margin:0 -20px}
+.sk-track{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;scroll-padding:0 20px;padding:4px 20px 8px;scrollbar-width:none;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+.sk-track::-webkit-scrollbar{display:none}
+.sk-slide{flex:0 0 85%;scroll-snap-align:start;display:flex}
+.sk-slide:only-child{flex-basis:100%}
+.sk-slide > .sk-jump{flex:1;min-height:228px}
+.sk-car-prev,.sk-car-next{display:none}
+@media (hover:hover) and (pointer:fine){
+  .study .sk-carousel [data-ui='button'].sk-car-prev,.study .sk-carousel [data-ui='button'].sk-car-next{display:inline-flex;position:absolute;top:calc(50% - 30px);z-index:1;border-radius:99px;box-shadow:inset 0 0 0 1px var(--line2),var(--sk-shadow)}
+  .study .sk-carousel .sk-car-prev{left:8px} .study .sk-carousel .sk-car-next{right:8px}
+  .study .sk-carousel [data-ui='button'].sk-car-prev:disabled,.study .sk-carousel [data-ui='button'].sk-car-next:disabled{display:none}
+}
+.sk-dots{display:flex;justify-content:center;gap:6px;padding-top:6px}
+.sk-dots button{width:8px;height:8px;padding:0;border:0;border-radius:99px;background:var(--line2);cursor:pointer;transition:width var(--dur-2) var(--ease-out),background var(--dur-2)}
+.sk-dots button[aria-current='true']{width:20px;background:var(--her)}
+.sk-jump-art svg{width:100%;height:100%;display:block}
+.sk-jump .sk-jump-art .art-face{fill:var(--art)} .sk-jump .sk-jump-art .art-back{fill:var(--accent-bg)}
+.sk-jump > *:not(.sk-jump-art){position:relative;z-index:1}
+.sk-jump .sk-grow{flex:1}
+@media (prefers-reduced-motion:reduce){.sk-track{scroll-behavior:auto}.sk-dots button{transition:none}}

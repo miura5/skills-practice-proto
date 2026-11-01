@@ -4,7 +4,16 @@
   'use strict';
   var U = SP.ui, P = SP.core.progress;
 
+  // T-08: a saved round is continued in whichever mode was chosen; otherwise a fresh one.
   function start(app, mode) {
+    var r = SP.core.rounds.pick(SP.store.round(app.set.id), app.items, mode);
+    if (!r) return fresh(app, mode);
+    save(app, r);
+    app.update({ screen: mode, sheet: null, round: r });
+    app.focus('#answer');
+  }
+
+  function fresh(app, mode) {
     var set = app.set, p = SP.store.progress(set.id);
     var list = SP.core.rounds.build(app.items, SP.store.settings(set.id), p);
     if (!list.length) return app.toast('No items match these Options. Open Options to widen the round.');
@@ -48,7 +57,7 @@
     var map = Object.assign({}, SP.store.progress(app.set.id));
     map[it.id] = P.apply(map[it.id], result, how);
     SP.store.saveProgress(app.set.id, map);
-    r.res.push({ id: it.id, result: result, hinted: !!(note && note.hinted) });
+    r.res.push({ id: it.id, mode: r.mode, result: result, hinted: !!(note && note.hinted) });
     if (note) r.notes[it.id] = note;
     r.i += 1; r.flip = false; r.hint = false; r.open = null; r.nearby = null;
     if (r.i >= r.ids.length) { finish(app, r); app.update({ screen: 'done' }); }
@@ -77,7 +86,7 @@
       return '<li class="sk-row" data-result="' + x.result + '"><span class="n">' + U.esc(it.num) + '</span><span class="grow">' + U.esc(cards ? it.front : (it.cue || it.answer)) + '</span><span class="tag">' + TAG[x.result] + (x.hinted ? ' <span class="sk-hinted">hinted</span>' : '') + '</span></li>';
     };
     return '<main class="screen">' +
-      '<header class="sk-top"><div class="grow stack"><span class="sk-meta">' + U.esc(app.set.title) + ' · ' + modeName(app) + ' · ' + mins + ' min</span><h1>Round done</h1></div></header>' +
+      '<header class="sk-top"><div class="grow stack"><span class="sk-meta">' + U.esc(app.set.title) + ' · ' + modeName(app, true) + ' · ' + mins + ' min</span><h1>Round done</h1></div></header>' +
       '<div class="sk-stats">' + stat('right', 'Right', 'ok') + stat('shaky', 'Shaky', 'warn') + stat('missed', 'Missed', 'bad') + '</div>' +
       (changed.length ? '<section class="stack"><h2 class="sk-h2">What changed</h2><ul class="sk-wheel">' + changed.map(function (x) {
         return '<li class="sk-row"><span class="n">' + U.esc(app.byId[x.id].num) + '</span><span class="grow">' + U.esc(cards ? app.byId[x.id].front : (app.byId[x.id].cue || app.byId[x.id].answer)) + '</span><span class="sk-meta">' + r.before[x.id] + ' → ' + p[x.id].state + '</span></li>';
@@ -87,19 +96,23 @@
       '<button data-ui="button" data-kind="neutral" data-act="toSet" class="sk-tall">Back to set</button></div></main>';
   }
 
-  function modeName(app) {
-    var m = app.state.round.mode;
+  // whole: Results' label, which is 'Mixed' when the round used both modes
+  function modeName(app, whole) {
+    var m = whole ? SP.core.rounds.modeOf(app.state.round) : app.state.round.mode;
+    if (m === 'mixed') return 'Mixed';
     return m === 'type' ? 'Type it' : app.set.kind === 'cards' ? 'Flashcards' : 'Next Step';
   }
 
   var actions = {
     startNext: function (app) { start(app, 'next'); },
     startType: function (app) { start(app, 'type'); },
-    again: function (app) { start(app, app.state.round.mode); },
+    again: function (app) { fresh(app, app.state.round.mode); },
+    // Options sheet, in a round: drop the saved round and begin a fresh one in the same mode.
+    startOver: function (app) { var m = app.state.round.mode; SP.store.clearRound(app.set.id); app.state.round = null; fresh(app, m); },
     resume: function (app) { if (!resume(app)) app.toast('That round can’t be picked up any more.'); },
     end: function (app) { app.update({ screen: 'set', round: null }); },
     toSet: function (app) { app.update({ screen: 'set', round: null }); }
   };
 
-  SP.screens.round = { start: start, resume: resume, current: current, enter: enter, record: record, refilter: refilter, render: results, modeName: modeName, actions: actions };
+  SP.screens.round = { start: start, fresh: fresh, resume: resume, current: current, enter: enter, record: record, refilter: refilter, render: results, modeName: modeName, actions: actions };
 })(window.SP);

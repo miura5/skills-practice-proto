@@ -45,5 +45,21 @@
     };
   }
 
-  SP.core.rounds = { build: build, DEFAULTS: DEFAULTS, snapshot: snapshot, restore: restore };
+  // T-08: one round per set, shared by every mode. Starting any mode continues the saved round
+  // (same ids, i and answers) in that mode; null means build a fresh round.
+  function pick(saved, items, mode) {
+    var r = restore(saved, items);
+    if (r && mode) r.mode = mode;
+    return r;
+  }
+
+  // The mode label for Results: the one mode used, or 'mixed' when answers came from both.
+  function modeOf(r) {
+    var seen = {};
+    (r.res || []).forEach(function (x) { if (x.mode) seen[x.mode] = true; });
+    var k = Object.keys(seen);
+    return k.length > 1 ? 'mixed' : k[0] || r.mode;
+  }
+
+  SP.core.rounds = { build: build, DEFAULTS: DEFAULTS, snapshot: snapshot, restore: restore, pick: pick, modeOf: modeOf };
 })((typeof window !== 'undefined' ? window : globalThis).SP);

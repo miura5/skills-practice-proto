@@ -124,9 +124,9 @@ Matt hands it to a new chat by attaching the repo; CLAUDE.md sets the role.
 - [x] T-05 Type it layout without scrolling (D-14). Shipped 2026-11-01 as v0.3.2 (Matt: works on iPhone).
 - [x] T-06 Smooth transition to the next item: procedures slide vertically (Next Step, Type it), card sets slide horizontally (Flashcards, Type it) (D-15). Shipped 2026-11-01 as v0.3.3.
 - [x] T-07 Study kit clean-up + ladder colours (D-16). Shipped 2026-11-01 as v0.3.4.
-- [ ] T-08 One round per set, shared across modes: any mode continues the saved round at its number (D-17). In progress.
-- [ ] T-09 Set overview: remove the Resume card; Start over moves to the bottom of the in-round Options sheet in red. Home keeps the round card (D-17). In progress.
-- [ ] T-10 Home "Jump back in" as an sk-carousel (Study kit): cards, arrows on desktop, swipe on phone, dots (D-18). In progress.
+- [x] T-08 One round per set, shared across modes: any mode continues the saved round at its number (D-17). Shipped v0.4.0.
+- [x] T-09 Set overview: remove the Resume card; Start over moves to the bottom of the in-round Options sheet in red. Home keeps the round card (D-17). Shipped v0.4.0.
+- [x] T-10 Home "Jump back in" as an sk-carousel (Study kit): cards, arrows on desktop, swipe on phone, dots (D-18). Shipped v0.4.0.
 
 ## D-10 build notes (2026-11-01)
 - Bands: 100% Right; 60%+ row stays open with blanks; 34-59% Shaky; under 34% Missed.
@@ -167,3 +167,14 @@ values stay inline (gauge widths, --sk-flip-h). Hard-coded #fff -> var(--on-her)
 Ladder tokens in the Study theme: --learned = --ok (green), --familiar = lch(80% 78 92) light /
 lch(84% 72 95) dark (yellow, was brown --fam), --weak = --bad (red, was --warn).
 Right/Shaky/Missed keep ok/warn/bad. Rule from now on: no static inline styles in screens.
+
+## D-17 · One round per set, shared across modes (2026-11-01, v0.4.0)
+Decision: any mode continues the set's saved round (core.rounds.pick); fresh rounds only when
+none is saved, after Results, or Start over. Each answer stores its mode; Results says "Mixed"
+when both were used. The set overview drops the Resume card for a quiet "Round in progress · N of M"
+note; Start over is the last item in the in-round Options sheet, red, no confirm.
+
+## D-18 · Home carousel, sk-carousel (2026-11-01, v0.4.0)
+Decision: Study kit sk-carousel (scroll-snap track, 85% slides, arrows only on fine pointers,
+tappable dots), markup via U.carousel. Home's Jump back in: last set, then sets with a saved
+round, then others, max 5; Resume round or Continue; practice art bottom-right.

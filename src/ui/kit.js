@@ -50,6 +50,7 @@
     flip: '<svg viewBox="0 0 120 72" aria-hidden="true"><rect x="10" y="20" width="56" height="42" rx="6" class="art-back" transform="rotate(-8 38 41)"/><rect x="28" y="8" width="58" height="44" rx="6" class="art-face" stroke="currentColor" stroke-width="2.5"/><text x="57" y="38" text-anchor="middle" font-size="20" font-weight="700" fill="currentColor" font-family="system-ui">?</text><circle cx="92" cy="54" r="12" fill="currentColor"/><path d="M86 54h11M93 49l5 5-5 5" class="art-arrow" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     type: '<svg viewBox="0 0 120 72" aria-hidden="true"><rect x="16" y="6" width="88" height="24" rx="6" class="art-face" stroke="currentColor" stroke-width="2.5"/><rect x="24" y="15" width="40" height="6" rx="3" fill="currentColor"/><rect x="70" y="12" width="2" height="12" fill="currentColor"/><g class="art-back"><rect x="16" y="38" width="15" height="10" rx="2"/><rect x="35" y="38" width="15" height="10" rx="2"/><rect x="54" y="38" width="15" height="10" rx="2"/><rect x="73" y="38" width="15" height="10" rx="2"/><rect x="92" y="38" width="12" height="10" rx="2"/><rect x="30" y="54" width="60" height="10" rx="2"/></g></svg>'
   };
+  function art(name) { return ART[name]; }
   function practice(title, desc, art, act) {
     return '<button class="sk-practice" data-act="' + act + '"><b>' + esc(title) + '</b><span>' + esc(desc) + '</span><div class="sk-art">' + ART[art] + '</div></button>';
   }
@@ -81,5 +82,39 @@
       '<input type="checkbox" role="switch" data-opt="' + name + '"' + (on ? ' checked' : '') + '><i aria-hidden="true"></i></label>';
   }
 
-  SP.ui = { esc: esc, marked: marked, icon: icon, iconBtn: iconBtn, mastery: mastery, setRow: setRow, practice: practice, flip: flip, session: session, tabbar: tabbar, toggle: toggle };
+  // T-10: a horizontal carousel of slides (HTML strings). id names it for the carPrev/carNext/carGo actions.
+  function carousel(id, slides) {
+    var n = slides.length;
+    return '<div class="sk-carousel" data-car="' + esc(id) + '">' +
+      '<button data-ui="button" data-kind="neutral" class="icon sk-car-prev" aria-label="Previous" data-act="carPrev" data-id="' + esc(id) + '" disabled>' + icon('back') + '</button>' +
+      '<div class="sk-track">' + slides.map(function (s, i) { return '<div class="sk-slide" aria-roledescription="slide" aria-label="' + (i + 1) + ' of ' + n + '">' + s + '</div>'; }).join('') + '</div>' +
+      '<button data-ui="button" data-kind="neutral" class="icon sk-car-next" aria-label="Next" data-act="carNext" data-id="' + esc(id) + '"' + (n < 2 ? ' disabled' : '') + '>' + icon('next') + '</button>' +
+      (n > 1 ? '<div class="sk-dots">' + slides.map(function (s, i) { return '<button aria-label="Slide ' + (i + 1) + '" aria-current="' + (i === 0) + '" data-act="carGo" data-id="' + esc(id) + '" data-n="' + i + '"></button>'; }).join('') + '</div>' : '') +
+      '</div>';
+  }
+  // Keeps arrows and dots in step with the track's scroll position. Call after render.
+  function carouselBind(root) {
+    [].forEach.call(root.querySelectorAll('.sk-carousel'), function (c) {
+      var t = c.querySelector('.sk-track'), raf = 0;
+      var sync = function () {
+        raf = 0;
+        var w = t.firstElementChild ? t.firstElementChild.offsetWidth + 12 : 1, i = Math.round(t.scrollLeft / w), n = t.children.length;
+        var end = t.scrollLeft >= t.scrollWidth - t.clientWidth - 2;
+        if (end) i = n - 1;
+        [].forEach.call(c.querySelectorAll('.sk-dots button'), function (d, k) { d.setAttribute('aria-current', String(k === i)); });
+        c.querySelector('.sk-car-prev').disabled = t.scrollLeft < 2;
+        c.querySelector('.sk-car-next').disabled = end;
+      };
+      t.addEventListener('scroll', function () { if (!raf) raf = requestAnimationFrame(sync); }, { passive: true });
+      sync();
+    });
+  }
+  function carouselMove(root, id, by, to) {
+    var c = root.querySelector('.sk-carousel[data-car="' + id + '"]'), t = c && c.querySelector('.sk-track');
+    if (!t || !t.firstElementChild) return;
+    var w = t.firstElementChild.offsetWidth + 12;
+    t.scrollTo({ left: to != null ? to * w : t.scrollLeft + by * w });
+  }
+
+  SP.ui = { carousel: carousel, carouselBind: carouselBind, carouselMove: carouselMove, esc: esc, marked: marked, icon: icon, iconBtn: iconBtn, mastery: mastery, setRow: setRow, practice: practice, art: art, flip: flip, session: session, tabbar: tabbar, toggle: toggle };
 })(window.SP);
