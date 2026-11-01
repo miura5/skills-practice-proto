@@ -27,7 +27,7 @@
     var jump = [last].concat(saved, others.filter(function (s) { return saved.indexOf(s) < 0; })).slice(0, 5);
     var recents = others.slice(0, 4);
     return '<main class="screen">' +
-      '<header class="sk-top"><div class="grow stack"><span class="sk-meta">' + hello + ', Matt</span><h1>Study</h1></div>' +
+      '<header class="sk-top"><div class="grow stack"><span class="sk-meta">' + hello + '</span><h1>Study</h1></div>' +
       U.iconBtn('theme', 'Switch light or dark', 'theme') + '</header>' +
       '<section class="stack"><h2 class="sk-h2">Jump back in</h2>' +
       U.carousel('jump', jump.map(function (s) { return slide(app, s); })) + '</section>' +
