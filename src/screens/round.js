@@ -11,6 +11,7 @@
     var raw = SP.store.round(app.set.id), r = SP.core.rounds.pick(raw, app.items, mode);
     if (!r) return fresh(app, mode);
     attach(r, raw);
+    Object.assign(app.state, { screen: mode, sheet: null, round: r });   // before save: a save redraws (D-30)
     save(app, r);
     app.update({ screen: mode, sheet: null, round: r });
     app.focus('#answer');
@@ -44,6 +45,7 @@
     app.items.forEach(function (it) { before[it.id] = (p[it.id] || P.blank()).state; });
     var r = { mode: mode, ids: list.map(function (it) { return it.id; }), i: 0, res: [], flip: false, hint: false, notes: {}, before: before, t0: Date.now(), active: 0, last: Date.now() };
     keepPlan(r, SP.core.rounds.plan(app.items, o, p, set));
+    Object.assign(app.state, { screen: mode, sheet: null, round: r });   // before save: a save redraws (D-30)
     save(app, r);
     app.update({ screen: mode, sheet: null, round: r });
     app.focus('#answer');
@@ -113,6 +115,7 @@
     var raw = SP.store.round(app.set.id), r = SP.core.rounds.restore(raw, app.items);
     if (!r) { clearSaved(app); return false; }
     attach(r, raw);
+    Object.assign(app.state, { screen: r.mode, sheet: null, round: r });   // before save: a save redraws (D-30)
     save(app, r);
     app.update({ screen: r.mode, sheet: null, round: r });
     app.focus('#answer');
