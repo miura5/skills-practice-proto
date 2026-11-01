@@ -123,6 +123,7 @@ Matt hands it to a new chat by attaching the repo; CLAUDE.md sets the role.
 - [x] T-04 Type it: keep the current row in view above the phone keyboard (D-13). Shipped 2026-11-01 as v0.3.1.
 - [x] T-05 Type it layout without scrolling (D-14). Shipped 2026-11-01 as v0.3.2 (Matt: works on iPhone).
 - [x] T-06 Smooth transition to the next item: procedures slide vertically (Next Step, Type it), card sets slide horizontally (Flashcards, Type it) (D-15). Shipped 2026-11-01 as v0.3.3.
+- [ ] T-07 Study kit clean-up (inline styles into sk- classes) + ladder colours: Learned green, Familiar clear yellow, Weak red (D-16). In progress.
 
 ## D-10 build notes (2026-11-01)
 - Bands: 100% Right; 60%+ row stays open with blanks; 34-59% Shaky; under 34% Missed.
