@@ -218,5 +218,14 @@ ok('t16 non-smart round restores with stage null', t16None.stage === null && t16
 const t16Old = rounds.restore({ mode: 'type', ids: ['a1', 'a2'], i: 0, res: [], notes: {}, before: {}, t0: 1, nearby: { id: 'a2' } }, t16Items);
 ok('t16 old save (no plan) restores, stage undefined', t16Old && t16Old.i === 0 && !('stage' in t16Old) && !('chunk' in t16Old));
 ok('t16 no nearby in restored rounds', !('nearby' in t16Old) && !('nearby' in t16Back) && !('nearby' in t16Snap));
+// ---- T-18 tests (Lane A) ----
+
+
+// ---- T-19..T-21 tests (Lane B) ----
+
+
+// ---- T-22..T-23 tests (Lane C) ----
+
+
 console.log(pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);
