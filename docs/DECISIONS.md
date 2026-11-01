@@ -146,12 +146,12 @@ Matt hands it to a new chat by attaching the repo; CLAUDE.md sets the role.
 - [x] T-27 Editor redesign: folding section rows with scene badge, flat step rows, star icon, grip + ⋯ menu, header ⋯ (D-25). Done 2026-11-01 (Lane A).
 - [x] T-28 sk-sort: Study kit drag-to-reorder from a grip only (pointer + keyboard-free fallback via menu) (D-25). Done 2026-11-01 (Lane A).
 - [x] T-29 Editor section header: step range + compact scene badge, aligned (D-27). Done 2026-11-01 (build manager).
-- [ ] T-30 Smart v2 core: chunk = scene (no split), no Link; stages learn -> run; rounds.stale (D-28). Lane A.
-- [ ] T-31 Sync: core/sync.js merge (newest wins; progress per item) + store live updates and refresh on focus (D-28). Lane A.
-- [ ] T-32 Round screens: header scene · section; bar (done green, current fills, later grey); Results Next / Again (D-28). Lane B.
-- [ ] T-33 Stale saved round replaced on start; Home and set screen show the same round and count (D-28). Lane B.
-- [ ] T-34 Result rows: editor rows renamed sk-erow; round and Results rows get their padding back (D-28). Lane B.
-- [ ] T-35 Round time counts active time only (D-28). Lane B.
+- [x] T-30 Smart v2 core: chunk = scene (no split), no Link; stages learn -> run; rounds.stale (D-28). Done 2026-11-01 (Lane A).
+- [x] T-31 Sync: core/sync.js merge (newest wins; progress per item) + store live updates and refresh on focus (D-28). Done 2026-11-01 (Lane A).
+- [x] T-32 Round screens: header scene · section; bar (done green, current fills, later grey); Results Next / Again (D-28). Done 2026-11-01 (Lane B).
+- [x] T-33 Stale saved round replaced on start; Home and set screen show the same round and count (D-28). Done 2026-11-01 (Lane B).
+- [x] T-34 Result rows: editor rows renamed sk-erow; round and Results rows get their padding back (D-28). Done 2026-11-01 (Lane B).
+- [x] T-35 Round time counts active time only (D-28). Done 2026-11-01 (Lane B).
 
 ## D-10 build notes (2026-11-01)
 - Bands: 100% Right; 60%+ row stays open with blanks; 34-59% Shaky; under 34% Missed.
@@ -356,3 +356,16 @@ Lanes: A = T-30, T-31 (core/chunks.js, core/rounds.js, new core/sync.js, store/s
 B = T-32..T-35 (screens round/next/type/set/home/edit, study.css). API: chunks.smart(set, p) ->
 {stage:'learn'|'run', chunk, index, ids, label, next}; rounds.plan stage 'learn'|'run'|null;
 rounds.stale(saved, set, p) -> true when a saved learn round's chunk is done or gone.
+
+## D-29 · Smart v2 + sync shipped (2026-11-01, v0.8.0; T-30..T-35, Haiku lanes)
+Build notes:
+- Store: records stamped u; account mode listens (onSnapshot, else a 30 s re-read) and re-reads on focus;
+  progress writes merge per item; a finished round is a tombstone {cleared:true}, never resurrected. Known
+  gaps: a set deleted while another device is open can come back; clock skew can lose a non-progress write.
+- R.summary(set) feeds Home and the set screen ("<label> · i of n" for a saved round, else the next round).
+  The separate "Round in progress" note is gone. Old 'link' saves count as stale.
+- Round rows: one padding/number/tag layout for round and Results; the editor's rows are .sk-erow.
+- Active time: r.active, gaps capped at 2 min; kept by round.js around the snapshot.
+- Verified together at 390px: 0/7 first scene, "Again: Review and assess" after a miss, "Next: Med room"
+  (0/41, "Med room · Prepare: all meds") after all right, a stale saved round replaced. Account sync
+  across devices not testable here (Matt to check).

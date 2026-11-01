@@ -3,8 +3,8 @@
 Last updated 2026-11-01 by the D-19 batch chat (build manager). No agent is running.
 
 ## Where things stand
-- Live: v0.7.1 at https://claude.ai/artifact/UUj5psocojXR1xkK2QVAbh (same link every release; version 14).
-- Tests: `node tests/core.test.js` passes 328.
+- Live: v0.8.0 at https://claude.ai/artifact/UUj5psocojXR1xkK2QVAbh (same link every release; version 14).
+- Tests: `node tests/core.test.js` passes 344.
 - Shipped today (v0.5.0): chunked learning, D-19 + D-21, tasks T-14..T-17 all ticked.
   - Chunks: card groups of 7; procedure scenes (Med Admin 9 chunks, NG tube 9). Smart rounds go
     Learn -> Link (last 3 steps of the previous chunk) -> Run (whole set) from progress.
@@ -14,6 +14,11 @@ Last updated 2026-11-01 by the D-19 batch chat (build manager). No agent is runn
   - Grading: strict order; no nearby-step stage, no stored order rules.
 - Earlier today: v0.4.2 and before (D-10..D-18). Account saving set up; not yet confirmed with real data
   (list data/users/me via ArtifactData).
+
+## v0.8.0 (D-28, D-29; T-30..T-35)
+Smart v2: one scene (never split) or 7 cards per round, then the whole set; no Link. Header scene · section.
+Results Next / Again. Sync: live account updates, newest wins, per-item progress merge, round tombstones.
+OPEN: Matt to test phone <-> PC sync with his account.
 
 ## v0.7.0 (D-25, D-26; T-25..T-28)
 Editor redesign: folding section rows with the scene badge, flat step rows, star icon, grip drag + ⋯ menus,
