@@ -152,6 +152,10 @@ Matt hands it to a new chat by attaching the repo; CLAUDE.md sets the role.
 - [x] T-33 Stale saved round replaced on start; Home and set screen show the same round and count (D-28). Done 2026-11-01 (Lane B).
 - [x] T-34 Result rows: editor rows renamed sk-erow; round and Results rows get their padding back (D-28). Done 2026-11-01 (Lane B).
 - [x] T-35 Round time counts active time only (D-28). Done 2026-11-01 (Lane B).
+- [ ] T-36 Open round adopts the newest saved copy on focus / store change (no stale-tab overwrite) (D-30). Agent.
+- [ ] T-37 Type it: empty Check does nothing; rows and Results show "You typed: …" for Shaky/Missed (D-30). Agent.
+- [ ] T-38 Options change that leaves no items mid-round: toast, keep the round; scope.parse safe on any word, reports skipped parts (D-30). Agent.
+- [ ] T-39 Wording "Right" everywhere, "Missed · hint used"; Home carousel arrows clear of the cards (D-30). Build manager + agent (Results tag).
 
 ## D-10 build notes (2026-11-01)
 - Bands: 100% Right; 60%+ row stays open with blanks; 34-59% Shaky; under 34% Missed.
@@ -369,3 +373,10 @@ Build notes:
 - Verified together at 390px: 0/7 first scene, "Again: Review and assess" after a miss, "Next: Med room"
   (0/41, "Med room · Prepare: all meds") after all right, a stale saved round replaced. Account sync
   across devices not testable here (Matt to check).
+
+## D-30 · Fixes from the spike/probe test (Matt chose, 2026-11-01)
+Fix: stale open tab overwriting newer answers; empty Check graded Missed; typed answer not shown; Custom with
+no steps ending a round silently; scope.parse crash on "constructor"/"__proto__" (+ "Skipped: …" note for
+unreadable parts); "Got it" -> "Right", "Missed hinted" -> "Missed · hint used"; Jump back in arrow overlap.
+Not now (Matt): Library "0 learned" wording, "4 of 4" on Home for small card sets, Practice line wrap.
+Not bugs: Shaky -> Familiar (ladder D-06), New set flow, "32-1" range.
