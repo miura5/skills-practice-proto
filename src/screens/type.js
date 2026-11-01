@@ -25,6 +25,9 @@
 
   function render(app) {
     var r = app.state.round, it = R.current(app), cards = app.set.kind === 'cards';
+    // T-36/T-37: the typed text survives a redraw of the same item, and a store update that adopted a newer copy.
+    var old = document.getElementById('answer'), typed = old && (R.keepTyped || old.dataset.for === it.id) ? old.value : '';
+    R.keepTyped = false;
     // Only the last answer, as one compact line under the focus row (T-05): nothing tall above it.
     var last = r.res[r.res.length - 1], fb = '';
     if (last) {
@@ -32,8 +35,8 @@
       var miss = note && note.missing && note.missing.length && last.result !== 'right' ? note.missing.join(', ') : '';
       fb = '<li class="sk-row sk-last" data-result="' + last.result + '"><span class="n">' + U.esc(p.num) + '</span>' +
         '<span class="sk-last-body"><span class="sk-last-label">' + U.esc(cards ? p.front : (p.cue || p.answer)) + '</span>' +
-        (miss ? '<span class="sk-note sk-clamp">Missing: ' + U.esc(miss) + '</span>' : '') +
-        '</span><span class="tag">' + TAG[last.result] + (last.hinted ? ' <span class="sk-hinted">hinted</span>' : '') + '</span></li>';
+        (miss ? '<span class="sk-note sk-clamp">Missing: ' + U.esc(miss) + '</span>' : '') + R.typedLine(last) +
+        '</span><span class="tag">' + TAG[last.result] + R.hintTag(last) + '</span></li>';
     }
     var upcoming = r.ids.slice(r.i + 1, r.i + 3).map(function (id, k) {
       var u = app.byId[id];
@@ -45,7 +48,7 @@
     var box = open
       ? '<p class="sk-fill">' + blanks(it, open) + '</p><span class="sk-meta">Almost: fill in what’s missing.</span>'
       : '<label for="answer" class="sr">Your answer</label>' +
-        '<textarea id="answer" class="sk-input" rows="3" autocomplete="off" autocapitalize="off" placeholder="' + (cards ? 'Type what’s on the back…' : 'Type the step…') + '"></textarea>' + hint;
+        '<textarea id="answer" data-for="' + it.id + '" class="sk-input" rows="3" autocomplete="off" autocapitalize="off" placeholder="' + (cards ? 'Type what’s on the back…' : 'Type the step…') + '">' + U.esc(typed) + '</textarea>' + hint;
     var enter = R.enter(seen, r, cards);
     return R.bar(app) +
       '<main class="screen g12 snug">' +
@@ -63,33 +66,41 @@
   // Grade, or hold the row open for the missing parts. A hinted right answer stays Right
   // (tagged hinted); record() with how 'hint' caps the ladder at Familiar (D-06).
   var seen = {};   // last round + index drawn (T-06)
-  function done(app, g) {
+  // typed: what the person typed for this item (shown on Results and the last-answer row for Shaky/Missed).
+  function done(app, g, typed) {
     var r = app.state.round, hinted = r.hint;
     r.open = null;
-    R.record(app, g.result, hinted ? 'hint' : 'type', { missing: g.missing, hinted: hinted });
+    R.record(app, g.result, hinted ? 'hint' : 'type', { missing: g.missing, hinted: hinted, typed: String(typed || '').trim() });
+  }
+  // T-37 (D-30): an empty or whitespace-only answer does nothing: the box shakes and keeps focus.
+  function shake(box) {
+    if (!box) return;
+    box.classList.remove('sk-shake'); void box.offsetWidth; box.classList.add('sk-shake');
+    box.focus({ preventScroll: true });
   }
   function check(app) {
     var it = R.current(app), r = app.state.round, g;
     if (r.open) {
       var fill = [].slice.call(document.querySelectorAll('.sk-blank')).map(function (el) { return el.value; });
       g = SP.core.grade(it, r.open.typed, app.set, { hinted: r.hint, fill: fill });
-      return done(app, g);
+      return done(app, g, r.open.typed);
     }
     var box = document.getElementById('answer'), typed = box ? box.value : '';
+    if (!typed.trim()) return shake(box);
     g = SP.core.grade(it, typed, app.set, { hinted: r.hint });
     if (g.result === 'open') {
       r.open = { typed: typed, parts: g.parts }; app.render();
       var b = document.querySelector('.sk-blank'); if (b) b.focus({ preventScroll: true });
       return;
     }
-    done(app, g);
+    done(app, g, typed);
   }
 
   var actions = {
     check: check,
     skip: function (app) {
       var r = app.state.round;
-      if (r.open) { var g = SP.core.grade(R.current(app), r.open.typed, app.set, { hinted: r.hint, fill: [] }); return done(app, g); }
+      if (r.open) { var g = SP.core.grade(R.current(app), r.open.typed, app.set, { hinted: r.hint, fill: [] }); return done(app, g, r.open.typed); }
       R.record(app, 'missed', 'type', { missing: R.current(app).keys });
     },
     hint: function (app) {

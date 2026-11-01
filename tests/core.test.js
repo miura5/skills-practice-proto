@@ -363,5 +363,25 @@ ok('kit: escape and grip helpers are exported', typeof SP.ui.sortBind === 'funct
 // ---- T-32..T-35 tests (Lane B) ----
 
 
+// ---- T-36..T-38 tests (D-30) ----
+{
+  // T-36: which copy of a round is newer (rounds.newer(saved, mine)).
+  ok('newer: a later stamp wins', rounds.newer({ u: 9, res: [] }, { u: 5, res: [] }) === true && rounds.newer({ u: 5, res: [] }, { u: 9, res: [] }) === false);
+  ok('newer: unstamped on this screen: more answers wins', rounds.newer({ res: [{ id: 'a' }, { id: 'b' }] }, { res: [{ id: 'a' }] }) === true && rounds.newer({ res: [] }, { res: [{ id: 'a' }] }) === false);
+  ok('newer: a cleared or missing saved copy is never newer', rounds.newer({ cleared: true, u: 99 }, { u: 1, res: [] }) === false && rounds.newer(null, { u: 1, res: [] }) === false);
+  ok('newer: no round on this screen means the saved one is newer', rounds.newer({ u: 1, res: [] }, null) === true);
+  // T-38: scope.parse is safe on any word; parseDetail reports the parts that name no step.
+  const scItems = ['1', '2', '3', '8', '9', '10', '11', '12', '15', '15a'].map((n) => ({ id: 'i' + n, num: n }));
+  const sc = SP.core.scope;
+  ok('scope: words that are object keys are just unknown', sc.parse('constructor, __proto__, toString, hasOwnProperty, valueOf', scItems).length === 0);
+  const d1 = sc.parseDetail('constructor, 999, 1', scItems);
+  ok('scope: constructor and 999 are skipped, 1 is read', d1.ids.join() === 'i1' && d1.skipped.join() === 'constructor,999');
+  const d2 = sc.parseDetail('8-12, 99-100', scItems);
+  ok('scope: a range with an unknown end is skipped whole', d2.ids.join() === 'i8,i9,i10,i11,i12' && d2.skipped.join() === '99-100');
+  ok('scope: a bare number with no step of its own takes its lettered steps', sc.parse('15', [{ id: 'x', num: '15a' }, { id: 'y', num: '15b' }]).join() === 'x,y');
+  const d3 = sc.parseDetail('', scItems);
+  ok('scope: empty text reads nothing and skips nothing', d3.ids.length === 0 && d3.skipped.length === 0);
+}
+
 console.log(pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);

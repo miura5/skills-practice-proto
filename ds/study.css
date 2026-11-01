@@ -502,3 +502,8 @@
 /* while a row is dragged: the others glide to make room; the dragged row lifts and follows the pointer */
 .sk-sorting > [data-sort]{transition:transform var(--dur-2) var(--ease-std)}
 .sk-sorting > .sk-lift{transition:none;position:relative;z-index:var(--z-raised);background:var(--surface);box-shadow:var(--elev-2);border-radius:var(--r-md)}
+/* D-30 (T-37): an empty Check shakes the answer box (none under reduced motion); "You typed: …" is a block line */
+.sk-input.sk-shake{animation:sk-shake 320ms ease-out}
+@keyframes sk-shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+@media (prefers-reduced-motion:reduce){.sk-input.sk-shake{animation:none}}
+.sk-typed{display:block;margin-top:2px}
