@@ -28,7 +28,7 @@
           field('Front', 'cards.' + i + '.front', c.front) + field('Back · put [brackets] around the key words', 'cards.' + i + '.back', c.back, true) + '</div>';
       }).join('') + '<button data-ui="button" data-kind="neutral" data-act="addItem">' + U.icon('plus') + 'Add card</button>'
       : d.sections.map(function (s, si) {
-        return '<section class="stack">' + field('Section', 'sections.' + si + '.title', s.title) + picker(d.scenes, si, s.scene) +
+        return '<section class="stack">' + field('Section', 'sections.' + si + '.title', s.title) + scenePicker(d.scenes, si, s.scene) +
           s.steps.map(function (st, j) {
             var p = 'sections.' + si + '.steps.' + j + '.';
             return '<div class="sk-edit"><div class="sk-edit-h"><b>Step</b>' +
@@ -46,17 +46,17 @@
       '<div class="sk-bar">' + U.iconBtn('close', 'Cancel', 'cancelEdit') + '<b>' + (app.state.draftNew ? 'New ' : 'Edit ') + (cards ? 'card set' : 'procedure') + '</b>' +
       '<button data-ui="button" data-kind="primary" data-act="save" class="sk-pill">Save</button></div>' +
       field('Title', 'title', d.title) +
-      (cards ? '' : U.tags('scenes', d.scenes, app.state.tagEdit, { label: 'Scenes', placeholder: d.scenes.length ? 'Add a scene' : 'Type a scene, then comma' })) +
+      (cards ? '' : U.tags('scenes', d.scenes, app.state.tagEdit, { label: 'Scenes', tones: true, placeholder: d.scenes.length ? 'Add a scene' : 'Type a scene, then comma' })) +
       (live && live.builtin && !live.edited ? '<p class="sk-meta sk-flush">This is a built-in set. Saving keeps your copy; you can reset it later.</p>' : '') +
       body + danger + '</main>';
   }
 
-  // Proprietary's Picker (a native select): "No scene" + the set's scene tags. Hidden until there are tags.
-  function picker(scenes, si, current) {
+  // Proprietary's Picker (kit U.picker): "No scene" + the set's scene tags, each in its scene colour
+  // (by its index in scenes). Hidden until there are tags. Choosing a row runs pickScene.
+  function scenePicker(scenes, si, current) {
     if (!scenes.length) return '';
-    var opt = function (id, label) { return '<option value="' + U.esc(id) + '"' + ((current || '') === id ? ' selected' : '') + '>' + U.esc(label) + '</option>'; };
-    return '<label class="sk-field">Scene<select data-ui="picker" data-edit="sections.' + si + '.scene">' + opt('', 'No scene') +
-      scenes.map(function (t) { return opt(t.id, t.label); }).join('') + '</select></label>';
+    var opts = [{ value: '', label: 'No scene' }].concat(scenes.map(function (t, i) { return { value: t.id, label: t.label, tone: U.sceneTone(i) }; }));
+    return '<div class="sk-field"><span>Scene</span>' + U.picker('scene-' + si, current || '', opts, { label: 'Scene', act: 'pickScene' }) + '</div>';
   }
 
   // Applies an sk-tags intent (SP.ui.tagIntent, or a badge tap) to the draft's scenes.
@@ -103,6 +103,14 @@
   var actions = {
     tagEdit: function (app, el) { onTag(app, { type: 'edit', name: el.dataset.tags, id: el.dataset.id }); },
     tagRemove: function (app, el) { onTag(app, { type: 'remove', name: el.dataset.tags, id: el.dataset.id }); },
+    // A Picker row: sets the section's scene (blank = No scene). The app closes the menu before this runs.
+    pickScene: function (app, el) {
+      var si = Number(el.dataset.id.split('-')[1]), s = app.state.draft.sections[si];
+      if (!s) return;
+      s.scene = el.dataset.value || '';
+      app.render();
+      app.focus('#pkc-scene-' + si);
+    },
     addItem: function (app, el) {
       var d = app.state.draft;
       if (d.kind === 'cards') d.cards.push({ id: uid('c'), front: '', back: '' });

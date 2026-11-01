@@ -123,14 +123,15 @@
   function tags(name, list, editingId, o) {
     o = o || {};
     var n = esc(name), at = ' data-tags="' + n + '" data-id="';
+    var tone = function (i) { return o.tones ? ' data-tone="' + sceneTone(i) + '"' : ''; };   // T-18: colour by index
     return '<div class="sk-field"><label for="sk-tags-' + n + '">' + esc(o.label || name) + '</label><div class="sk-tags">' +
-      list.map(function (t) {
+      list.map(function (t, i) {
         var l = esc(t.label), id = esc(t.id);
         if (t.id === editingId) {
-          return '<input id="sk-tags-' + n + '-edit" class="sk-tags-in sk-tags-edit"' + at + id + '" value="' + l + '" size="' +
+          return '<input id="sk-tags-' + n + '-edit" class="sk-tags-in sk-tags-edit"' + at + id + '"' + tone(i) + ' value="' + l + '" size="' +
             Math.max(4, String(t.label).length + 1) + '" aria-label="Rename ' + l + '" autocomplete="off" enterkeyhint="done">';
         }
-        return '<span data-ui="chip" class="sk-tag"><button type="button" class="sk-tag-l" data-act="tagEdit"' + at + id + '" aria-label="Rename ' + l + '">' + l + '</button>' +
+        return '<span data-ui="chip" class="sk-tag"' + tone(i) + '><button type="button" class="sk-tag-l" data-act="tagEdit"' + at + id + '" aria-label="Rename ' + l + '">' + l + '</button>' +
           '<button type="button" class="sk-tag-x" data-act="tagRemove"' + at + id + '" aria-label="Remove ' + l + '">' + icon('close') + '</button></span>';
       }).join('') +
       '<input id="sk-tags-' + n + '" class="sk-tags-in" data-tags="' + n + '" placeholder="' + esc(o.placeholder || '') + '" autocomplete="off" enterkeyhint="done">' +
@@ -175,6 +176,28 @@
 
 
   // ---- T-18 helpers (Lane A) ----
+  // Scene colour by position: the Nth tag (0-based) takes scene-1..scene-6, then wraps (index mod 6).
+  function sceneTone(i) { return 'scene-' + ((i % 6) + 1); }
+  // Proprietary's Picker (generic, no scene logic): a chip button that opens a .popover menu on the native
+  // popover attribute. id names it (popover id pk-<id>, chip id pkc-<id>); value is the chosen option's value;
+  // options = [{value, label, tone?}]; o = {label (caption for screen readers), act (data-act of a row)}.
+  // Each row is a button carrying data-act, data-id (= id) and data-value. The app positions and closes it.
+  function picker(id, value, options, o) {
+    o = o || {};
+    var n = esc(id), cur = options.filter(function (x) { return x.value === value; })[0] || options[0] || { label: '' };
+    var pid = 'pk-' + n;
+    return '<button type="button" id="pkc-' + n + '" data-ui="chip" class="sk-picker"' + (cur.tone ? ' data-tone="' + esc(cur.tone) + '"' : '') +
+      ' popovertarget="' + pid + '" aria-haspopup="menu" aria-expanded="false" aria-label="' + esc(o.label ? o.label + ': ' : '') + esc(cur.label) + '">' +
+      (cur.tone ? '<i class="sk-pdot" aria-hidden="true"></i>' : '') + '<span class="sk-picker-l">' + esc(cur.label) + '</span>' +
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg></button>' +
+      '<div id="' + pid + '" class="popover sk-pmenu" popover="auto" role="menu" aria-label="' + esc(o.label || 'Choose') + '">' +
+      options.map(function (x) {
+        var on = x.value === value;
+        return '<button type="button" class="popover-i sk-prow" role="menuitemradio" aria-checked="' + (on ? 'true' : 'false') + '"' +
+          ' data-act="' + esc(o.act || '') + '" data-id="' + n + '" data-value="' + esc(x.value) + '">' +
+          (x.tone ? '<i class="sk-pdot" data-tone="' + esc(x.tone) + '" aria-hidden="true"></i>' : '') + '<span>' + esc(x.label) + '</span></button>';
+      }).join('') + '</div>';
+  }
 
 
   // ---- T-20 helpers (Lane B) ----
@@ -183,5 +206,5 @@
   // ---- T-23 helpers (Lane C) ----
 
 
-  SP.ui = { carousel: carousel, carouselBind: carouselBind, carouselMove: carouselMove, esc: esc, marked: marked, icon: icon, iconBtn: iconBtn, mastery: mastery, setRow: setRow, practice: practice, art: art, flip: flip, session: session, tabbar: tabbar, toggle: toggle, tags: tags, tagIntent: tagIntent, tagsFocus: tagsFocus, segbar: segbar };
+  SP.ui = { carousel: carousel, carouselBind: carouselBind, carouselMove: carouselMove, esc: esc, marked: marked, icon: icon, iconBtn: iconBtn, mastery: mastery, setRow: setRow, practice: practice, art: art, flip: flip, session: session, tabbar: tabbar, toggle: toggle, tags: tags, tagIntent: tagIntent, tagsFocus: tagsFocus, segbar: segbar, picker: picker, sceneTone: sceneTone };
 })(window.SP);
