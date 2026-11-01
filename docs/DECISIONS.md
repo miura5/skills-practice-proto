@@ -141,6 +141,10 @@ Matt hands it to a new chat by attaching the repo; CLAUDE.md sets the role.
 - [x] T-22 Options "Scope": Smart / Whole set / Custom (D-22). Done 2026-11-01 (Lane C).
 - [x] T-23 Custom scope editor sk-scope + core/scope.js + tests (D-22). Done 2026-11-01 (Lane C).
 - [x] T-24 sk-segbar min segment width + right fade (D-24). Done 2026-11-01 (build manager).
+- [ ] T-25 Step numbering: core/numbers.js (generated nums, sub-steps, per part) + sets.items uses it + tests (D-25). Lane B.
+- [ ] T-26 Picker chip / rows: remove leftover native button border, shadow and highlight (D-25). Lane B.
+- [ ] T-27 Editor redesign: folding section rows with scene badge, flat step rows, star icon, grip + ⋯ menu, header ⋯ (D-25). Lane A.
+- [ ] T-28 sk-sort: Study kit drag-to-reorder from a grip only (pointer + keyboard-free fallback via menu) (D-25). Lane A.
 
 ## D-10 build notes (2026-11-01)
 - Bands: 100% Right; 60%+ row stays open with blanks; 34-59% Shaky; under 34% Missed.
@@ -291,3 +295,19 @@ Why: with many chunks, equal segments got too thin. Decision: each segment is at
 few). When they overflow, the rail slides so one finished chunk shows before the current one, and the
 overflow fades out on the right (container units + mask; --n/--at computed inline). Count pill unchanged.
 Also confirmed by Matt: a bare step number in Custom ranges covers all its lettered sub-steps.
+
+## D-25 · A cleaner editor; generated step numbers with sub-steps (Matt approved, 2026-11-01)
+- Sections are folding rows (chevron, title, scene badge in its colour that opens the Picker, "n steps"),
+  all folded at first; the title is editable inside an open section. No separate Scene label.
+- Flat: no card per step; rows with hairlines; fields borderless with a soft fill and the focus ring.
+  Step text placeholder "Put [brackets] around the key words" (no caption). Star = a star icon toggle.
+- Reorder: a grip (drag starts only there) + a ⋯ menu per row: Move up, Move down, Make / Undo sub-step,
+  Delete. Sections: grip + ⋯ (Move up, Move down, Delete). Header ⋯ holds "Reset to built-in"; the
+  "This is a built-in set…" text is gone. Card sets get the same flat rows + grip.
+- Numbers are generated from position, per part (NG tube restarts for Removal), else across the set.
+  step.sub = true makes a step a sub-step of the one before: a main step followed by sub-steps is Na,
+  its subs Nb, Nc… (packet style: 13a–13d, no bare 13). Steps without `sub` get it from their old num
+  (a letter other than a = sub), so built-in numbers stay the same. Stored num is no longer used.
+- Bugs: Starred checkbox styles fought (gone with the icon); Picker chip showed the native button border.
+Lanes: A = T-27, T-28 (edit.js, app.js); B = T-25, T-26 (core/numbers.js, sets.js, index.html, Picker CSS).
+API between them: SP.core.numbers.of(set) -> {stepId: '13a', ...}; sets.items() uses it for num.

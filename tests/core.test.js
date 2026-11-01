@@ -264,5 +264,11 @@ ok('scope old section as custom: builds that section', rounds.build(sx, { sectio
 ok('scope legacy: none for practice whole/smart/custom', S.legacy({ practice: 'whole' }) === null && S.legacy({ practice: 'smart', section: 'all' }) === null && S.legacy({}) === null);
 
 
+// ---- T-25 tests (Lane B) ----
+
+
+// ---- T-27..T-28 tests (Lane A) ----
+
+
 console.log(pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);

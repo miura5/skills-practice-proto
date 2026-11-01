@@ -225,5 +225,8 @@
   }
 
 
+  // ---- T-27..T-28 helpers (Lane A) ----
+
+
   SP.ui = { carousel: carousel, carouselBind: carouselBind, carouselMove: carouselMove, esc: esc, marked: marked, icon: icon, iconBtn: iconBtn, mastery: mastery, setRow: setRow, practice: practice, art: art, flip: flip, session: session, tabbar: tabbar, toggle: toggle, tags: tags, tagIntent: tagIntent, tagsFocus: tagsFocus, segbar: segbar, picker: picker, sceneTone: sceneTone, radio: radio, scopeRow: scopeRow };
 })(window.SP);
