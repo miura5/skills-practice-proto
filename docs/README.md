@@ -14,6 +14,7 @@
         sets.js             schema, items(), validate()
         grade.js            one answer -> right / shaky / missed (D-05)
         progress.js         Weak / Familiar / Learned ladder (D-06)
+        chunks.js           scenes / card chunks, Learn-Link-Run, Smart round (D-19)
         rounds.js           which items a round asks (D-07)
       store/store.js        account or browser storage (D-08)
       ui/kit.js             Study kit markup helpers

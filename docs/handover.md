@@ -1,6 +1,6 @@
 # Handover
 
-Last updated 2026-11-01 by the chat that shipped v0.4.2 and planned D-19. No agent is running.
+Last updated 2026-11-01 by the D-19 batch chat (build manager). No agent is running.
 
 ## Where things stand
 - Live: v0.4.2 at https://claude.ai/artifact/UUj5psocojXR1xkK2QVAbh (same link every release).
@@ -10,10 +10,9 @@ Last updated 2026-11-01 by the chat that shipped v0.4.2 and planned D-19. No age
   set + Start over in Options (D-17), Home carousel sk-carousel (D-18, T-11..T-13 fixes).
 - Account saving is set up; not yet confirmed with real data (list data/users/me via ArtifactData).
 
-## Next: the D-19 batch (chunked learning), design approved, NOT started
-Matt runs this batch from a new build-manager chat. Nothing is built yet (a T-14 agent was started
-by mistake and stopped before it changed any file). Do NOT start any task or agent until Matt says
-go in the new chat; all four tasks are marked "Waiting for Matt's go".
+## Now: the D-19 batch (chunked learning), in progress
+Matt said go 2026-11-01. T-14 done (src/core/chunks.js, 79 tests), committed and pushed on branch
+claude/ecstatic-feynman-vglfce; not on main, not published. PAUSED: waiting for Matt's go on T-15.
 Read D-19 in docs/DECISIONS.md first; it is the full design. Tasks, in this order:
 1. T-14 Core chunking (src/core/chunks.js + tests).
 2. T-15 Data + Edit: scene tags, sk-tags (generic Study kit tag input), Proprietary Picker per section,
