@@ -137,10 +137,28 @@ ok('chunks: empty sets = []', C.list({ id: 'em', kind: 'cards', title: 'E', card
 ok('of: finds the chunk, null when missing', C.of(proc, 'd2').id === 'scene:room' && C.of(proc, 'g1').id === 'sec:g' && C.of(proc, 'zz') === null);
 ['med-admin', 'ngt'].forEach((id) => {
   const s = set(id), cs = C.list(s), secs = s.sections.filter((x) => (x.steps || []).length);
-  ok('real ' + id + ': one chunk per section (no scenes yet)', cs.length === secs.length && cs.every((c, i) => c.id === 'sec:' + secs[i].id && c.sections.length === 1));
+  ok('real ' + id + ': every section in one scene chunk, in set order (T-15 seeds)', cs.every((c) => c.id.indexOf('scene:') === 0) && cs.reduce((a, c) => a.concat(c.sections), []).join() === secs.map((x) => x.id).join());
   ok('real ' + id + ': chunk ids = all items', cs.reduce((a, c) => a.concat(c.ids), []).join() === sets.items(s).map((i) => i.id).join());
 });
 
+// ---- T-15 tests (Lane A: scenes data) ----
+const t15proc = (scenes, secScenes) => ({ id: 't15', kind: 'procedure', title: 'T', scenes,
+  sections: secScenes.map((sc, i) => ({ id: 's' + i, title: 'S' + i, scene: sc, steps: [{ id: 'x' + i, num: '1', text: 'do [it]' }] })) });
+const t15errs = (p) => sets.validate(p).join(' | ');
+ok('t15 validate: good scenes pass', sets.validate(t15proc([{ id: 'a', label: 'A' }, { id: 'b-2', label: 'B' }], ['a', '', undefined, 'b-2'])).length === 0);
+ok('t15 validate: duplicate scene id', /duplicate scene a/.test(t15errs(t15proc([{ id: 'a', label: 'A' }, { id: 'a', label: 'B' }], []))));
+ok('t15 validate: empty label', /has no name/.test(t15errs(t15proc([{ id: 'a', label: '  ' }], []))));
+ok('t15 validate: bad scene id', /scene id must be/.test(t15errs(t15proc([{ id: 'Med Room', label: 'Med room' }], []))) && /scene id must be/.test(t15errs(t15proc([{ label: 'X' }], []))));
+ok('t15 validate: unknown section scene', /unknown scene zz/.test(t15errs(t15proc([{ id: 'a', label: 'A' }], ['zz']))));
+ok('t15 validate: section scene with no scenes list', /unknown scene a/.test(t15errs(t15proc(undefined, ['a']))));
+ok('t15 validate: scenes must be a list', /scenes must be a list/.test(t15errs(t15proc({ a: 'A' }, []))));
+ok('t15 tagId: slug of the label', sets.tagId('Med room', []) === 'med-room' && sets.tagId('Removal: set up') === 'removal-set-up');
+ok('t15 tagId: unique against taken', sets.tagId('Med room', ['med-room']) === 'med-room-2' && sets.tagId('Med room', ['med-room', 'med-room-2']) === 'med-room-3');
+ok('t15 tagId: valid scene id', /^[a-z0-9-]{1,60}$/.test(sets.tagId('Ünïcode & 2 things!', [])));
+ok('t15 items carry scene', item('med-admin', '1').scene === 'review' && sets.items(set('ngt')).every((i) => i.scene) && sets.items(t15proc([{ id: 'a', label: 'A' }], ['', 'a']))[0].scene === null && sets.items(t15proc([{ id: 'a', label: 'A' }], ['', 'a']))[1].scene === 'a');
+ok('t15 seeded med-admin chunks', chunks.list(set('med-admin')).map((c) => c.label).join('|') === 'Review and assess|Med room 1|Med room 2|Med room 3|Walking in|Giving the meds 1|Giving the meds 2|Giving the meds 3|Walking out');
+ok('t15 seeded ngt chunks', chunks.list(set('ngt')).map((c) => c.label).join('|') === 'Assess|Plan|Set up|Pass the tube|Secure and finish|Evaluate and document|Removal: assess and plan|Removal: set up|Removal: take it out');
+ok('t15 seeded: every section has a scene', ['med-admin', 'ngt'].every((id) => set(id).sections.every((x) => x.scene)));
 // ---- T-17 tests (Lane C: strict grading) ----
 const g13 = grade(m('13d'), m('13c').answer, medSet), g26 = grade(m('26d'), m('26e').answer, medSet);
 ok("strict: 13c's exact text on 13d = missed, no nearby field", g13.result === 'missed' && !('nearby' in g13));

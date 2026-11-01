@@ -5,6 +5,7 @@
   'use strict';
   var root = document.getElementById('app');
   var toastTimer = null;
+  var painting = false, tapAct = null;   // T-15: sk-tags blur handling (see tag() below)
 
   var app = {
     state: { screen: 'home', setId: null, filter: 'all', sheet: null, round: null, draft: null, pv: 0, pvFlip: false },
@@ -30,8 +31,9 @@
       var screen = SP.screens[{ next: 'next', type: 'type', done: 'round' }[s.screen] || s.screen];
       var old = root.querySelector('.screen'), keep = old && old.dataset.key === key() ? old.scrollTop : 0;
       var sheet = s.sheet === 'options' ? SP.screens.set.sheet(app) : s.sheet === 'new' ? SP.screens.library.sheet(app) : '';
-      root.innerHTML = '<div class="study frame" data-mode="' + theme() + '">' + screen.render(app) + sheet +
+      var html = '<div class="study frame" data-mode="' + theme() + '">' + screen.render(app) + sheet +
         (s.toast ? '<div class="sk-toast" role="status">' + SP.ui.esc(s.toast) + '</div>' : '') + '</div>';
+      painting = true; root.innerHTML = html; painting = false;
       var now = root.querySelector('.screen');
       if (now) { now.dataset.key = key(); now.scrollTop = keep; }
       if (now && screen.after) screen.after(app, now);
@@ -62,13 +64,26 @@
   };
   Object.keys(SP.screens).forEach(function (k) { Object.assign(actions, SP.screens[k].actions || {}); });
 
+  // sk-tags: keys, a typed comma and blur become intents for the editor. A blur that comes from tapping
+  // a [data-act] control applies quietly (that action redraws); a blur caused by our own redraw is ignored.
+  function tag(e) {
+    var it = !painting && SP.ui.tagIntent(e);
+    if (it && e.type === 'keydown') e.preventDefault();
+    if (it) SP.screens.edit.onTag(app, it, it.blur && !!tapAct);
+    return it;
+  }
+  root.addEventListener('pointerdown', function (e) { tapAct = e.target.closest('[data-act]'); });
+  root.addEventListener('focusout', tag);
+
   root.addEventListener('click', function (e) {
     var el = e.target.closest('[data-act]');
+    tapAct = null;
     if (!el || el.disabled) return;
     var fn = actions[el.dataset.act];
     if (fn) { e.preventDefault(); fn(app, el, e); }
   });
   root.addEventListener('input', function (e) {
+    if (tag(e)) return;
     if (e.target.dataset.edit) SP.screens.edit.onEdit(app, e.target);
   });
   root.addEventListener('change', function (e) {
@@ -76,6 +91,7 @@
     if (e.target.dataset.opt) SP.screens.set.onOption(app, e.target);
   });
   root.addEventListener('keydown', function (e) {
+    if (tag(e)) return;
     if ((e.target.id === 'answer' || (e.target.classList && e.target.classList.contains('sk-blank'))) && e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); SP.screens.type.check(app); }
     if (e.target.id === 'newTitle' && e.key === 'Enter') { e.preventDefault(); actions.createSet(app); }
     if (e.key === 'Escape' && app.state.sheet) actions.closeSheet(app);

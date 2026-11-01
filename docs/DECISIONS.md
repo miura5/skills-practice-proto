@@ -131,7 +131,7 @@ Matt hands it to a new chat by attaching the repo; CLAUDE.md sets the role.
 - [x] T-12 Carousel: pre-T-11 slide width (85% of track - 40px), centred snap with symmetric padding, art .75 in the carousel only, arrows 6px from the edge (D-18). Shipped v0.4.2.
 - [x] T-13 Set overview mode cards: captions removed (U.practice(title, art, act)); art pinned to the card bottom so both align. Shipped v0.4.2. Build manager review passed.
 - [x] T-14 Core chunking: src/core/chunks.js (chunks, stages, Smart round list) + tests (D-19). Batch 1 of 4. Done 2026-11-01 (79 tests), not yet published.
-- [ ] T-15 Data + Edit: scene tags in set data; sk-tags tag input (Study kit, generic); Proprietary Picker per section; seed Med Admin + NG tube scenes from the old prototype (D-19). Batch 2 of 4. Go given (D-20), in a lane.
+- [x] T-15 Data + Edit: scene tags in set data; sk-tags tag input (Study kit, generic); Proprietary Picker per section; seed Med Admin + NG tube scenes from the old prototype (D-19). Batch 2 of 4. Done 2026-11-01 (Lane A), not yet published.
 - [ ] T-16 Rounds + screens: Smart rounds, segmented session bar (Study kit), scene in the prompt, Options Practice Smart / Whole set / Section, Results "Next: <chunk>" (D-19). Batch 3 of 4. Go given (D-20), in a lane.
 - [x] T-17 Grading simplification: strict order; remove the nearby-step stage and the stored strict/before/anytime rules; update tests (D-19). Batch 4 of 4. Done 2026-11-01 (Lane C, 89 tests), not yet published.
 

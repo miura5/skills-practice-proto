@@ -17,11 +17,50 @@ SP.content.add({
    "maxOther": 2
   }
  ],
+ "scenes": [
+  {
+   "id": "assess",
+   "label": "Assess"
+  },
+  {
+   "id": "plan",
+   "label": "Plan"
+  },
+  {
+   "id": "setup",
+   "label": "Set up"
+  },
+  {
+   "id": "pass",
+   "label": "Pass the tube"
+  },
+  {
+   "id": "secure",
+   "label": "Secure and finish"
+  },
+  {
+   "id": "evaldoc",
+   "label": "Evaluate and document"
+  },
+  {
+   "id": "r-assess",
+   "label": "Removal: assess and plan"
+  },
+  {
+   "id": "r-setup",
+   "label": "Removal: set up"
+  },
+  {
+   "id": "r-out",
+   "label": "Removal: take it out"
+  }
+ ],
  "sections": [
   {
    "id": "i-assess",
    "part": "ins",
    "title": "Insertion: assessment",
+   "scene": "assess",
    "steps": [
     {
      "id": "I1",
@@ -64,6 +103,7 @@ SP.content.add({
    "id": "i-plan",
    "part": "ins",
    "title": "Insertion: planning",
+   "scene": "plan",
    "steps": [
     {
      "id": "I6",
@@ -92,6 +132,7 @@ SP.content.add({
    "id": "i-prep",
    "part": "ins",
    "title": "Insertion: set up the patient",
+   "scene": "setup",
    "steps": [
     {
      "id": "I9",
@@ -155,6 +196,7 @@ SP.content.add({
    "id": "i-insert",
    "part": "ins",
    "title": "Insertion: pass the tube",
+   "scene": "pass",
    "steps": [
     {
      "id": "I17",
@@ -197,6 +239,7 @@ SP.content.add({
    "id": "i-secure",
    "part": "ins",
    "title": "Insertion: secure and finish",
+   "scene": "secure",
    "steps": [
     {
      "id": "I22",
@@ -246,6 +289,7 @@ SP.content.add({
    "id": "i-eval",
    "part": "ins",
    "title": "Insertion: evaluate and document",
+   "scene": "evaldoc",
    "steps": [
     {
      "id": "I28a",
@@ -323,6 +367,7 @@ SP.content.add({
    "id": "r-assess",
    "part": "rem",
    "title": "Removal: assess and plan",
+   "scene": "r-assess",
    "steps": [
     {
      "id": "R1",
@@ -372,6 +417,7 @@ SP.content.add({
    "id": "r-prep",
    "part": "rem",
    "title": "Removal: set up",
+   "scene": "r-setup",
    "steps": [
     {
      "id": "R7",
@@ -428,6 +474,7 @@ SP.content.add({
    "id": "r-remove",
    "part": "rem",
    "title": "Removal: take it out",
+   "scene": "r-out",
    "steps": [
     {
      "id": "R14",
@@ -491,6 +538,7 @@ SP.content.add({
    "id": "r-eval",
    "part": "rem",
    "title": "Removal: evaluate and document",
+   "scene": "r-out",
    "steps": [
     {
      "id": "R22",

@@ -12,11 +12,34 @@ SP.content.add({
    "maxOther": 8
   }
  ],
+ "scenes": [
+  {
+   "id": "review",
+   "label": "Review and assess"
+  },
+  {
+   "id": "medroom",
+   "label": "Med room"
+  },
+  {
+   "id": "walkin",
+   "label": "Walking in"
+  },
+  {
+   "id": "give",
+   "label": "Giving the meds"
+  },
+  {
+   "id": "walkout",
+   "label": "Walking out"
+  }
+ ],
  "sections": [
   {
    "id": "mar",
    "part": null,
    "title": "Verify the MAR",
+   "scene": "review",
    "steps": [
     {
      "id": "1",
@@ -31,6 +54,7 @@ SP.content.add({
    "id": "assess",
    "part": null,
    "title": "Assess / review",
+   "scene": "review",
    "steps": [
     {
      "id": "2",
@@ -80,6 +104,7 @@ SP.content.add({
    "id": "prep",
    "part": null,
    "title": "Prepare: all meds",
+   "scene": "medroom",
    "steps": [
     {
      "id": "8",
@@ -122,6 +147,7 @@ SP.content.add({
    "id": "oralprep",
    "part": null,
    "title": "Prepare: oral",
+   "scene": "medroom",
    "steps": [
     {
      "id": "13a",
@@ -157,6 +183,7 @@ SP.content.add({
    "id": "improp",
    "part": null,
    "title": "Prepare: IM from a vial",
+   "scene": "medroom",
    "steps": [
     {
      "id": "14a",
@@ -269,6 +296,7 @@ SP.content.add({
    "id": "insulin",
    "part": null,
    "title": "Prepare: mixing insulin",
+   "scene": "medroom",
    "steps": [
     {
      "id": "15a",
@@ -395,6 +423,7 @@ SP.content.add({
    "id": "bedside",
    "part": null,
    "title": "At the bedside",
+   "scene": "walkin",
    "steps": [
     {
      "id": "16",
@@ -458,6 +487,7 @@ SP.content.add({
    "id": "oralgive",
    "part": null,
    "title": "Give: oral",
+   "scene": "give",
    "steps": [
     {
      "id": "24a",
@@ -493,6 +523,7 @@ SP.content.add({
    "id": "imgive",
    "part": null,
    "title": "Give: IM",
+   "scene": "give",
    "steps": [
     {
      "id": "25a",
@@ -605,6 +636,7 @@ SP.content.add({
    "id": "sqgive",
    "part": null,
    "title": "Give: subcutaneous",
+   "scene": "give",
    "steps": [
     {
      "id": "26a",
@@ -703,6 +735,7 @@ SP.content.add({
    "id": "post",
    "part": null,
    "title": "After administration",
+   "scene": "walkout",
    "steps": [
     {
      "id": "27",
