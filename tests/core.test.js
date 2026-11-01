@@ -333,5 +333,11 @@ const mv = (a, f, t) => SP.ui.moveItem(a, f, t);
 ok('kit: escape and grip helpers are exported', typeof SP.ui.sortBind === 'function' && typeof SP.ui.more === 'function' && typeof SP.ui.autosize === 'function');
 
 
+// ---- T-30..T-31 tests (Lane A) ----
+
+
+// ---- T-32..T-35 tests (Lane B) ----
+
+
 console.log(pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);

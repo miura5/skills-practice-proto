@@ -146,6 +146,12 @@ Matt hands it to a new chat by attaching the repo; CLAUDE.md sets the role.
 - [x] T-27 Editor redesign: folding section rows with scene badge, flat step rows, star icon, grip + ⋯ menu, header ⋯ (D-25). Done 2026-11-01 (Lane A).
 - [x] T-28 sk-sort: Study kit drag-to-reorder from a grip only (pointer + keyboard-free fallback via menu) (D-25). Done 2026-11-01 (Lane A).
 - [x] T-29 Editor section header: step range + compact scene badge, aligned (D-27). Done 2026-11-01 (build manager).
+- [ ] T-30 Smart v2 core: chunk = scene (no split), no Link; stages learn -> run; rounds.stale (D-28). Lane A.
+- [ ] T-31 Sync: core/sync.js merge (newest wins; progress per item) + store live updates and refresh on focus (D-28). Lane A.
+- [ ] T-32 Round screens: header scene · section; bar (done green, current fills, later grey); Results Next / Again (D-28). Lane B.
+- [ ] T-33 Stale saved round replaced on start; Home and set screen show the same round and count (D-28). Lane B.
+- [ ] T-34 Result rows: editor rows renamed sk-erow; round and Results rows get their padding back (D-28). Lane B.
+- [ ] T-35 Round time counts active time only (D-28). Lane B.
 
 ## D-10 build notes (2026-11-01)
 - Bands: 100% Right; 60%+ row stays open with blanks; 34-59% Shaky; under 34% Missed.
@@ -331,3 +337,22 @@ generic size, data-size="sm" (U.picker o.size; 24px, fs-1; a larger invisible ta
 it sits on the same line, pinned right before the ⋯ so badges line up; on phones it drops under the title,
 aligned with the title's first letter. "n steps" left the row (the screen reader label keeps it).
 
+## D-28 · Smart v2: one scene at a time, then the whole set; sync fixes (Matt, 2026-11-01)
+Why: Smart's hidden rules (Link warm-ups, auto-split scenes, later chunks pre-filled) made 7 become 12 and
+confused Matt; the phone and PC overwrote each other's rounds. Supersedes D-19's Link stage and scene split.
+- Stage 1 (learn): a round is one chunk: 7 cards, or one scene exactly as tagged (never split; Med room = 41).
+  Untagged sections are their own chunk. Counter = the chunk's items. The chunk is done when all its items are
+  Familiar or better. Results: "Next: <chunk>" when it's done, else "Again: <chunk>".
+- Stage 2 (run): every chunk done -> a round is the whole set, start to finish, plain bar. "Again: Whole set".
+- No Link stage, no warm-up steps. The round header shows "<scene> · <section>" (cards: "Cards 1–7").
+- Bar in stage 1: one segment per chunk; done chunks green, the current one fills with this round, later grey.
+- A saved Smart round whose chunk is already done (or gone) is dropped and the current chunk starts.
+  Home and the set screen show the saved round if there is one, else the next Smart round.
+- Sync: every saved record carries u (time saved). Newest wins per record; progress merges per item by
+  `last`. The store listens to the account collection while open and re-reads it when the tab comes back.
+- Rows: the editor's .sk-row clashed with round/Results rows (v0.7.0 regression) -> editor uses .sk-erow.
+- Round time = active time (gaps over 2 min between answers count as 2 min).
+Lanes: A = T-30, T-31 (core/chunks.js, core/rounds.js, new core/sync.js, store/store.js, index.html);
+B = T-32..T-35 (screens round/next/type/set/home/edit, study.css). API: chunks.smart(set, p) ->
+{stage:'learn'|'run', chunk, index, ids, label, next}; rounds.plan stage 'learn'|'run'|null;
+rounds.stale(saved, set, p) -> true when a saved learn round's chunk is done or gone.
