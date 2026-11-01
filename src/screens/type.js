@@ -39,16 +39,15 @@
       var u = app.byId[id];
       return '<li class="sk-row" data-d="' + (k ? 'far' : 'near') + '"><span class="n">' + U.esc(u.num) + '</span><span class="grow sk-faint">' + (cards ? U.esc(u.front) : '· · ·') + '</span></li>';
     }).join('');
-    var lead = cards ? 'Card ' + it.num : (it.prev ? 'After: ' + (it.prev.cue || it.prev.answer) : 'Start of the checklist');
+    var lead = cards ? 'Card ' + it.num : R.scene(app, it) + (it.prev ? 'After: ' + (it.prev.cue || it.prev.answer) : 'Start of the checklist');
     var hint = r.hint ? '<span class="sk-meta">Key words: ' + U.esc(it.keys.map(function (k) { return k.split(' ')[0] + '…'; }).join(', ')) + '</span>' : '';
-    var open = r.open, near = r.nearby && app.byId[r.nearby.id];
-    var msg = near ? '<span class="sk-nearby" role="status">That’s a nearby step: ' + U.esc(near.num) + ' · ' + U.esc(near.cue || near.answer) + '. Which step comes here?</span>' : '';
+    var open = r.open;
     var box = open
       ? '<p class="sk-fill">' + blanks(it, open) + '</p><span class="sk-meta">Almost: fill in what’s missing.</span>'
       : '<label for="answer" class="sr">Your answer</label>' +
-        '<textarea id="answer" class="sk-input" rows="3" autocomplete="off" autocapitalize="off" placeholder="' + (cards ? 'Type what’s on the back…' : 'Type the step…') + '"></textarea>' + hint + msg;
+        '<textarea id="answer" class="sk-input" rows="3" autocomplete="off" autocapitalize="off" placeholder="' + (cards ? 'Type what’s on the back…' : 'Type the step…') + '"></textarea>' + hint;
     var enter = R.enter(seen, r, cards);
-    return U.session(r.i, r.ids.length) +
+    return R.bar(app) +
       '<main class="screen g12 snug">' +
       '<span class="sk-meta center">' + U.esc(app.set.title) + ' · Type it</span>' +
       '<ol class="sk-wheel"' + enter + '>' +
@@ -66,7 +65,7 @@
   var seen = {};   // last round + index drawn (T-06)
   function done(app, g) {
     var r = app.state.round, hinted = r.hint;
-    r.open = null; r.nearby = null;
+    r.open = null;
     R.record(app, g.result, hinted ? 'hint' : 'type', { missing: g.missing, hinted: hinted });
   }
   function check(app) {
@@ -78,9 +77,8 @@
     }
     var box = document.getElementById('answer'), typed = box ? box.value : '';
     g = SP.core.grade(it, typed, app.set, { hinted: r.hint });
-    if (g.result === 'nearby') { r.nearby = g.nearby; app.render(); app.focus && app.focus('#answer'); return; }
     if (g.result === 'open') {
-      r.open = { typed: typed, parts: g.parts }; r.nearby = null; app.render();
+      r.open = { typed: typed, parts: g.parts }; app.render();
       var b = document.querySelector('.sk-blank'); if (b) b.focus({ preventScroll: true });
       return;
     }
@@ -92,7 +90,7 @@
     skip: function (app) {
       var r = app.state.round;
       if (r.open) { var g = SP.core.grade(R.current(app), r.open.typed, app.set, { hinted: r.hint, fill: [] }); return done(app, g); }
-      r.nearby = null; R.record(app, 'missed', 'type', { missing: R.current(app).keys });
+      R.record(app, 'missed', 'type', { missing: R.current(app).keys });
     },
     hint: function (app) {
       var box = document.getElementById('answer'), keep = box ? box.value : '';

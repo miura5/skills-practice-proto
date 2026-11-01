@@ -38,7 +38,9 @@
 
   function render(app) {
     var set = app.set, items = app.items, cards = set.kind === 'cards', t = app.tally(set);
-    var inRound = SP.core.rounds.build(items, SP.store.settings(set.id), SP.store.progress(set.id)).length;
+    var o = SP.store.settings(set.id), p = SP.store.progress(set.id);
+    var inRound = SP.core.rounds.build(items, o, p, set).length, pl = SP.core.rounds.plan(items, o, p, set);
+    var what = (pl.label ? U.esc(pl.label) + ' · ' : '') + inRound + ' of ' + items.length + ' in a round';
     return '<main class="screen tight">' +
       '<div class="sk-bar">' + U.iconBtn('back', 'Back', 'back') + '<b></b>' +
       '<button data-ui="button" data-kind="ghost" data-act="edit">' + U.icon('edit') + 'Edit</button>' +
@@ -46,7 +48,7 @@
       '<header class="stack g10"><h1 class="sk-title">' + U.esc(set.title) + '</h1>' +
       U.mastery(t, 'sk-big') +
       '<div class="sk-legend"><span><i data-s="learned"></i>Learned ' + t.learned + '</span><span><i data-s="familiar"></i>Familiar ' + t.familiar + '</span><span><i data-s="weak"></i>Weak ' + t.weak + '</span></div></header>' +
-      '<section class="stack"><div class="row"><h2 class="sk-h2 grow">Practice</h2><span class="sk-meta">' + inRound + ' of ' + items.length + ' in a round</span></div>' + roundNote(app) + '<div class="two">' +
+      '<section class="stack"><div class="row"><h2 class="sk-h2 grow">Practice</h2><span class="sk-meta">' + what + '</span></div>' + roundNote(app) + '<div class="two">' +
       U.practice(cards ? 'Flashcards' : 'Next Step', 'flip', 'startNext') +
       U.practice('Type it', 'type', 'startType') +
       '</div></section>' +
@@ -57,16 +59,20 @@
 
   function sheet(app) {
     var set = app.set, o = SP.store.settings(set.id), cards = set.kind === 'cards';
-    var n = SP.core.rounds.build(app.items, o, SP.store.progress(set.id)).length;
-    var sections = cards ? '' : '<label class="sk-field">Section<select data-opt="section"><option value="all">All sections</option>' +
-      (set.sections || []).map(function (s) { return '<option value="' + U.esc(s.id) + '"' + (o.section === s.id ? ' selected' : '') + '>' + U.esc(s.title) + '</option>'; }).join('') + '</select></label>';
+    var p = SP.store.progress(set.id), n = SP.core.rounds.build(app.items, o, p, set).length;
+    // D-19 Practice: Smart (default) / Whole set / one entry per section (procedures). An old saved
+    // section option shows as that section (rounds.plan reads it).
+    var cur = SP.core.rounds.plan(app.items, o, p, set).practice;
+    var opt = function (v, label) { return '<option value="' + U.esc(v) + '"' + (cur === v ? ' selected' : '') + '>' + U.esc(label) + '</option>'; };
+    var practice = '<label class="sk-field">Practice<select data-opt="practice">' + opt('smart', 'Smart') + opt('whole', 'Whole set') +
+      (cards ? '' : (set.sections || []).map(function (s) { return opt(s.id, s.title || s.id); }).join('')) + '</select></label>';
     return '<div class="sk-scrim" data-act="closeSheet"></div><section class="sk-sheet" role="dialog" aria-label="Options">' +
-      '<div class="sk-sheet-h"><h2>Options</h2>' + U.iconBtn('close', 'Close', 'closeSheet') + '</div>' + sections +
+      '<div class="sk-sheet-h"><h2>Options</h2>' + U.iconBtn('close', 'Close', 'closeSheet') + '</div>' + practice +
       '<div class="stack g0">' +
       (cards ? '' : U.toggle('starred', 'Starred steps only', o.starred, 'The ones you can’t miss')) +
       U.toggle('weakFirst', 'Weak first', o.weakFirst) +
       U.toggle('skipLearned', 'Skip learned', o.skipLearned) +
-      U.toggle('shuffle', 'Shuffle', o.shuffle, cards ? '' : 'Off keeps the checklist order') + '</div>' +
+      (cards ? U.toggle('shuffle', 'Shuffle', o.shuffle) : '') + '</div>' +
       '<p class="sk-meta sk-flush">' + n + ' of ' + app.items.length + ' in a round. Changes apply to the round you’re in.</p>' +
       '<button data-ui="button" data-kind="primary" data-act="closeSheet" class="sk-tall">Done</button>' +
       (app.state.round ? '<button data-ui="button" data-kind="ghost" data-act="startOver" class="sk-danger sk-tall">Start over</button>' : '') + '</section>';
@@ -82,6 +88,7 @@
   function onOption(app, el) {
     var o = SP.store.settings(app.set.id);
     o[el.dataset.opt] = el.type === 'checkbox' ? el.checked : el.value;
+    if (el.dataset.opt === 'practice') delete o.section;   // the pre-D-19 Section option gives way
     SP.store.saveSettings(app.set.id, o);
     if (app.state.round) SP.screens.round.refilter(app);
     app.render();
