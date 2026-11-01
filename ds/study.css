@@ -11,7 +11,7 @@
         sk-tabbar, sk-set (+ sk-ico, sk-set-b), sk-inround, sk-jump (+ sk-jump-art), sk-carousel (+ sk-track, sk-slide,
         sk-car-prev/-next, sk-dots), sk-bar, sk-key, sk-legend, sk-item (+ sk-dot,
         sk-star, sk-sec), sk-scrim, sk-sheet, sk-switch, sk-field, sk-edit, sk-check, sk-note, sk-toast, sk-big,
-        sk-fill, sk-blank, sk-nearby, sk-hinted, sk-title, sk-say, sk-enter (T-06 motion);
+        sk-fill, sk-blank, sk-hinted, sk-title, sk-say, sk-enter (T-06 motion);
         button modifiers sk-pill (+ .sm), sk-pad, sk-tall, sk-danger.
      The theme's mastery ladder tokens: --learned (green, = --ok), --familiar (yellow), --weak (red, = --bad).
      Results (Right / Shaky / Missed) keep --ok / --warn / --bad.
@@ -223,11 +223,10 @@
 .sk-toast{position:absolute;left:20px;right:20px;bottom:96px;z-index:30;padding:12px 16px;border-radius:var(--r-lg);background:var(--text);color:var(--bg);font-size:var(--fs-2)}
 .gauge.sk-big{height:10px;border-radius:99px}
 
-/* ---------- Type it v2 (D-10): inline blanks, nearby step, hinted tag ---------- */
+/* ---------- Type it v2 (D-10): inline blanks, hinted tag ---------- */
 .sk-fill{margin:0;font-size:var(--fs-3);line-height:2.1}
 .sk-blank{font:inherit;border:0;border-bottom:2px solid var(--warn);background:transparent;color:var(--text);padding:0 2px;max-width:100%;border-radius:0}
 .sk-blank:focus{outline:0;border-bottom-color:var(--her)}
-.sk-nearby{display:block;padding:8px 12px;border-radius:var(--r-md);background:var(--warn-bg);color:var(--text);font-size:var(--fs-2)}
 .sk-hinted{font-size:var(--fs-1);font-weight:500;color:var(--quiet);border:1px solid var(--line2);border-radius:99px;padding:0 6px;margin-left:4px}
 
 /* T-06: moving to the next item. Procedures rise into place (a list moving up); cards are dealt
@@ -291,4 +290,11 @@
 
 
 /* ---------- T-16: sk-segbar, the chunked session bar (Lane B) ---------- */
+/* One segment per chunk, sized by its item count (flex set by U.segbar). Learned chunks are full in the
+   ladder's --learned; the current chunk fills in the accent (--her) as the round goes; the rest are track. */
+.sk-segbar{flex:1;min-width:0;display:flex;align-items:center;gap:3px;height:8px}
+.sk-seg{display:block;min-width:4px;height:100%;border-radius:99px;background:var(--line);overflow:hidden}
+.sk-seg > i{display:block;height:100%;background:var(--learned);transition:width var(--dur-3) var(--ease-out)}
+.sk-seg[data-current]{height:12px}
+.sk-seg[data-current] > i{background:var(--her)}
 

@@ -71,9 +71,9 @@ ok('loose allowances carried', Object.keys(medSet.grading.loose).length === 9);
 
 // saved rounds (T-03)
 const ngtItems = sets.items(set('ngt'));
-const live = { mode: 'type', ids: ngtItems.slice(0, 5).map((i) => i.id), i: 2, res: [{ id: ngtItems[0].id, result: 'right' }, { id: ngtItems[1].id, result: 'missed' }], notes: {}, before: {}, t0: 5, flip: true, hint: true, open: { typed: 'x' }, nearby: {} };
+const live = { mode: 'type', ids: ngtItems.slice(0, 5).map((i) => i.id), i: 2, res: [{ id: ngtItems[0].id, result: 'right' }, { id: ngtItems[1].id, result: 'missed' }], notes: {}, before: {}, t0: 5, flip: true, hint: true, open: { typed: 'x' } };
 const snap = rounds.snapshot(live);
-ok('round snapshot drops on-screen state', !('flip' in snap) && !('open' in snap) && !('nearby' in snap) && snap.i === 2 && snap.ids.length === 5);
+ok('round snapshot drops on-screen state', !('flip' in snap) && !('open' in snap) && !('hint' in snap) && snap.i === 2 && snap.ids.length === 5);
 const back = rounds.restore(snap, ngtItems);
 ok('round restores at the same item', back.i === 2 && back.ids.length === 5 && back.res.length === 2 && back.flip === false);
 const cut = rounds.restore(snap, ngtItems.filter((i) => i.id !== live.ids[0] && i.id !== live.ids[3]));
@@ -140,5 +140,45 @@ ok('of: finds the chunk, null when missing', C.of(proc, 'd2').id === 'scene:room
   ok('real ' + id + ': one chunk per section (no scenes yet)', cs.length === secs.length && cs.every((c, i) => c.id === 'sec:' + secs[i].id && c.sections.length === 1));
   ok('real ' + id + ': chunk ids = all items', cs.reduce((a, c) => a.concat(c.ids), []).join() === sets.items(s).map((i) => i.id).join());
 });
+// ---- T-16 tests (Lane B: Smart rounds) ----
+const t16Steps = (s, n, star) => Array.from({ length: n }, (_, i) => ({ id: s + (i + 1), text: 'do ' + s + ' ' + (i + 1), star: star === i + 1 }));
+const t16Proc = { id: 't16p', kind: 'procedure', title: 'P', scenes: [{ id: 'room', label: 'Med room' }],
+  sections: [{ id: 'a', title: 'Prep', steps: t16Steps('a', 2) }, { id: 'b', title: 'Draw up', scene: 'room', steps: t16Steps('b', 3, 2) }, { id: 'c', title: 'Give', steps: t16Steps('c', 2) }] };
+const t16Items = sets.items(t16Proc);
+const t16Ids = (list) => list.map((i) => i.id).join();
+const t16Map = (pairs) => Object.keys(pairs).reduce((m, id) => (m[id] = { state: pairs[id] }, m), {});
+const t16A = t16Map({ a1: 'familiar', a2: 'learned' });
+ok('t16 DEFAULTS: practice smart, no section', rounds.DEFAULTS.practice === 'smart' && !('section' in rounds.DEFAULTS));
+ok('t16 build smart (default) = first chunk', t16Ids(rounds.build(t16Items, {}, {}, t16Proc)) === 'a1,a2');
+ok('t16 build smart = link steps + current chunk', t16Ids(rounds.build(t16Items, { practice: 'smart' }, t16A, t16Proc)) === 'a1,a2,b1,b2,b3');
+ok('t16 build whole = all items in order', t16Ids(rounds.build(t16Items, { practice: 'whole' }, t16A, t16Proc)) === t16Ids(t16Items));
+ok('t16 build section = that section', t16Ids(rounds.build(t16Items, { practice: 'c' }, {}, t16Proc)) === 'c1,c2');
+ok('t16 old section option still means that section', t16Ids(rounds.build(t16Items, { section: 'b' }, {}, t16Proc)) === 'b1,b2,b3' && rounds.practiceOf({ section: 'b', practice: 'smart' }) === 'b');
+ok('t16 old section all = smart', rounds.practiceOf({ section: 'all' }) === 'smart' && t16Ids(rounds.build(t16Items, { section: 'all' }, {}, t16Proc)) === 'a1,a2');
+ok('t16 unknown section falls back to smart', rounds.plan(t16Items, { practice: 'gone' }, {}, t16Proc).practice === 'smart' && t16Ids(rounds.build(t16Items, { section: 'gone' }, {}, t16Proc)) === 'a1,a2');
+ok('t16 smart + starred only', t16Ids(rounds.build(t16Items, { starred: true }, t16A, t16Proc)) === 'b2');
+ok('t16 smart + skip learned drops learned link steps', t16Ids(rounds.build(t16Items, { skipLearned: true }, t16A, t16Proc)) === 'a1,b1,b2,b3');
+ok('t16 weak first keeps link steps first', t16Ids(rounds.build(t16Items, { weakFirst: true }, Object.assign({ b3: { state: 'weak' } }, t16A), t16Proc)) === 'a1,a2,b3,b1,b2');
+ok('t16 shuffle ignored for procedures', t16Ids(rounds.build(t16Items, { practice: 'whole', shuffle: true }, {}, t16Proc)) === t16Ids(t16Items));
+const t16Cards = { id: 't16c', kind: 'cards', title: 'C', cards: Array.from({ length: 14 }, (_, i) => ({ id: 'q' + (i + 1), front: 'f' + i, back: 'b' + i })) };
+const t16CItems = sets.items(t16Cards), t16Sh = rounds.build(t16CItems, { shuffle: true }, {}, t16Cards);
+ok('t16 cards smart = first 7, shuffle stays inside the chunk', t16Sh.length === 7 && t16Ids(t16Sh.slice().sort((x, y) => x.id.localeCompare(y.id, 'en', { numeric: true }))) === 'q1,q2,q3,q4,q5,q6,q7');
+const t16All = t16Map(t16Items.reduce((m, i) => (m[i.id] = 'familiar', m), {}));
+ok('t16 run = whole set', t16Ids(rounds.build(t16Items, {}, t16All, t16Proc)) === t16Ids(t16Items));
+ok('t16 no set = whole list (legacy call)', rounds.build(t16Items, {}, {}).length === t16Items.length);
+let t16P = rounds.plan(t16Items, {}, t16A, t16Proc);
+ok('t16 plan: link stage, chunk id and label', t16P.stage === 'link' && t16P.chunk === 'scene:room' && t16P.label === 'Med room' && t16P.link.join() === 'a1,a2');
+ok('t16 plan: learn, run, and null when not smart', rounds.plan(t16Items, {}, {}, t16Proc).stage === 'learn' && rounds.plan(t16Items, {}, t16All, t16Proc).stage === 'run' &&
+  rounds.plan(t16Items, {}, t16All, t16Proc).chunk === null && rounds.plan(t16Items, { practice: 'whole' }, {}, t16Proc).stage === null);
+ok('t16 basis: the plan from a round\'s before-states', t16Ids(rounds.build(t16Items, {}, t16All, t16Proc, rounds.basisOf({ before: { a1: 'familiar', a2: 'familiar' } }))) === 'a1,a2,b1,b2,b3');
+const t16Live = { mode: 'next', ids: ['a1', 'a2', 'b1', 'b2', 'b3'], i: 1, res: [{ id: 'a1', result: 'right' }], notes: {}, before: {}, t0: 1, stage: 'link', chunk: 'scene:room', label: 'Med room', nearby: { id: 'x' } };
+const t16Snap = rounds.snapshot(t16Live), t16Back = rounds.restore(t16Snap, t16Items);
+ok('t16 snapshot/restore keep stage, chunk and label', t16Snap.stage === 'link' && t16Back.stage === 'link' && t16Back.chunk === 'scene:room' && t16Back.label === 'Med room');
+ok('t16 pick keeps the plan', rounds.pick(t16Snap, t16Items, 'type').chunk === 'scene:room');
+const t16None = rounds.restore(rounds.snapshot(Object.assign({}, t16Live, { stage: null, chunk: null, label: null })), t16Items);
+ok('t16 non-smart round restores with stage null', t16None.stage === null && t16None.chunk === null);
+const t16Old = rounds.restore({ mode: 'type', ids: ['a1', 'a2'], i: 0, res: [], notes: {}, before: {}, t0: 1, nearby: { id: 'a2' } }, t16Items);
+ok('t16 old save (no plan) restores, stage undefined', t16Old && t16Old.i === 0 && !('stage' in t16Old) && !('chunk' in t16Old));
+ok('t16 no nearby in restored rounds', !('nearby' in t16Old) && !('nearby' in t16Back) && !('nearby' in t16Snap));
 console.log(pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);

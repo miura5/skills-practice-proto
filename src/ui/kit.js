@@ -63,10 +63,11 @@
       '</div></button>';
   }
 
-  function session(done, total) {
+  // bar: optional markup that replaces the plain round meter (T-16: segbar)
+  function session(done, total, bar) {
     var pc = total ? Math.round(100 * done / total) : 0;
     return '<div class="sk-session">' + iconBtn('close', 'End round', 'end') +
-      '<div class="gauge" role="progressbar" aria-label="Round progress" aria-valuenow="' + pc + '" aria-valuemin="0" aria-valuemax="100"><i data-tone="ok" style="width:' + pc + '%"></i></div>' +
+      (bar || '<div class="gauge" role="progressbar" aria-label="Round progress" aria-valuenow="' + pc + '" aria-valuemin="0" aria-valuemax="100"><i data-tone="ok" style="width:' + pc + '%"></i></div>') +
       '<span class="sk-count">' + done + ' / ' + total + '</span>' + iconBtn('options', 'Options', 'options') + '</div>';
   }
 
@@ -120,7 +121,16 @@
 
 
   // ---- T-16 helpers (Lane B) ----
+  // sk-segbar: the chunked session bar (D-19). segs: [{label, size, fill 0..1}], one per chunk, sized by
+  // its item count; at: the current chunk. One progressbar for the round, named by the current chunk.
+  function segbar(segs, at, done, total) {
+    var cur = segs[at] || {};
+    return '<div class="sk-segbar" role="progressbar" aria-label="' + esc(cur.label) + ', part ' + (at + 1) + ' of ' + segs.length + '" aria-valuenow="' + done + '" aria-valuemin="0" aria-valuemax="' + total + '">' +
+      segs.map(function (s, k) {
+        return '<span class="sk-seg"' + (k === at ? ' data-current="true"' : '') + ' title="' + esc(s.label) + '" style="flex:' + s.size + '"><i style="width:' + (100 * s.fill).toFixed(1) + '%"></i></span>';
+      }).join('') + '</div>';
+  }
 
 
-  SP.ui = { carousel: carousel, carouselBind: carouselBind, carouselMove: carouselMove, esc: esc, marked: marked, icon: icon, iconBtn: iconBtn, mastery: mastery, setRow: setRow, practice: practice, art: art, flip: flip, session: session, tabbar: tabbar, toggle: toggle };
+  SP.ui = { carousel: carousel, carouselBind: carouselBind, carouselMove: carouselMove, esc: esc, marked: marked, icon: icon, iconBtn: iconBtn, mastery: mastery, setRow: setRow, practice: practice, art: art, flip: flip, session: session, tabbar: tabbar, toggle: toggle, segbar: segbar };
 })(window.SP);
