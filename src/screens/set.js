@@ -30,17 +30,11 @@
     return out;
   }
 
-  // T-09: the saved round, as a quiet note. The mode cards continue it (T-08).
-  function roundNote(app) {
-    var r = SP.core.rounds.restore(SP.store.round(app.set.id), app.items);
-    return r ? '<span class="sk-inround">Round in progress · ' + r.i + ' of ' + r.ids.length + '</span>' : '';
-  }
-
   function render(app) {
     var set = app.set, items = app.items, cards = set.kind === 'cards', t = app.tally(set);
     var o = SP.store.settings(set.id), p = SP.store.progress(set.id);
-    var inRound = SP.core.rounds.build(items, o, p, set).length, pl = SP.core.rounds.plan(items, o, p, set);
-    var what = (pl.label ? U.esc(pl.label) + ' · ' : '') + inRound + ' of ' + items.length + ' in a round';
+    // T-33: the same summary as Home's Jump back in (a saved round's i of n, else the next Smart round)
+    var sm = SP.screens.round.summary(set), what = (sm.label ? U.esc(sm.label) + ' · ' : '') + (sm.saved ? sm.i + ' of ' + sm.n : sm.n + ' of ' + sm.total) + ' in a round';
     return '<main class="screen tight">' +
       '<div class="sk-bar">' + U.iconBtn('back', 'Back', 'back') + '<b></b>' +
       '<button data-ui="button" data-kind="ghost" data-act="edit">' + U.icon('edit') + 'Edit</button>' +
@@ -48,7 +42,7 @@
       '<header class="stack g10"><h1 class="sk-title">' + U.esc(set.title) + '</h1>' +
       U.mastery(t, 'sk-big') +
       '<div class="sk-legend"><span><i data-s="learned"></i>Learned ' + t.learned + '</span><span><i data-s="familiar"></i>Familiar ' + t.familiar + '</span><span><i data-s="weak"></i>Weak ' + t.weak + '</span></div></header>' +
-      '<section class="stack"><div class="row"><h2 class="sk-h2 grow">Practice</h2><span class="sk-meta">' + what + '</span></div>' + roundNote(app) + '<div class="two">' +
+      '<section class="stack"><div class="row"><h2 class="sk-h2 grow">Practice</h2><span class="sk-meta">' + what + '</span></div><div class="two">' +
       U.practice(cards ? 'Flashcards' : 'Next Step', 'flip', 'startNext') +
       U.practice('Type it', 'type', 'startType') +
       '</div></section>' +
