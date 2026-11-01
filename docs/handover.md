@@ -3,7 +3,7 @@
 Last updated 2026-11-01 by the D-19 batch chat (build manager). No agent is running.
 
 ## Where things stand
-- Live: v0.6.0 at https://claude.ai/artifact/UUj5psocojXR1xkK2QVAbh (same link every release; version 14).
+- Live: v0.6.1 at https://claude.ai/artifact/UUj5psocojXR1xkK2QVAbh (same link every release; version 14).
 - Tests: `node tests/core.test.js` passes 152.
 - Shipped today (v0.5.0): chunked learning, D-19 + D-21, tasks T-14..T-17 all ticked.
   - Chunks: card groups of 7; procedure scenes (Med Admin 9 chunks, NG tube 9). Smart rounds go
@@ -27,7 +27,6 @@ combined build in Chromium (390px, no console errors), and republished once. Les
 anchors really landed in every shared file before launching lanes (the tests anchor did not).
 
 ## Open for Matt
-- Range rule to confirm with Matt: a bare "15" means 15a..15q.
 - Smart + Starred only can give an empty round when the current chunk has no starred steps (toast). Possible
   follow-up: skip to the next chunk with starred steps.
 - A copy of Med Admin or NG tube that Matt edited before v0.5.0 has no scenes (his saved copy wins). Reset in

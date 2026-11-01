@@ -13,7 +13,7 @@
         sk-star, sk-sec), sk-scrim, sk-sheet, sk-switch, sk-field, sk-edit, sk-check, sk-note, sk-toast, sk-big,
         sk-fill, sk-blank, sk-hinted, sk-title, sk-say, sk-enter (T-06 motion),
         sk-tags (+ sk-tag, sk-tag-l, sk-tag-x, sk-tags-in, sk-tags-edit; T-15, generic tag input on Proprietary's Chip),
-        sk-segbar (+ sk-seg; T-16, the chunked session bar);
+        sk-segbar (+ sk-segview, sk-segrail, sk-seg; T-16/T-20/D-24, the chunked session bar);
         button modifiers sk-pill (+ .sm), sk-pad, sk-tall, sk-danger.
      The theme's mastery ladder tokens: --learned (green, = --ok), --familiar (yellow), --weak (red, = --bad).
      Results (Right / Shaky / Missed) keep --ok / --warn / --bad.
@@ -367,8 +367,17 @@
 /* ---------- T-19..T-20: round header, sk-segbar v2 (Lane B) ---------- */
 /* sk-segbar (D-22): one equal-width segment per chunk, track var(--line), fill var(--ok), pill ends.
    Every segment is the same height; the current one only carries data-current (for a11y hooks). */
-.sk-segbar{flex:1;min-width:0;display:flex;align-items:center;gap:3px;height:8px}
-.sk-seg{display:block;flex:1 1 0;min-width:0;height:100%;border-radius:var(--r-pill);background:var(--line);overflow:hidden}
+.sk-segbar{flex:1;min-width:0;height:8px;container-type:inline-size}
+/* D-24: each segment is at least --seg-min wide. The rail shifts left only as far as it overflows, keeping one
+   finished chunk before the current one; what still overflows fades out on the right. */
+.sk-segview{--seg-min:40px;--seg-gap:3px;--seg-len:calc(var(--n) * (var(--seg-min) + var(--seg-gap)) - var(--seg-gap));
+  --seg-shift:min(calc(var(--at) * (var(--seg-min) + var(--seg-gap))), max(0px, calc(var(--seg-len) - 100cqw)));
+  --seg-fade:min(32px, max(0px, calc(var(--seg-len) - 100cqw - var(--seg-shift))));
+  height:100%;overflow:hidden;-webkit-mask-image:linear-gradient(to right,#000 calc(100% - var(--seg-fade)),transparent);
+  mask-image:linear-gradient(to right,#000 calc(100% - var(--seg-fade)),transparent)}
+.sk-segrail{display:flex;gap:var(--seg-gap);height:100%;min-width:100%;transform:translateX(calc(-1 * var(--seg-shift)));
+  transition:transform var(--dur-3) var(--ease-out)}
+.sk-seg{display:block;flex:1 0 var(--seg-min);height:100%;border-radius:var(--r-pill);background:var(--line);overflow:hidden}
 .sk-seg > i{display:block;height:100%;width:0;border-radius:var(--r-pill);background:var(--ok);transition:width var(--dur-3) var(--ease-out)}
 
 

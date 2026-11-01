@@ -140,6 +140,7 @@ Matt hands it to a new chat by attaching the repo; CLAUDE.md sets the role.
 - [x] T-21 Results after Smart: Continue: <next chunk> + Back to set (D-22). Done 2026-11-01 (Lane B).
 - [x] T-22 Options "Scope": Smart / Whole set / Custom (D-22). Done 2026-11-01 (Lane C).
 - [x] T-23 Custom scope editor sk-scope + core/scope.js + tests (D-22). Done 2026-11-01 (Lane C).
+- [x] T-24 sk-segbar min segment width + right fade (D-24). Done 2026-11-01 (build manager).
 
 ## D-10 build notes (2026-11-01)
 - Bands: 100% Right; 60%+ row stays open with blanks; 34-59% Shaky; under 34% Missed.
@@ -284,3 +285,9 @@ Build notes:
 - Continue always starts a Smart round in the same mode, whatever Scope is saved.
 - Scope: an old Section option now reads as Custom with that section's steps. In ranges a bare number
   means its lettered steps (15 = 15a..15q). index.html gained <meta charset="utf-8"> (fixes "Â·" locally).
+
+## D-24 · sk-segbar keeps a minimum segment width (Matt, 2026-11-01, v0.6.1)
+Why: with many chunks, equal segments got too thin. Decision: each segment is at least 40px (fills more when
+few). When they overflow, the rail slides so one finished chunk shows before the current one, and the
+overflow fades out on the right (container units + mask; --n/--at computed inline). Count pill unchanged.
+Also confirmed by Matt: a bare step number in Custom ranges covers all its lettered sub-steps.

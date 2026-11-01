@@ -168,10 +168,13 @@
   // segment per chunk; at: the current chunk. One progressbar for the round, named by the current chunk.
   function segbar(segs, at, done, total) {
     var cur = segs[at] || {};
+    // D-24: segments keep a minimum width; when they don't fit, the rail slides so one finished chunk shows
+    // before the current one, and the rest fades out on the right (CSS, container units). --n and --at are computed.
     return '<div class="sk-segbar" role="progressbar" aria-label="' + esc(cur.label) + ', part ' + (at + 1) + ' of ' + segs.length + '" aria-valuenow="' + done + '" aria-valuemin="0" aria-valuemax="' + total + '">' +
+      '<div class="sk-segview" style="--n:' + segs.length + ';--at:' + Math.max(0, at - 1) + '"><div class="sk-segrail">' +
       segs.map(function (s, k) {
         return '<span class="sk-seg"' + (k === at ? ' data-current="true"' : '') + ' title="' + esc(s.label) + '"><i style="width:' + (100 * s.fill).toFixed(1) + '%"></i></span>';
-      }).join('') + '</div>';
+      }).join('') + '</div></div></div>';
   }
 
 
