@@ -30,6 +30,18 @@
     return out;
   }
 
+  // The round left part-way, if any: Resume picks it up, Start over begins a fresh one in the same mode.
+  function resumeCard(app) {
+    var r = SP.core.rounds.restore(SP.store.round(app.set.id), app.items);
+    if (!r) return '';
+    var mode = r.mode === 'type' ? 'Type it' : app.set.kind === 'cards' ? 'Flashcards' : 'Next Step';
+    var pc = Math.round(100 * r.i / r.ids.length);
+    return '<div class="sk-resume"><div class="row"><b class="grow">' + mode + ' round</b><span class="sk-meta">' + r.i + ' of ' + r.ids.length + '</span></div>' +
+      '<div class="gauge" role="progressbar" aria-label="Round progress" aria-valuenow="' + pc + '" aria-valuemin="0" aria-valuemax="100"><i data-tone="ok" style="width:' + pc + '%"></i></div>' +
+      '<div class="row" style="gap:8px"><button data-ui="button" data-kind="primary" data-act="resume" class="grow" style="height:48px;border-radius:99px">Resume round</button>' +
+      '<button data-ui="button" data-kind="ghost" data-act="startOver" data-id="' + r.mode + '">Start over</button></div></div>';
+  }
+
   function render(app) {
     var set = app.set, items = app.items, cards = set.kind === 'cards', t = app.tally(set);
     var inRound = SP.core.rounds.build(items, SP.store.settings(set.id), SP.store.progress(set.id)).length;
@@ -40,7 +52,7 @@
       '<header class="stack" style="gap:10px"><h1 style="margin:0;font-size:26px;font-weight:700;letter-spacing:-.02em">' + U.esc(set.title) + '</h1>' +
       U.mastery(t, 'sk-big') +
       '<div class="sk-legend"><span><i style="--x:var(--ok)"></i>Learned ' + t.learned + '</span><span><i style="--x:var(--fam)"></i>Familiar ' + t.familiar + '</span><span><i style="--x:var(--warn)"></i>Weak ' + t.weak + '</span></div></header>' +
-      '<section class="stack"><div class="row"><h2 class="sk-h2 grow">Practice</h2><span class="sk-meta">' + inRound + ' of ' + items.length + ' in a round</span></div><div class="two">' +
+      '<section class="stack"><div class="row"><h2 class="sk-h2 grow">Practice</h2><span class="sk-meta">' + inRound + ' of ' + items.length + ' in a round</span></div>' + resumeCard(app) + '<div class="two">' +
       U.practice(cards ? 'Flashcards' : 'Next Step', cards ? 'See the front, recall it, flip to check' : 'Say the next step, reveal, grade yourself', 'flip', 'startNext') +
       U.practice('Type it', cards ? 'Type the back from memory' : 'Type the steps from memory', 'type', 'startType') +
       '</div></section>' +
@@ -68,6 +80,7 @@
   var actions = {
     flipPreview: function (app) { app.update({ pvFlip: !app.state.pvFlip }); },
     pv: function (app, el) { app.update({ pv: Math.max(0, (app.state.pv || 0) + Number(el.dataset.id)), pvFlip: false }); },
+    startOver: function (app, el) { SP.store.clearRound(app.set.id); SP.screens.round.start(app, el.dataset.id); },
     edit: function (app) { SP.screens.edit.start(app, app.set, false); }
   };
 
@@ -80,5 +93,5 @@
     app.render();
   }
 
-  SP.screens.set = { render: render, sheet: sheet, actions: actions, onOption: onOption };
+  SP.screens.set = { resumeCard: resumeCard, render: render, sheet: sheet, actions: actions, onOption: onOption };
 })(window.SP);

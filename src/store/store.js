@@ -6,11 +6,12 @@
 //   sets~<id>      a set you made, or your edited copy of a built-in set
 //   progress~<id>  Weak / Familiar / Learned per item of that set
 //   settings~<id>  that set's Options
+//   rounds~<id>    the round you left part-way (not progress; cleared when it finishes)
 //   meta           {last, theme}
 (function (SP) {
   'use strict';
   var C = SP.core;
-  var cache = { sets: {}, progress: {}, settings: {}, meta: {} };
+  var cache = { sets: {}, progress: {}, settings: {}, rounds: {}, meta: {} };
   var backend = { name: 'browser', write: null, remove: null };
   var listeners = [];
   var LS = 'sp:v1';
@@ -19,7 +20,7 @@
 
   // ---------- backends ----------
   function local() {
-    try { var raw = localStorage.getItem(LS); if (raw) cache = Object.assign(cache, JSON.parse(raw)); } catch (e) { /* private window */ }
+    try { var raw = localStorage.getItem(LS); if (raw) cache = Object.assign(cache, JSON.parse(raw)); cache.rounds = cache.rounds || {}; } catch (e) { /* private window */ }
     var save = function () { try { localStorage.setItem(LS, JSON.stringify(cache)); } catch (e) { /* full or blocked */ } };
     backend = { name: 'browser', write: save, remove: save };
   }
@@ -94,7 +95,7 @@
     return [];
   }
   // A built-in set goes back to its shipped content; a set you made is removed.
-  function removeSet(id) { drop('sets', id); if (!isBuiltin(id)) { drop('progress', id); drop('settings', id); } }
+  function removeSet(id) { drop('sets', id); if (!isBuiltin(id)) { drop('progress', id); drop('settings', id); } drop('rounds', id); }
   function newId(title) {
     var base = C.sets.slug(title), id = base, n = 2;
     while (get(id)) id = base + '-' + n++;
@@ -106,6 +107,9 @@
   function saveProgress(id, map) { put('progress', id, map); }
   function settings(id) { return Object.assign({}, C.rounds.DEFAULTS, cache.settings[id] || {}); }
   function saveSettings(id, opts) { put('settings', id, opts); }
+  function round(id) { return cache.rounds[id] || null; }
+  function saveRound(id, r) { put('rounds', id, r); }
+  function clearRound(id) { if (cache.rounds[id]) drop('rounds', id); }
   function meta() { return cache.meta || {}; }
   function saveMeta(patch) { put('meta', null, Object.assign({}, cache.meta, patch)); }
 
@@ -114,6 +118,7 @@
     onChange: function (fn) { listeners.push(fn); },
     all: all, get: get, saveSet: saveSet, removeSet: removeSet, newId: newId, isBuiltin: isBuiltin,
     progress: progress, saveProgress: saveProgress, settings: settings, saveSettings: saveSettings,
+    round: round, saveRound: saveRound, clearRound: clearRound,
     meta: meta, saveMeta: saveMeta
   };
 })(window.SP);

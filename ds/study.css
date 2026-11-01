@@ -130,6 +130,11 @@
 .sk-set-b span{font-size:var(--fs-1);color:var(--quiet)}
 .sk-set .gauge{width:56px;height:6px;border-radius:99px;flex:none}
 
+/* ---------- 2h2. sk-resume: the round left part-way, on a set's page (T-03) ---------- */
+.sk-resume{display:flex;flex-direction:column;gap:10px;padding:16px;border-radius:var(--r-xl);background:var(--surface);box-shadow:0 0 0 2px var(--her),var(--sk-shadow)}
+.sk-resume b{font-size:var(--fs-4);font-weight:600}
+.sk-resume .gauge{height:8px;border-radius:99px}
+
 /* ---------- 2i. sk-jump: "Jump back in" ---------- */
 .sk-jump{display:flex;flex-direction:column;gap:14px;padding:20px;border-radius:var(--r-card);background:var(--surface);box-shadow:0 0 0 1px var(--line),var(--sk-shadow);position:relative;overflow:hidden}
 .sk-jump b{font-size:20px;font-weight:700;letter-spacing:-.01em}

@@ -69,5 +69,15 @@ ok('require: 23 needs gloves', grade(m('23'), 'hand hygiene', medSet).missing.in
 ok('synonym counts carried', Object.keys(medSet.synonyms).length === 20 && Object.keys(ngt.synonyms).length === 12);
 ok('loose allowances carried', Object.keys(medSet.grading.loose).length === 9);
 
+// saved rounds (T-03)
+const ngtItems = sets.items(set('ngt'));
+const live = { mode: 'type', ids: ngtItems.slice(0, 5).map((i) => i.id), i: 2, res: [{ id: ngtItems[0].id, result: 'right' }, { id: ngtItems[1].id, result: 'missed' }], notes: {}, before: {}, t0: 5, flip: true, hint: true, open: { typed: 'x' }, nearby: {} };
+const snap = rounds.snapshot(live);
+ok('round snapshot drops on-screen state', !('flip' in snap) && !('open' in snap) && !('nearby' in snap) && snap.i === 2 && snap.ids.length === 5);
+const back = rounds.restore(snap, ngtItems);
+ok('round restores at the same item', back.i === 2 && back.ids.length === 5 && back.res.length === 2 && back.flip === false);
+const cut = rounds.restore(snap, ngtItems.filter((i) => i.id !== live.ids[0] && i.id !== live.ids[3]));
+ok('round restore drops removed items and clamps i', cut.i === 1 && cut.ids.length === 3 && cut.res.length === 1);
+ok('round restore: nothing left = null', rounds.restore(snap, ngtItems.filter((i) => live.ids.slice(2).indexOf(i.id) < 0)) === null && rounds.restore(null, ngtItems) === null);
 console.log(pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);

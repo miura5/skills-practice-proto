@@ -119,6 +119,7 @@ Matt hands it to a new chat by attaching the repo; CLAUDE.md sets the role.
 # Tasks
 - [x] T-01 Grading v2 (D-10). Shipped 2026-11-01 as v0.2.0, 41 tests.
 - [x] T-02 Repo + CLAUDE.md + handover (D-11).
+- [x] T-03 Resume a round (D-12). Shipped 2026-11-01 as v0.3.0, 45 tests.
 
 ## D-10 build notes (2026-11-01)
 - Bands: 100% Right; 60%+ row stays open with blanks; 34-59% Shaky; under 34% Missed.
@@ -126,3 +127,11 @@ Matt hands it to a new chat by attaching the repo; CLAUDE.md sets the role.
 - The hint shows only first words; typing just those grades Shaky, the full key words grade Right + hinted.
 - Order rules (strict/before/anytime) are stored in content but not used until the whole-checklist matcher.
 - Rules came from the old prototype's skills/med-admin.js and skills/ngt.js typeMode blocks, copied as is.
+
+## D-12 · Resume a round (2026-11-01, v0.3.0)
+Why: Matt leaves a round and comes back to 0.
+Decision: the round in progress is saved per set (store 'rounds', doc rounds~<setId>, account or
+browser) at start and after every answer; cleared at Results or on Start over. Leaving keeps it.
+The set screen shows a Resume card (mode, "12 of 30", gauge, Resume / Start over); Home's Jump
+back in resumes too. core.rounds.snapshot/restore keep it JSON-safe and drop items removed
+from an edited set. The Results time includes time away; a resumed round keeps its item list.

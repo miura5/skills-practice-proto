@@ -10,8 +10,24 @@
     if (!list.length) return app.toast('No items match these Options. Open Options to widen the round.');
     var before = {};
     app.items.forEach(function (it) { before[it.id] = (p[it.id] || P.blank()).state; });
-    app.update({ screen: mode, sheet: null, round: { mode: mode, ids: list.map(function (it) { return it.id; }), i: 0, res: [], flip: false, hint: false, notes: {}, before: before, t0: Date.now() } });
+    var r = { mode: mode, ids: list.map(function (it) { return it.id; }), i: 0, res: [], flip: false, hint: false, notes: {}, before: before, t0: Date.now() };
+    save(app, r);
+    app.update({ screen: mode, sheet: null, round: r });
     app.focus('#answer');
+  }
+
+  // The round in progress is kept per set, so leaving and coming back picks it up (T-03).
+  function save(app, r) { SP.store.saveRound(app.set.id, SP.core.rounds.snapshot(r)); }
+  function finish(app, r) { r.t1 = Date.now(); SP.store.clearRound(app.set.id); }
+
+  // Back into the saved round, checked against the set as it is now. False if there's nothing to resume.
+  function resume(app) {
+    var r = SP.core.rounds.restore(SP.store.round(app.set.id), app.items);
+    if (!r) { SP.store.clearRound(app.set.id); return false; }
+    save(app, r);
+    app.update({ screen: r.mode, sheet: null, round: r });
+    app.focus('#answer');
+    return true;
   }
 
   function current(app) {
@@ -28,8 +44,8 @@
     r.res.push({ id: it.id, result: result, hinted: !!(note && note.hinted) });
     if (note) r.notes[it.id] = note;
     r.i += 1; r.flip = false; r.hint = false; r.open = null; r.nearby = null;
-    if (r.i >= r.ids.length) { r.t1 = Date.now(); app.update({ screen: 'done' }); }
-    else { app.render(); app.focus('#answer'); }
+    if (r.i >= r.ids.length) { finish(app, r); app.update({ screen: 'done' }); }
+    else { save(app, r); app.render(); app.focus('#answer'); }
   }
 
   // Options changed mid-round: keep what's answered, rebuild what's left.
@@ -38,7 +54,8 @@
     var next = SP.core.rounds.build(app.items, SP.store.settings(app.set.id), SP.store.progress(app.set.id))
       .map(function (it) { return it.id; }).filter(function (id) { return done.indexOf(id) < 0; });
     r.ids = done.concat(next);
-    if (r.i >= r.ids.length && r.i > 0) { r.t1 = Date.now(); app.state.screen = 'done'; }
+    if (r.i >= r.ids.length && r.i > 0) { finish(app, r); app.state.screen = 'done'; }
+    else save(app, r);
   }
 
   function results(app) {
@@ -72,9 +89,10 @@
     startNext: function (app) { start(app, 'next'); },
     startType: function (app) { start(app, 'type'); },
     again: function (app) { start(app, app.state.round.mode); },
+    resume: function (app) { if (!resume(app)) app.toast('That round can’t be picked up any more.'); },
     end: function (app) { app.update({ screen: 'set', round: null }); },
     toSet: function (app) { app.update({ screen: 'set', round: null }); }
   };
 
-  SP.screens.round = { start: start, current: current, record: record, refilter: refilter, render: results, modeName: modeName, actions: actions };
+  SP.screens.round = { start: start, resume: resume, current: current, record: record, refilter: refilter, render: results, modeName: modeName, actions: actions };
 })(window.SP);
