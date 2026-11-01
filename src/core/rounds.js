@@ -106,6 +106,16 @@
     return !c || SP.core.chunks.isLearned(c, progress || {});
   }
 
+  // T-36 (D-30): is the saved copy of a round newer than this screen's copy? saved: the store's record (u = when
+  // it was saved; null when cleared or none). mine: this screen's round (u = its own last save, when known).
+  // Both stamped: the later stamp wins. Otherwise the copy with more answers wins.
+  function newer(saved, mine) {
+    if (!saved || saved.cleared) return false;
+    if (!mine) return true;
+    if (typeof saved.u === 'number' && typeof mine.u === 'number') return saved.u > mine.u;
+    return (saved.res || []).length > (mine.res || []).length;
+  }
+
   // The mode label for Results: the one mode used, or 'mixed' when answers came from both.
   function modeOf(r) {
     var seen = {};
@@ -121,5 +131,5 @@
     return m;
   }
 
-  SP.core.rounds = { build: build, selected: S.selected, plan: plan, practiceOf: practiceOf, basisOf: basisOf, DEFAULTS: DEFAULTS, snapshot: snapshot, restore: restore, pick: pick, stale: stale, modeOf: modeOf };
+  SP.core.rounds = { build: build, selected: S.selected, plan: plan, practiceOf: practiceOf, basisOf: basisOf, DEFAULTS: DEFAULTS, snapshot: snapshot, restore: restore, pick: pick, stale: stale, modeOf: modeOf, newer: newer };
 })((typeof window !== 'undefined' ? window : globalThis).SP);

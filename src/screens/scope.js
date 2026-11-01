@@ -8,7 +8,9 @@
   function chosen(app) { return S.selected(SP.store.settings(app.set.id), app.items); }
 
   // Saves the picked ids (any order) as the set's custom scope, in set order.
-  function save(app, ids) {
+  // skipped (T-38): the parts of a typed range that named no step; shown under the range field until the next change.
+  function save(app, ids, skipped) {
+    app.state.scopeSkipped = skipped && skipped.length ? skipped : null;
     var o = SP.store.settings(app.set.id), keep = {};
     ids.forEach(function (id) { keep[id] = true; });
     o.practice = 'custom';
@@ -53,6 +55,7 @@
       '<div class="sk-scope-range"><label class="sk-field sk-scope-field">Steps<input id="scopeRange" value="' + U.esc(SP.core.scope.format(picked, items)) +
       '" autocomplete="off" inputmode="numeric" enterkeyhint="done" placeholder="1, 8–12"></label>' +
       '<button data-ui="button" data-kind="neutral" data-act="scopeApply">Apply</button></div>' +
+      (app.state.scopeSkipped ? '<p class="sk-note sk-flush">Skipped: ' + U.esc(app.state.scopeSkipped.join(', ')) + '</p>' : '') +
       '<div class="sk-scope-chips"><button data-ui="chip" data-act="scopeAll">All</button>' +
       '<button data-ui="chip" data-act="scopeNone">None</button>' +
       '<button data-ui="chip" data-act="scopeStarred">★ Starred only</button></div>' +
@@ -89,9 +92,9 @@
     },
     scopeApply: function (app) {
       var input = document.getElementById('scopeRange'), text = input ? input.value : '';
-      var ids = S.parse(text, app.items);
-      if (!ids.length && text.trim()) return app.toast('Could not read that. Try 1, 8–12, 15–32.');
-      save(app, ids);
+      var got = S.parseDetail(text, app.items);
+      if (!got.ids.length && text.trim()) return app.toast('Could not read that. Try 1, 8–12, 15–32.');
+      save(app, got.ids, got.skipped);
     },
     scopeAll: function (app) { save(app, app.items.map(function (it) { return it.id; })); },
     scopeNone: function (app) { save(app, []); },

@@ -30,8 +30,10 @@
   // a–b (en dash, em dash or hyphen, spaces allowed). A range spans set order from a to b inclusive,
   // whichever comes first. A bare number also means its lettered steps: 15 is 15a..15q. Unknown
   // numbers are ignored (a range with an unknown end is dropped). Returns ids in set order.
-  function parse(text, items) {
-    var list = items || [], at = {}, family = {}, hit = {};
+  // T-38 (D-30): any word is just unknown (null-prototype maps, so "constructor" or "__proto__" name nothing).
+  // Returns { ids, skipped }: skipped lists the parts that named no step (as typed), in order.
+  function parseDetail(text, items) {
+    var list = items || [], at = Object.create(null), family = Object.create(null), hit = Object.create(null), skipped = [];
     var base = function (n) { return norm(n).replace(/[a-z]+$/, ''); };
     list.forEach(function (it, k) {
       if (!(norm(it.num) in at)) at[norm(it.num)] = k;
@@ -44,22 +46,26 @@
       return family[norm(tok)] || [];
     };
     String(text == null ? '' : text).split(/[,;]+/).forEach(function (part) {
-      var t = part.trim(), ends, x, y, lo, hi, k;
+      var t = part.trim(), ends, x, y, lo, hi, k, got;
       if (!t) return;
       ends = t.split(/\s*[\u2013\u2014-]\s*/);
       if (ends.length === 2) {
         x = named(ends[0]);
         y = named(ends[1]);
-        if (!x.length || !y.length) return;
+        if (!x.length || !y.length) { skipped.push(t); return; }
         lo = Math.min(x[0], y[0]);
         hi = Math.max(x[x.length - 1], y[y.length - 1]);
         for (k = lo; k <= hi; k++) hit[list[k].id] = true;
       } else if (ends.length === 1) {
-        named(t).forEach(function (j) { hit[list[j].id] = true; });
-      }
+        got = named(t);
+        if (!got.length) { skipped.push(t); return; }
+        got.forEach(function (j) { hit[list[j].id] = true; });
+      } else skipped.push(t);
     });
-    return list.filter(function (it) { return hit[it.id]; }).map(function (it) { return it.id; });
+    return { ids: list.filter(function (it) { return hit[it.id]; }).map(function (it) { return it.id; }), skipped: skipped };
   }
+
+  function parse(text, items) { return parseDetail(text, items).ids; }
 
   // Writes ids as "1, 8–12, 15–32": runs that are consecutive in set order become a range.
   function format(ids, items) {
@@ -78,5 +84,5 @@
     return out.join(', ');
   }
 
-  SP.core.scope = { legacy: legacy, selected: selected, parse: parse, format: format };
+  SP.core.scope = { legacy: legacy, selected: selected, parse: parse, parseDetail: parseDetail, format: format };
 })((typeof window !== 'undefined' ? window : globalThis).SP);

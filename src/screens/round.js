@@ -21,8 +21,12 @@
     return !!(saved && SP.core.rounds.stale && SP.core.rounds.stale(saved, set, p || SP.store.progress(set.id)));
   }
   function dropStale(app) {
-    if (stale(SP.store.round(app.set.id), app.set)) SP.store.clearRound(app.set.id);
+    if (stale(SP.store.round(app.set.id), app.set)) clearSaved(app);
   }
+
+  // T-36: this screen's own clears are not "finished on another device" (the store listener ignores them).
+  var busy = false;   // true while this screen writes to the store
+  function clearSaved(app) { busy = true; try { SP.store.clearRound(app.set.id); } finally { busy = false; } }
 
   // T-35: the round's active time (ms). Kept beside the round in the save; snapshot/restore do not carry it,
   // so it is put back here. last = when the previous answer (or the start / resume) happened.
@@ -49,19 +53,65 @@
   function keepPlan(r, pl) { r.stage = pl.stage; r.chunk = pl.chunk; r.label = pl.label; }
 
   // The round in progress is kept per set, so leaving and coming back picks it up (T-03).
+  // T-36: before writing, a newer saved copy (another tab or device) is adopted instead; a round this screen
+  // saved that is cleared elsewhere goes back to the set. Returns false when nothing was written.
   function save(app, r) {
+    var cur = SP.store.round(app.set.id);
+    if (typeof r.u === 'number' && (!cur || SP.core.rounds.newer(cur, r))) {
+      if (cur) adopt(app, cur); else leave(app);
+      return false;
+    }
     var s = SP.core.rounds.snapshot(r);
     if (s && typeof r.active === 'number') s.active = r.active;
-    SP.store.saveRound(app.set.id, s);
+    busy = true;
+    try { SP.store.saveRound(app.set.id, s); } finally { busy = false; }
+    r.u = (SP.store.round(app.set.id) || {}).u;
+    return true;
   }
+
+  // T-36: take the saved copy as this screen's round, keeping the mode. A typed answer in the box is kept
+  // (type.js reads SP.screens.round.keepTyped), and an open blank row stays when it is the same item.
+  function adopt(app, saved) {
+    var mine = app.state.round, r = SP.core.rounds.restore(saved, app.items);
+    if (!r) return leave(app);
+    attach(r, saved);
+    if (mine) {
+      r.mode = mine.mode;
+      if (mine.ids[mine.i] === r.ids[r.i]) { r.open = mine.open; r.hint = mine.hint; }
+    }
+    r.u = saved.u;
+    app.state.round = r;
+    SP.screens.round.keepTyped = app.state.screen === 'type';
+    app.render();
+    if (app.state.screen === 'type') app.focus('#answer');
+  }
+
+  // T-36: the round was finished on another device (or cleared there): back to the set, with a note.
+  function leave(app) {
+    app.state.round = null;
+    app.state.screen = 'set';
+    app.state.sheet = null;
+    app.toast('This round was finished on another device');
+  }
+
+  // T-36: the store changed (this tab, another tab, or another device through live update or focus).
+  // If the saved copy is newer than this screen's round, adopt it; if it is gone, leave.
+  function onStore() {
+    var app = SP.app, s = app && app.state, mine = s && s.round;
+    if (busy || !mine || (s.screen !== 'next' && s.screen !== 'type') || !app.set) return;
+    var raw = SP.store.round(app.set.id);
+    if (!raw) return leave(app);
+    if (SP.core.rounds.newer(raw, mine)) adopt(app, raw);
+  }
+  SP.store.onChange(onStore);
   // Results first: clearing the save re-renders (store change), and the mode screen has no item left.
-  function finish(app, r) { r.t1 = Date.now(); app.state.screen = 'done'; SP.store.clearRound(app.set.id); }
+  function finish(app, r) { r.t1 = Date.now(); app.state.screen = 'done'; clearSaved(app); }
 
   // Back into the saved round, checked against the set as it is now. False if there's nothing to resume.
   function resume(app) {
     dropStale(app);
     var raw = SP.store.round(app.set.id), r = SP.core.rounds.restore(raw, app.items);
-    if (!r) { SP.store.clearRound(app.set.id); return false; }
+    if (!r) { clearSaved(app); return false; }
     attach(r, raw);
     save(app, r);
     app.update({ screen: r.mode, sheet: null, round: r });
@@ -121,7 +171,9 @@
     var map = Object.assign({}, SP.store.progress(app.set.id));
     map[it.id] = P.apply(map[it.id], result, how);
     SP.store.saveProgress(app.set.id, map);
-    r.res.push({ id: it.id, mode: r.mode, result: result, hinted: !!(note && note.hinted) });
+    var rec = { id: it.id, mode: r.mode, result: result, hinted: !!(note && note.hinted) };
+    if (note && note.typed) rec.typed = note.typed;
+    r.res.push(rec);
     if (note) r.notes[it.id] = note;
     r.i += 1; r.flip = false; r.hint = false; r.open = null;
     if (r.i >= r.ids.length) { finish(app, r); app.render(); }
@@ -130,16 +182,19 @@
 
   // Options changed mid-round: keep what's answered, rebuild what's left. The Smart plan is made from
   // the progress at the round's start, so the round keeps its chunk while you answer.
+  // T-38 (D-30): when the new Options leave nothing to ask, the round is kept as it was (nothing is reverted)
+  // and the toast says why. Returns false in that case.
   function refilter(app) {
     var r = app.state.round, done = r.ids.slice(0, r.i), R = SP.core.rounds;
     var o = SP.store.settings(app.set.id), p = SP.store.progress(app.set.id);
     var basis = Object.keys(r.before || {}).length ? R.basisOf(r) : p;
     var next = R.build(app.items, o, p, app.set, basis)
       .map(function (it) { return it.id; }).filter(function (id) { return done.indexOf(id) < 0; });
+    if (!next.length) { app.toast('No steps match these Options.'); return false; }
     keepPlan(r, R.plan(app.items, o, basis, app.set));
     r.ids = done.concat(next);
-    if (r.i >= r.ids.length && r.i > 0) finish(app, r);
-    else save(app, r);
+    save(app, r);
+    return true;
   }
 
   function results(app) {
@@ -153,7 +208,7 @@
     var stat = function (k, label, tone) { return '<div class="sk-stat" data-tone="' + tone + '"><b>' + n(k) + '</b><span>' + label + '</span></div>'; };
     var row = function (x) {
       var it = app.byId[x.id];
-      return '<li class="sk-row" data-result="' + x.result + '"><span class="n">' + U.esc(it.num) + '</span><span class="grow">' + U.esc(cards ? it.front : (it.cue || it.answer)) + '</span><span class="tag">' + TAG[x.result] + (x.hinted ? ' <span class="sk-hinted">hinted</span>' : '') + '</span></li>';
+      return '<li class="sk-row" data-result="' + x.result + '"><span class="n">' + U.esc(it.num) + '</span><span class="grow">' + U.esc(cards ? it.front : (it.cue || it.answer)) + typedLine(x) + '</span><span class="tag">' + TAG[x.result] + hintTag(x) + '</span></li>';
     };
     return '<main class="screen">' +
       '<header class="sk-top"><div class="grow stack"><span class="sk-meta">' + U.esc(app.set.title) + ' · ' + modeName(app, true) + ' · ' + mins + ' min</span><h1>Round done</h1></div></header>' +
@@ -168,6 +223,13 @@
         : '<button data-ui="button" data-kind="primary" data-act="continue" class="sk-tall">' + U.esc(nextLabel(r, p, app)) + '</button>') +
       '<button data-ui="button" data-kind="neutral" data-act="toSet" class="sk-tall">Back to set</button></div></main>';
   }
+
+  // T-37 (D-30): what was typed, shown for Shaky and Missed answers only (escaped, clamped to two lines).
+  function typedLine(x) {
+    return x.typed && x.result !== 'right' ? '<span class="sk-note sk-clamp sk-typed">You typed: ' + U.esc(x.typed) + '</span>' : '';
+  }
+  // D-30: "Missed · hint used" (the badge component, new wording).
+  function hintTag(x) { return x.hinted ? ' <span class="sk-hinted">· hint used</span>' : ''; }
 
   // T-32c: the Results button after a Smart round. Still in the same learn chunk -> Again: <chunk>;
   // otherwise the next chunk, or the whole set once every chunk is learned (Again when this was a Run round).
@@ -202,11 +264,11 @@
     // D-22: after a Smart round, a fresh Smart round in the same mode (whatever Scope is saved).
     continue: function (app) { fresh(app, app.state.round.mode, Object.assign({}, SP.store.settings(app.set.id), { practice: 'smart', section: null })); },
     // Options sheet, in a round: drop the saved round and begin a fresh one in the same mode.
-    startOver: function (app) { var m = app.state.round.mode; SP.store.clearRound(app.set.id); app.state.round = null; fresh(app, m); },
+    startOver: function (app) { var m = app.state.round.mode; clearSaved(app); app.state.round = null; fresh(app, m); },
     resume: function (app) { if (!resume(app)) app.toast('That round can’t be picked up any more.'); },
     end: function (app) { app.update({ screen: 'set', round: null }); },
     toSet: function (app) { app.update({ screen: 'set', round: null }); }
   };
 
-  SP.screens.round = { start: start, fresh: fresh, resume: resume, current: current, enter: enter, bar: bar, header: header, record: record, refilter: refilter, render: results, modeName: modeName, summary: summary, actions: actions };
+  SP.screens.round = { start: start, fresh: fresh, resume: resume, current: current, enter: enter, bar: bar, header: header, record: record, refilter: refilter, render: results, modeName: modeName, summary: summary, actions: actions, typedLine: typedLine, hintTag: hintTag, keepTyped: false };
 })(window.SP);
