@@ -420,6 +420,19 @@
 .sk-scope .sk-star{color:var(--her)}
 
 /* ---------- T-26: Picker fixes (Lane B) ---------- */
+/* The chip: no native button border, shadow or appearance; its own inset ring only. */
+.sk-picker{border:0;appearance:none;-webkit-appearance:none;outline-offset:2px;text-decoration:none}
+.sk-picker:focus-visible{outline:2px solid var(--focus);outline-offset:2px;box-shadow:inset 0 0 0 1px var(--line2)}
+.sk-picker:active{background:var(--sel)}
+.sk-picker[data-tone]:active{background:var(--sc-bg)}
+/* The menu rows: one wash on hover, the accent ring on keyboard focus only, the current row marked by its check. */
+.sk-prow{appearance:none;-webkit-appearance:none;outline:none;box-shadow:none;background:none}
+.sk-prow:hover{background:var(--hover)}
+.sk-prow:focus-visible{background:none;outline:2px solid var(--focus);outline-offset:-2px}
+.sk-prow:hover:focus-visible{background:var(--hover)}
+.sk-prow:active{background:var(--sel)}
+.sk-prow[aria-checked='true']{font-weight:var(--fw-medium)}
+.sk-prow[aria-checked='true']::after{content:"";flex:none;width:5px;height:9px;margin:0 3px 2px auto;border:solid var(--quiet);border-width:0 1.5px 1.5px 0;rotate:45deg}
 
 
 /* ---------- T-27..T-28: flat editor, sk-sort (Lane A) ---------- */

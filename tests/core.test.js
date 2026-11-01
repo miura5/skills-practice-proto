@@ -1,6 +1,6 @@
 // Run: node tests/core.test.js  (no dependencies). Every grading bug gets a line here (D-05).
 global.SP = { core: {}, content: { list: [], add(s) { this.list.push(s); } } };
-['text', 'sets', 'keys', 'grade', 'progress', 'chunks', 'scope', 'rounds'].forEach((f) => require('../src/core/' + f + '.js'));
+['text', 'numbers', 'sets', 'keys', 'grade', 'progress', 'chunks', 'scope', 'rounds'].forEach((f) => require('../src/core/' + f + '.js'));
 ['procedures/med-admin', 'procedures/ngt', 'cards/pharm-antibiotics', 'cards/lab-values'].forEach((f) => require('../content/' + f + '.js'));
 const { sets, grade, progress, rounds, chunks } = SP.core;
 let pass = 0, fail = 0;
@@ -265,6 +265,59 @@ ok('scope legacy: none for practice whole/smart/custom', S.legacy({ practice: 'w
 
 
 // ---- T-25 tests (Lane B) ----
+const N = SP.core.numbers;
+const numsOf = (id) => N.of(set(id));
+// Generated labels equal the stored num for every step (regression: no content change).
+['med-admin', 'ngt'].forEach((id) => {
+  const L = numsOf(id);
+  set(id).sections.forEach((sec) => sec.steps.forEach((st) => {
+    if (L[st.id] !== st.num) console.log('MISMATCH', id, st.id, 'stored', st.num, 'generated', L[st.id]);
+    ok('num ' + id + ' ' + st.id + ' = stored ' + st.num, L[st.id] === st.num);
+  }));
+});
+ok('numbers: cards get no labels', Object.keys(N.of(set('pharm-antibiotics'))).length === 0);
+ok('numbers: items carry sub flag', item('med-admin', '13b').sub === true && item('med-admin', '13a').sub === false && item('ngt', 'I29a').sub === false);
+ok('numbers: 13b and 26d are sub-steps, 13a and 27 are not', item('med-admin', '13b').sub && item('med-admin', '26d').sub && !item('med-admin', '13a').sub && !item('med-admin', '27').sub);
+// fixture: explicit sub flags, main + 2 subs, then a main
+const fx = (secs, parts) => ({ id: 'fx', kind: 'procedure', title: 'Fixture', parts, sections: secs });
+const st = (id, extra) => Object.assign({ id, num: id, star: false, cue: '', text: 'x' }, extra || {});
+let L = N.of(fx([{ id: 's', steps: [st('a1'), st('a2', { sub: true }), st('a3', { sub: true }), st('b1')] }]));
+ok('numbers: main + 2 subs -> 1a,1b,1c then 2', L.a1 === '1a' && L.a2 === '1b' && L.a3 === '1c' && L.b1 === '2');
+// parts restart the counter; a return to an earlier part restarts too
+const P = [{ id: 'x' }, { id: 'y' }];
+L = N.of(fx([
+  { id: 's1', part: 'x', steps: [st('p1'), st('p2')] },
+  { id: 's2', part: 'x', steps: [st('p3')] },
+  { id: 's3', part: 'y', steps: [st('q1'), st('q2')] },
+  { id: 's4', part: 'x', steps: [st('r1')] }
+], P));
+ok('numbers: parts restart at 1', L.p1 === '1' && L.p3 === '3' && L.q1 === '1' && L.q2 === '2' && L.r1 === '1');
+// no parts: one counter across sections
+L = N.of(fx([{ id: 's1', steps: [st('n1')] }, { id: 's2', part: 'z', steps: [st('n2')] }]));
+ok('numbers: no parts = one counter', L.n1 === '1' && L.n2 === '2');
+// a sub-step never starts a part or the set
+L = N.of(fx([{ id: 's1', steps: [st('f1', { sub: true }), st('f2')] }]));
+ok('numbers: first step sub ignored', L.f1 === '1' && L.f2 === '2');
+L = N.of(fx([{ id: 's1', part: 'x', steps: [st('g1')] }, { id: 's2', part: 'y', steps: [st('g2', { sub: true }), st('g3')] }], P));
+ok('numbers: first step of a part sub ignored', L.g2 === '1' && L.g3 === '2');
+// a derived sub from an old num, with sub unset
+L = N.of(fx([{ id: 's1', steps: [st('h1', { num: '4' }), st('h2', { num: '4b' }), st('h3', { num: '4a' })] }]));
+ok('numbers: old num letters derive subs (4b sub, 4a not), numbers restart at 1', L.h1 === '1a' && L.h2 === '1b' && L.h3 === '2');
+ok('numbers: sub:false overrides an old letter', N.of(fx([{ id: 's1', steps: [st('k1', { num: '7' }), st('k2', { num: '7b', sub: false })] }])).k2 === '2');
+const ML27 = N.of(fx([{ id: 's1', steps: [st('m1')].concat(Array.from({ length: 27 }, (_, i) => st('m' + (i + 2), { sub: true }))) }]));
+ok('numbers: >26 subs use aa, ab', ML27.m27 === '1aa' && ML27.m28 === '1ab');
+// moving a step renumbers: a bare step moved to the top of its section
+const moved = JSON.parse(JSON.stringify(set('ngt')));
+const secA = moved.sections.find((s2) => s2.id === 'i-assess');
+secA.steps.unshift(secA.steps.splice(4, 1)[0]);
+const ML = N.of(moved);
+ok('numbers: moving a step renumbers the section', ML.I5 === '1' && ML.I1 === '2' && ML.I4 === '5' && ML.I6 === '6');
+ok('numbers: a moved step stays in its part', ML.R1 === '1' && ML.I30 === '30');
+// scope still reads generated nums
+const medItems = sets.items(set('med-admin'));
+ok('scope: 13 covers 13a..13d', SP.core.scope.parse('13', medItems).length === 4);
+ok('scope: 13b-14c range', SP.core.scope.parse('13b-14c', medItems).join() === '13b,13c,13d,14a,14b,14c'.split(',').map((n) => medItems.find((i) => i.num === n).id).join());
+ok('scope: format round-trips generated nums', SP.core.scope.format(SP.core.scope.parse('1, 8-12, 24', medItems), medItems) === '1, 8–12, 24a–24d');
 
 
 // ---- T-27..T-28 tests (Lane A) ----

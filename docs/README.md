@@ -11,6 +11,7 @@
       sp.js                 the SP namespace and the content registry
       core/                 pure functions, no DOM, no storage (D-03)
         text.js             normalising, stems, [key words]
+        numbers.js          step numbers generated from position, sub-steps a/b/c (D-25)
         sets.js             schema, items(), validate()
         grade.js            one answer -> right / shaky / missed (D-05)
         progress.js         Weak / Familiar / Learned ladder (D-06)

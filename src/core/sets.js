@@ -12,14 +12,16 @@
   function items(set) {
     if (set.kind === 'cards') {
       return (set.cards || []).map(function (c, i) {
-        return { id: c.id, num: String(i + 1), section: null, star: false, front: c.front,
+        return { id: c.id, num: String(i + 1), sub: false, section: null, star: false, front: c.front,
           cue: c.front, answer: T.plain(c.back), raw: c.back, keys: T.keys(c.back) };
       });
     }
-    var out = [];
+    var out = [], nums = SP.core.numbers ? SP.core.numbers.of(set) : null;
     (set.sections || []).forEach(function (sec) {
       (sec.steps || []).forEach(function (st) {
-        out.push({ id: st.id, num: st.num || st.id, section: sec.id, sectionTitle: sec.title, scene: sec.scene || null, star: !!st.star,
+        var gen = nums && nums[st.id] != null ? nums[st.id] : null;
+        out.push({ id: st.id, num: gen != null ? gen : (st.num || st.id), sub: gen != null ? SP.core.numbers.isSubLabel(gen) : !!(SP.core.numbers && SP.core.numbers.isSub(st)),
+          section: sec.id, sectionTitle: sec.title, scene: sec.scene || null, star: !!st.star,
           cue: st.cue || '', answer: T.plain(st.text), raw: st.text, keys: T.keys(st.text) });
       });
     });
