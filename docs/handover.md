@@ -1,6 +1,6 @@
 # Handover
 
-Last updated 2026-11-01 by the D-19 batch chat (build manager). No agent is running.
+Last updated 2026-11-01 by the D-19 batch chat (build manager). THREE lane agents are running (D-20).
 
 ## Where things stand
 - Live: v0.4.2 at https://claude.ai/artifact/UUj5psocojXR1xkK2QVAbh (same link every release).
@@ -11,8 +11,12 @@ Last updated 2026-11-01 by the D-19 batch chat (build manager). No agent is runn
 - Account saving is set up; not yet confirmed with real data (list data/users/me via ArtifactData).
 
 ## Now: the D-19 batch (chunked learning), in progress
-Matt said go 2026-11-01. T-14 done (src/core/chunks.js, 79 tests), committed and pushed on branch
-claude/ecstatic-feynman-vglfce; not on main, not published. PAUSED: waiting for Matt's go on T-15.
+Matt said go 2026-11-01, then asked for parallel lanes (D-20, no pause between tasks).
+T-14 done (src/core/chunks.js), pushed on branch claude/ecstatic-feynman-vglfce; not on main yet.
+Lanes A (T-15), B (T-16), C (T-17) run as agents in their own git worktrees, with lane anchors in
+tests/core.test.js, ds/study.css and src/ui/kit.js. If this chat ends before they finish: their
+worktree commits are local and lost with the container; restart the lanes from the D-20 file split.
+After the lanes: merge A, B, C into the branch, review the whole diff, test, republish once, merge to main.
 Read D-19 in docs/DECISIONS.md first; it is the full design. Tasks, in this order:
 1. T-14 Core chunking (src/core/chunks.js + tests).
 2. T-15 Data + Edit: scene tags, sk-tags (generic Study kit tag input), Proprietary Picker per section,
