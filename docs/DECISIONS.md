@@ -131,9 +131,9 @@ Matt hands it to a new chat by attaching the repo; CLAUDE.md sets the role.
 - [x] T-12 Carousel: pre-T-11 slide width (85% of track - 40px), centred snap with symmetric padding, art .75 in the carousel only, arrows 6px from the edge (D-18). Shipped v0.4.2.
 - [x] T-13 Set overview mode cards: captions removed (U.practice(title, art, act)); art pinned to the card bottom so both align. Shipped v0.4.2. Build manager review passed.
 - [x] T-14 Core chunking: src/core/chunks.js (chunks, stages, Smart round list) + tests (D-19). Batch 1 of 4. Done 2026-11-01 (79 tests), not yet published.
-- [ ] T-15 Data + Edit: scene tags in set data; sk-tags tag input (Study kit, generic); Proprietary Picker per section; seed Med Admin + NG tube scenes from the old prototype (D-19). Batch 2 of 4. Waiting for Matt's go.
-- [ ] T-16 Rounds + screens: Smart rounds, segmented session bar (Study kit), scene in the prompt, Options Practice Smart / Whole set / Section, Results "Next: <chunk>" (D-19). Batch 3 of 4. Waiting for Matt's go.
-- [ ] T-17 Grading simplification: strict order; remove the nearby-step stage and the stored strict/before/anytime rules; update tests (D-19). Batch 4 of 4. Waiting for Matt's go.
+- [ ] T-15 Data + Edit: scene tags in set data; sk-tags tag input (Study kit, generic); Proprietary Picker per section; seed Med Admin + NG tube scenes from the old prototype (D-19). Batch 2 of 4. Go given (D-20), in a lane.
+- [ ] T-16 Rounds + screens: Smart rounds, segmented session bar (Study kit), scene in the prompt, Options Practice Smart / Whole set / Section, Results "Next: <chunk>" (D-19). Batch 3 of 4. Go given (D-20), in a lane.
+- [ ] T-17 Grading simplification: strict order; remove the nearby-step stage and the stored strict/before/anytime rules; update tests (D-19). Batch 4 of 4. Go given (D-20), in a lane.
 
 ## D-10 build notes (2026-11-01)
 - Bands: 100% Right; 60%+ row stays open with blanks; 34-59% Shaky; under 34% Missed.
@@ -222,3 +222,13 @@ Decision:
 Batch rule (Matt): T-14..T-17 run in order, one agent each; after each task the build manager commits,
 pushes and PAUSES for Matt's go. The build manager reviews the whole batch's diff at the end (design
 system + structure), then republishes once.
+
+## D-20 · The D-19 batch runs in lanes (Matt, 2026-11-01)
+Supersedes D-19's batch rule (one task at a time, pause after each). Matt asked for the fastest finish
+with up to 3 agents in parallel and no pause. T-14 was done first (all lanes need it). Then three lanes,
+each an agent in its own git worktree, each owning its files; the build manager merges and reviews:
+- Lane A = T-15: content scenes, sets.js, edit.js, app.js (tag keys), sk-tags.
+- Lane B = T-16: rounds.js, set.js, round.js, next.js, type.js (incl. removing the nearby-step UI), sk-segbar.
+- Lane C = T-17: grade.js, keys.js, the content files' grading.strict/before/anytime keys only, about.js.
+Shared files (tests, study.css, kit.js) have one marked insertion point per lane.
+

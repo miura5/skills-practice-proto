@@ -286,3 +286,9 @@
 .sk-jump > *:not(.sk-jump-art){position:relative;z-index:1}
 .sk-jump .sk-grow{flex:1}
 @media (prefers-reduced-motion:reduce){.sk-track{scroll-behavior:auto}.sk-dots button{transition:none}}
+
+/* ---------- T-15: sk-tags, a generic tag input (Lane A) ---------- */
+
+
+/* ---------- T-16: sk-segbar, the chunked session bar (Lane B) ---------- */
+

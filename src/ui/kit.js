@@ -116,5 +116,11 @@
     t.scrollTo({ left: to != null ? to * w : t.scrollLeft + by * w });
   }
 
+  // ---- T-15 helpers (Lane A) ----
+
+
+  // ---- T-16 helpers (Lane B) ----
+
+
   SP.ui = { carousel: carousel, carouselBind: carouselBind, carouselMove: carouselMove, esc: esc, marked: marked, icon: icon, iconBtn: iconBtn, mastery: mastery, setRow: setRow, practice: practice, art: art, flip: flip, session: session, tabbar: tabbar, toggle: toggle };
 })(window.SP);
