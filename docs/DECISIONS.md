@@ -120,6 +120,7 @@ Matt hands it to a new chat by attaching the repo; CLAUDE.md sets the role.
 - [x] T-01 Grading v2 (D-10). Shipped 2026-11-01 as v0.2.0, 41 tests.
 - [x] T-02 Repo + CLAUDE.md + handover (D-11).
 - [x] T-03 Resume a round (D-12). Shipped 2026-11-01 as v0.3.0, 45 tests.
+- [ ] T-04 Type it: keep the current row in view above the phone keyboard, no scrolling (Matt, 2026-11-01). In progress.
 
 ## D-10 build notes (2026-11-01)
 - Bands: 100% Right; 60%+ row stays open with blanks; 34-59% Shaky; under 34% Missed.
