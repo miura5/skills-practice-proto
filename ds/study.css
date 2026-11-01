@@ -7,8 +7,8 @@
         plus a roomier density: --ts 1.12 and bigger radii. It sets values only, never component rules.
      2. study components, prefixed sk-, built only from Proprietary tokens:
         sk-h2, sk-meta (+ .sk-flush), sk-faint, sk-top, sk-practice, sk-art, sk-flip (+ sk-face, sk-pager),
-        sk-session (+ sk-count), sk-wheel (+ sk-row, sk-last, sk-clamp, sk-input, sk-q), sk-grade, sk-stats/sk-stat,
-        sk-tabbar, sk-set (+ sk-ico, sk-set-b), sk-inround, sk-jump (+ sk-jump-art), sk-carousel (+ sk-track, sk-slide,
+        sk-session (+ sk-count), sk-wheel (+ sk-row, sk-last, sk-clamp, sk-input, sk-q; D-28 round and Results rows), sk-grade, sk-stats/sk-stat,
+        sk-tabbar, sk-set (+ sk-ico, sk-set-b), sk-jump (+ sk-jump-art), sk-carousel (+ sk-track, sk-slide,
         sk-car-prev/-next, sk-dots), sk-bar, sk-key, sk-legend, sk-item (+ sk-dot,
         sk-star, sk-sec), sk-scrim, sk-sheet, sk-switch, sk-field, sk-note, sk-toast, sk-big,
         sk-fill, sk-blank, sk-hinted, sk-title, sk-say, sk-enter (T-06 motion),
@@ -16,7 +16,7 @@
         sk-segbar (+ sk-segview, sk-segrail, sk-seg; T-16/T-20/D-24, the chunked session bar);
         button modifiers sk-pill (+ .sm), sk-pad, sk-tall, sk-danger.
         T-27..T-28 (D-25): flat editor sk-secs (+ sk-sec, sk-sec-h, sk-sec-t, sk-sec-b, sk-sec-title, sk-steps),
-        sk-rows (+ sk-row, sk-step, sk-sub, sk-num, sk-body), sk-flat (borderless soft field), sk-cue, sk-text,
+        sk-rows (+ sk-erow, sk-step, sk-sub, sk-num, sk-body; the editor's rows), sk-flat (borderless soft field), sk-cue, sk-text,
         sk-starbtn, sk-more (⋯ menu on sk-pmenu/sk-prow), sk-add, sk-chev; sk-sort (+ sk-grip, sk-sorting, sk-lift).
      The theme's mastery ladder tokens: --learned (green, = --ok), --familiar (yellow), --weak (red, = --bad).
      Results (Right / Shaky / Missed) keep --ok / --warn / --bad.
@@ -103,9 +103,12 @@
 .sk-count{font:600 var(--fs-1)/1 var(--sans);font-variant-numeric:tabular-nums;color:var(--on-her);background:var(--ok);padding:4px 8px;border-radius:99px}
 
 /* ---------- 2e. sk-wheel: Type it's focus list ---------- */
-.sk-wheel{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
-.sk-row{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:var(--r-lg);font-size:var(--fs-3);line-height:1.4;transition:opacity var(--dur-3)}
-.sk-row .n{font-size:var(--fs-1);font-weight:600;color:var(--faint);font-variant-numeric:tabular-nums;min-width:18px;padding-top:2px}
+.sk-wheel{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:var(--sp-1_5)}
+/* D-28 (T-34): one row style for the round and Results: token padding, a number column, tag and meta at the end.
+   Tinted rows (data-result) and plain rows (What changed, faded upcoming) share it, so their text lines up. */
+.sk-row{display:flex;gap:var(--sp-3);align-items:flex-start;padding:var(--sp-2) var(--sp-3);border-radius:var(--r-lg);font-size:var(--fs-3);line-height:1.4;transition:opacity var(--dur-3)}
+.sk-row .n{flex:none;min-width:28px;text-align:end;font-size:var(--fs-1);font-weight:600;color:var(--faint);font-variant-numeric:tabular-nums;padding-top:2px}
+.sk-row .grow{flex:1;min-width:0}
 .sk-row[data-result='right']{background:var(--ok-bg)}
 .sk-row[data-result='shaky']{background:var(--warn-bg)}
 .sk-row[data-result='missed']{background:var(--bad-bg)}
@@ -113,9 +116,10 @@
 .sk-row[data-result='right']{--x:var(--ok)} .sk-row[data-result='shaky']{--x:var(--warn)} .sk-row[data-result='missed']{--x:var(--bad)}
 .sk-row[data-d='far']{opacity:.35}
 .sk-row[data-d='near']{opacity:.6}
-.sk-row.focus{flex-direction:column;gap:12px;background:var(--surface);box-shadow:0 0 0 1.5px var(--her),var(--sk-shadow);padding:16px;border-radius:var(--r-xl)}
-.sk-row .tag{margin-left:auto;font-size:var(--fs-1);font-weight:600;color:var(--x)}
-.sk-last{padding:8px 12px;font-size:var(--fs-2)}
+.sk-row.focus{flex-direction:column;gap:var(--sp-3);background:var(--surface);box-shadow:0 0 0 1.5px var(--her),var(--sk-shadow);padding:var(--sp-4);border-radius:var(--r-xl)}
+.sk-row .tag,.sk-row > .sk-meta:last-child{margin-left:auto;flex:none;padding-left:var(--sp-2);white-space:nowrap}
+.sk-row .tag{font-size:var(--fs-1);font-weight:600;color:var(--x)}
+.sk-last{font-size:var(--fs-2)}
 .sk-last-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
 .sk-last-label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sk-clamp{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
@@ -155,8 +159,6 @@
 .sk-set-b span{font-size:var(--fs-1);color:var(--quiet)}
 .sk-set .gauge{width:56px;height:6px;border-radius:99px;flex:none}
 
-/* ---------- 2h2. sk-inround: quiet note that the mode cards continue a saved round (T-09) ---------- */
-.sk-inround{align-self:flex-start;margin-top:-4px;padding:4px 10px;border-radius:99px;background:var(--accent-bg);color:var(--her);font-size:var(--fs-1);font-weight:600}
 
 /* ---------- 2i. sk-jump: "Jump back in" ---------- */
 .sk-jump{display:flex;flex-direction:column;gap:14px;padding:20px;border-radius:var(--r-card);background:var(--surface);box-shadow:0 0 0 1px var(--line),var(--sk-shadow);position:relative;overflow:hidden}
@@ -462,9 +464,9 @@
 .sk-steps{display:flex;flex-direction:column}
 /* Rows: flat, no card; a hairline between rows */
 .sk-rows{display:flex;flex-direction:column}
-.sk-row{display:flex;align-items:flex-start;gap:var(--sp-1);padding:var(--sp-1_5) 0;border-top:var(--hairline) solid var(--line)}
-.sk-rows > .sk-row:first-child,.sk-steps > .sk-row:first-child{border-top:0}
-.sk-row.sk-sub{margin-inline-start:var(--sp-5)}
+.sk-erow{display:flex;align-items:flex-start;gap:var(--sp-1);padding:var(--sp-1_5) 0;border-top:var(--hairline) solid var(--line)}
+.sk-rows > .sk-erow:first-child,.sk-steps > .sk-erow:first-child{border-top:0}
+.sk-erow.sk-sub{margin-inline-start:var(--sp-5)}
 .sk-num{flex:none;width:30px;padding-top:var(--sp-2);text-align:end;font-size:var(--fs-1);line-height:1.2;color:var(--faint);font-variant-numeric:tabular-nums}
 .sk-step .sk-num{width:34px}
 .sk-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:var(--sp-1)}

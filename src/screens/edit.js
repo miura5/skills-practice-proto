@@ -43,7 +43,7 @@
     if (cards) {
       body = '<div class="sk-rows">' + d.cards.map(function (c, i) {
         var p = 'cards.' + i + '.';
-        return '<div class="sk-row" data-sort="cards" data-sort-i="' + i + '">' + U.grip() +
+        return '<div class="sk-erow" data-sort="cards" data-sort-i="' + i + '">' + U.grip() +
           '<span class="sk-num">' + (i + 1) + '</span>' +
           '<div class="sk-body"><input class="sk-flat" aria-label="Front" placeholder="Front" autocomplete="off" data-edit="' + p + 'front" value="' + U.esc(c.front) + '">' +
           '<textarea class="sk-flat sk-text" rows="2" aria-label="Back" placeholder="Back · [brackets] mark key words" data-edit="' + p + 'back">' + U.esc(c.back) + '</textarea></div>' +
@@ -74,7 +74,7 @@
             '<input class="sk-flat sk-sec-title" aria-label="Section title" autocomplete="off" data-edit="sections.' + si + '.title" value="' + U.esc(sec.title) + '">' +
             '<div class="sk-steps">' + sec.steps.map(function (st, j) {
               var p = 'sections.' + si + '.steps.' + j + '.', sub = isSub(st), key = si + '.' + j;
-              return '<div class="sk-row sk-step' + (sub ? ' sk-sub' : '') + '" data-sort="steps-' + si + '" data-sort-i="' + j + '">' + U.grip() +
+              return '<div class="sk-erow sk-step' + (sub ? ' sk-sub' : '') + '" data-sort="steps-' + si + '" data-sort-i="' + j + '">' + U.grip() +
                 '<span class="sk-num">' + U.esc(nums[st.id] || '') + '</span>' + U.starToggle(!!st.star, key) +
                 '<div class="sk-body"><input class="sk-flat sk-cue" aria-label="Cue" placeholder="Cue" autocomplete="off" data-edit="' + p + 'cue" value="' + U.esc(st.cue) + '">' +
                 '<textarea class="sk-flat sk-text" rows="2" aria-label="Step text" placeholder="Put [brackets] around the key words" data-edit="' + p + 'text">' + U.esc(st.text) + '</textarea></div>' +

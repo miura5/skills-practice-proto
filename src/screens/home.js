@@ -6,11 +6,12 @@
   // One Jump back in slide: a saved round resumes, otherwise the set opens.
   function slide(app, set) {
     var t = app.tally(set), cards = set.kind === 'cards';
-    var r = SP.core.rounds.restore(SP.store.round(set.id), SP.core.sets.items(set));
+    // T-33: the same summary as the set screen's Practice line
+    var sm = SP.screens.round.summary(set), r = sm.saved;
     var mode = r && (r.mode === 'type' ? 'Type it' : cards ? 'Flashcards' : 'Next Step');
     return '<div class="sk-jump"><span class="sk-meta">' + (cards ? 'Card set' : 'Procedure') + '</span>' +
       '<b>' + U.esc(set.title) + '</b>' + U.mastery(t) +
-      '<span class="sk-meta">' + (r ? mode + ' round · ' + r.i + ' of ' + r.ids.length : t.learned + ' of ' + t.total + ' learned · ' + t.weak + ' weak') + '</span>' +
+      '<span class="sk-meta">' + (r ? mode + ' round · ' + sm.i + ' of ' + sm.n : (sm.label ? U.esc(sm.label) + ' · ' : '') + sm.n + ' of ' + sm.total + ' in a round') + '</span>' +
       '<span class="sk-grow"></span>' +
       '<button data-ui="button" data-kind="primary" data-act="' + (r ? 'resumeLast' : 'open') + '" data-id="' + U.esc(set.id) + '" class="sk-pill">' + (r ? 'Resume round' : 'Continue') + '</button>' +
       '<div class="sk-jump-art">' + U.art(r ? (r.mode === 'type' ? 'type' : 'flip') : cards ? 'flip' : 'type') + '</div></div>';
