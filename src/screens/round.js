@@ -232,7 +232,7 @@
     return x.typed && x.result !== 'right' ? '<span class="sk-note sk-clamp sk-typed">You typed: ' + U.esc(x.typed) + '</span>' : '';
   }
   // D-30: "Missed · hint used" (the badge component, new wording).
-  function hintTag(x) { return x.hinted ? ' <span class="sk-hinted">· hint used</span>' : ''; }
+  function hintTag(x) { return x.hinted ? ' <span class="sk-hinted">hint used</span>' : ''; }
 
   // T-32c: the Results button after a Smart round. Still in the same learn chunk -> Again: <chunk>;
   // otherwise the next chunk, or the whole set once every chunk is learned (Again when this was a Run round).

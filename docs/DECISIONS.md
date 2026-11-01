@@ -156,6 +156,7 @@ Matt hands it to a new chat by attaching the repo; CLAUDE.md sets the role.
 - [x] T-37 Type it: empty Check does nothing; rows and Results show "You typed: …" for Shaky/Missed (D-30). Agent. Done 2026-11-01.
 - [x] T-38 Options change that leaves no items mid-round: toast, keep the round; scope.parse safe on any word, reports skipped parts (D-30). Agent. Done 2026-11-01.
 - [x] T-39 Wording "Right" everywhere, "Missed · hint used"; Home carousel arrows clear of the cards (D-30). Build manager + agent (Results tag). Done 2026-11-01.
+- [x] T-40 Visual test fixes: carousel art + arrows, Custom chips, one toast spot, hint pill, Edit selection indent (D-31). Done 2026-11-01 (build manager).
 
 ## D-10 build notes (2026-11-01)
 - Bands: 100% Right; 60%+ row stays open with blanks; 34-59% Shaky; under 34% Missed.
@@ -385,3 +386,13 @@ on store change/focus, keeps typed text; a round finished elsewhere returns to t
 holds the typed answer. refilter never finishes a round now. scope.parseDetail -> {ids, skipped}.
 Build manager review fix: Start over crashed (a save now redraws at once, and the round was null) -> start,
 fresh and resume set the round before saving. Editor Move up/down stays within a section (by design).
+
+## D-31 · Visual test fixes; phone layout everywhere (Matt, 2026-11-01, v0.8.2)
+Matt: the app stays a phone column on every screen size (a small study window); no PC layout.
+Fixes from the visual tester (390/320, light + dark): Jump back in art smaller and under the button's layer,
+hidden below 360px; carousel arrows centred around the dots; Custom chips = Proprietary Chip at Study size
+(inherited font, soft --line2 ring); one toast spot, fixed at the top of the column above sheets; hint pill
+"hint used" without a stray dot; "Edit selection ›" aligned with the labels.
+Not bugs: editor ⋯ menu as a bottom sheet on phones; Type it hint shows only first words (D-10); one-line cue
+inputs clip long text.
+

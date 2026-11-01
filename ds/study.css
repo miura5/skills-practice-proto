@@ -222,7 +222,8 @@
 
 /* sk-note: feedback under a checked answer */
 .sk-note{font-size:var(--fs-1);color:var(--quiet)}
-.sk-toast{position:absolute;left:20px;right:20px;bottom:96px;z-index:30;padding:12px 16px;border-radius:var(--r-lg);background:var(--text);color:var(--bg);font-size:var(--fs-2)}
+/* D-31: one toast spot for every screen: fixed at the top of the phone column, above sheets, never over a field */
+.sk-toast{position:fixed;top:calc(env(safe-area-inset-top,0px) + var(--sp-4));left:50%;transform:translateX(-50%);width:min(360px,calc(100% - 40px));box-sizing:border-box;z-index:60;padding:12px 16px;border-radius:var(--r-lg);background:var(--text);color:var(--bg);font-size:var(--fs-2)}
 .gauge.sk-big{height:10px;border-radius:99px}
 
 /* ---------- Type it v2 (D-10): inline blanks, hinted tag ---------- */
@@ -277,7 +278,7 @@
   .study .sk-carousel .sk-dots{min-height:32px;align-items:center;padding-top:var(--sp-2)}
   .study .sk-carousel [data-ui='button'].sk-car-prev,.study .sk-carousel [data-ui='button'].sk-car-next{display:inline-flex;position:absolute;top:auto;bottom:0;width:32px;height:32px;min-height:32px;padding:0;justify-content:center;align-items:center;z-index:2;border-radius:99px;background:var(--surface);cursor:pointer;box-shadow:0 0 0 1px var(--line2),var(--sk-shadow)}
   .study .sk-carousel [data-ui='button'].sk-car-prev:not(:disabled):hover,.study .sk-carousel [data-ui='button'].sk-car-next:not(:disabled):hover{background:var(--sel)}
-  .study .sk-carousel .sk-car-prev{left:20px} .study .sk-carousel .sk-car-next{right:20px}
+  .study .sk-carousel .sk-car-prev{left:calc(50% - 88px)} .study .sk-carousel .sk-car-next{left:calc(50% + 56px);right:auto}
   .study .sk-carousel [data-ui='button'].sk-car-prev:disabled,.study .sk-carousel [data-ui='button'].sk-car-next:disabled{display:none}
 }
 .sk-dots{display:flex;justify-content:center;gap:6px;padding-top:6px}
@@ -396,7 +397,7 @@
 .sk-radio input:checked + i{box-shadow:inset 0 0 0 1.5px var(--her)}
 .sk-radio input:checked + i::after{content:'';position:absolute;inset:5px;border-radius:99px;background:var(--her)}
 .sk-radio input:focus-visible + i{outline:2px solid var(--focus);outline-offset:2px}
-.study [data-ui='button'].sk-link{height:36px;min-height:36px;padding:0 var(--sp-1);margin-left:0;color:var(--her);background:none;box-shadow:none}
+.study [data-ui='button'].sk-link{height:36px;min-height:36px;padding:0;margin-left:0;color:var(--her);background:none;box-shadow:none}
 .study [data-ui='button'].sk-link:hover{background:none;color:var(--text)}
 /* the editor */
 .sk-scope{display:flex;flex-direction:column;gap:var(--sp-4)}
@@ -507,3 +508,15 @@
 @keyframes sk-shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
 @media (prefers-reduced-motion:reduce){.sk-input.sk-shake{animation:none}}
 .sk-typed{display:block;margin-top:2px}
+
+/* ---------- D-31: visual test fixes ---------- */
+/* Jump back in art: smaller inside the card, never under the button; hidden on very narrow phones */
+.sk-carousel .sk-jump-art{width:120px;height:88px;right:-12px;bottom:-10px}
+.sk-jump [data-ui='button']{position:relative;z-index:2}
+@media (max-width:359px){.sk-carousel .sk-jump-art{display:none}}
+/* Custom scope chips: Proprietary's Chip at the Study size, inherited font, no heavy ring */
+.study .sk-scope-chips [data-ui='chip']{font:inherit;font-size:var(--fs-2);font-weight:var(--fw-medium);min-height:32px;padding:0 var(--sp-3);border:0;
+  background:var(--surface);color:var(--text);box-shadow:inset 0 0 0 1px var(--line2);cursor:pointer;-webkit-appearance:none;appearance:none}
+.study .sk-scope-chips [data-ui='chip']:hover{background:var(--hover)}
+.study .sk-scope-chips [data-ui='chip']:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+
