@@ -34,6 +34,7 @@
         (s.toast ? '<div class="sk-toast" role="status">' + SP.ui.esc(s.toast) + '</div>' : '') + '</div>';
       var now = root.querySelector('.screen');
       if (now) { now.dataset.key = key(); now.scrollTop = keep; }
+      if (now && screen.after) screen.after(app, now);
     }
   };
   function key() { return app.state.screen + ':' + (app.state.setId || ''); }

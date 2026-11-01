@@ -77,7 +77,7 @@
     if (g.result === 'nearby') { r.nearby = g.nearby; app.render(); app.focus && app.focus('#answer'); return; }
     if (g.result === 'open') {
       r.open = { typed: typed, parts: g.parts }; r.nearby = null; app.render();
-      var b = document.querySelector('.sk-blank'); if (b) b.focus();
+      var b = document.querySelector('.sk-blank'); if (b) b.focus({ preventScroll: true });
       return;
     }
     done(app, g);
@@ -97,5 +97,35 @@
     }
   };
 
-  SP.screens.type = { render: render, actions: actions, check: check };
+  // Keep the current row at the top of the list, just under the progress bar, so the answer box
+  // sits above the phone keyboard without scrolling (Matt, 2026-11-01).
+  // Bottom room is sized to fit, so the row can always reach the top (even the last item) with
+  // no big empty area. iOS may scroll the window when the keyboard opens: reset it and re-pin.
+  function pin(screen) {
+    var row = screen.querySelector('.sk-row.focus');
+    if (!row || !row.isConnected) return;
+    screen.style.paddingBottom = '';
+    var base = parseFloat(getComputedStyle(screen).paddingBottom) || 0;
+    var top = row.getBoundingClientRect().top - screen.getBoundingClientRect().top + screen.scrollTop - 8;
+    var room = screen.scrollHeight - top;
+    if (room < screen.clientHeight) screen.style.paddingBottom = (base + screen.clientHeight - room) + 'px';
+    screen.scrollTop = Math.max(0, top);
+    if (window.scrollY) window.scrollTo(0, 0);
+  }
+  var vvBound = false;
+  function after(app, screen) {
+    pin(screen);
+    requestAnimationFrame(function () { pin(screen); });
+    if (!vvBound && window.visualViewport) {
+      vvBound = true;
+      var re = function () {
+        var s = document.querySelector('.screen');
+        if (s && app.state.screen === 'type') pin(s);
+      };
+      visualViewport.addEventListener('resize', re);
+      visualViewport.addEventListener('scroll', function () { if (window.scrollY) window.scrollTo(0, 0); });
+    }
+  }
+
+  SP.screens.type = { after: after, render: render, actions: actions, check: check };
 })(window.SP);

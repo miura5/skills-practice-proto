@@ -120,7 +120,7 @@ Matt hands it to a new chat by attaching the repo; CLAUDE.md sets the role.
 - [x] T-01 Grading v2 (D-10). Shipped 2026-11-01 as v0.2.0, 41 tests.
 - [x] T-02 Repo + CLAUDE.md + handover (D-11).
 - [x] T-03 Resume a round (D-12). Shipped 2026-11-01 as v0.3.0, 45 tests.
-- [ ] T-04 Type it: keep the current row in view above the phone keyboard, no scrolling (Matt, 2026-11-01). In progress.
+- [x] T-04 Type it: keep the current row in view above the phone keyboard (D-13). Shipped 2026-11-01 as v0.3.1.
 
 ## D-10 build notes (2026-11-01)
 - Bands: 100% Right; 60%+ row stays open with blanks; 34-59% Shaky; under 34% Missed.
@@ -136,3 +136,9 @@ browser) at start and after every answer; cleared at Results or on Start over. L
 The set screen shows a Resume card (mode, "12 of 30", gauge, Resume / Start over); Home's Jump
 back in resumes too. core.rounds.snapshot/restore keep it JSON-safe and drop items removed
 from an edited set. The Results time includes time away; a resumed round keeps its item list.
+
+## D-13 · Type it keeps the current row at the top (2026-11-01, v0.3.1)
+Why: on iPhone the next row slid under the keyboard after each answer.
+Decision: screens may export after(app, el), called by app.render. Type it pins the focus row 8px
+below the top of .screen, adding only the bottom padding it needs; it resets window scroll and
+re-pins on visualViewport resize (keyboard). Tested in Playwright at 390x500; iOS keyboard untested.

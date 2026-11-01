@@ -1,12 +1,13 @@
 # Handover
 
-Last updated 2026-11-01 by the chat that shipped v0.3.0. No chat is managing right now.
+Last updated 2026-11-01 by the chat that shipped v0.3.1. No chat is managing right now.
 
 ## Where things stand
 - v0.2.0 is live at https://claude.ai/artifact/UUj5psocojXR1xkK2QVAbh (same link). It adds Grading v2 (D-10, T-01):
   full-stop fix, part-by-part credit, typo allowance, two-stage grading with inline blanks,
   "nearby step" message, Right + "hinted" tag. Build notes are at the end of DECISIONS.md.
 - v0.3.0 (D-12, T-03): a round in progress is saved per set; Resume on the set screen and Home.
+- v0.3.1 (D-13, T-04): Type it pins the current row above the keyboard. Needs Matt's iPhone check.
 - Matt says v0.2.0 grading looks good.
 - Tests: `node tests/core.test.js` passes 45.
 - Not yet clicked through in a real browser. Matt is the first to try it.
