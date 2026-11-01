@@ -268,6 +268,16 @@ ok('scope legacy: none for practice whole/smart/custom', S.legacy({ practice: 'w
 
 
 // ---- T-27..T-28 tests (Lane A) ----
+// kit.js only defines SP.ui at load (no DOM until a call), so it loads here with a stub window (pure helpers only).
+global.window = { SP: global.SP };
+require('../src/ui/kit.js');
+const mv = (a, f, t) => SP.ui.moveItem(a, f, t);
+{ const a = [1, 2, 3, 4]; ok('moveItem: down', mv(a, 0, 2) === true && a.join() === '2,3,1,4'); }
+{ const a = [1, 2, 3, 4]; ok('moveItem: up', mv(a, 3, 0) === true && a.join() === '4,1,2,3'); }
+{ const a = [1, 2, 3]; ok('moveItem: same index is a no-op', mv(a, 1, 1) === false && a.join() === '1,2,3'); }
+{ const a = [1, 2, 3]; ok('moveItem: out of range changes nothing', mv(a, 0, 3) === false && mv(a, -1, 0) === false && a.join() === '1,2,3'); }
+{ const a = [1, 2, 3]; ok('moveItem: no list is false', mv(null, 0, 1) === false && a.length === 3); }
+ok('kit: escape and grip helpers are exported', typeof SP.ui.sortBind === 'function' && typeof SP.ui.more === 'function' && typeof SP.ui.autosize === 'function');
 
 
 console.log(pass + ' passed, ' + fail + ' failed');

@@ -10,11 +10,14 @@
         sk-session (+ sk-count), sk-wheel (+ sk-row, sk-last, sk-clamp, sk-input, sk-q), sk-grade, sk-stats/sk-stat,
         sk-tabbar, sk-set (+ sk-ico, sk-set-b), sk-inround, sk-jump (+ sk-jump-art), sk-carousel (+ sk-track, sk-slide,
         sk-car-prev/-next, sk-dots), sk-bar, sk-key, sk-legend, sk-item (+ sk-dot,
-        sk-star, sk-sec), sk-scrim, sk-sheet, sk-switch, sk-field, sk-edit, sk-check, sk-note, sk-toast, sk-big,
+        sk-star, sk-sec), sk-scrim, sk-sheet, sk-switch, sk-field, sk-note, sk-toast, sk-big,
         sk-fill, sk-blank, sk-hinted, sk-title, sk-say, sk-enter (T-06 motion),
         sk-tags (+ sk-tag, sk-tag-l, sk-tag-x, sk-tags-in, sk-tags-edit; T-15, generic tag input on Proprietary's Chip),
         sk-segbar (+ sk-segview, sk-segrail, sk-seg; T-16/T-20/D-24, the chunked session bar);
         button modifiers sk-pill (+ .sm), sk-pad, sk-tall, sk-danger.
+        T-27..T-28 (D-25): flat editor sk-secs (+ sk-sec, sk-sec-h, sk-sec-t, sk-sec-b, sk-sec-title, sk-steps),
+        sk-rows (+ sk-row, sk-step, sk-sub, sk-num, sk-body), sk-flat (borderless soft field), sk-cue, sk-text,
+        sk-starbtn, sk-more (⋯ menu on sk-pmenu/sk-prow), sk-add, sk-chev; sk-sort (+ sk-grip, sk-sorting, sk-lift).
      The theme's mastery ladder tokens: --learned (green, = --ok), --familiar (yellow), --weak (red, = --bad).
      Results (Right / Shaky / Missed) keep --ok / --warn / --bad.
    ===================================================================================================== */
@@ -214,11 +217,6 @@
 .sk-field textarea{resize:vertical;min-height:64px}
 .sk-field :focus{outline:0;box-shadow:inset 0 0 0 1.5px var(--her)}
 
-/* sk-edit: one editable step or card */
-.sk-edit{display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:var(--r-lg);background:var(--surface);box-shadow:0 0 0 1px var(--line)}
-.sk-edit-h{display:flex;align-items:center;gap:8px}
-.sk-edit-h b{flex:1;font-size:var(--fs-2);color:var(--faint)}
-.sk-check{display:flex;align-items:center;gap:6px;font-size:var(--fs-2);color:var(--quiet)}
 
 /* sk-note: feedback under a checked answer */
 .sk-note{font-size:var(--fs-1);color:var(--quiet)}
@@ -423,3 +421,58 @@
 
 
 /* ---------- T-27..T-28: flat editor, sk-sort (Lane A) ---------- */
+/* Sections: a folding row (grip, chevron + title + n steps, scene badge, ⋯); the body holds the title field and steps */
+.sk-secs{display:flex;flex-direction:column}
+.sk-sec{border-bottom:var(--hairline) solid var(--line)}
+.sk-sec-h{display:flex;align-items:center;gap:var(--sp-1);min-height:var(--tap)}
+.sk-sec-h .sk-picker{align-self:center;flex:0 1 auto;min-width:0;max-width:44%}
+.sk-sec-h .sk-picker-l{min-width:0}
+.sk-sec-t{flex:1;min-width:0;display:flex;align-items:center;gap:var(--sp-2);min-height:var(--tap);padding:0 var(--sp-1);margin:0;border:0;border-radius:var(--r-md);background:transparent;color:var(--text);font:inherit;text-align:start;cursor:pointer}
+.sk-sec-t:hover{background:var(--hover)}
+.sk-sec-t:focus-visible{outline:2px solid var(--focus);outline-offset:-2px}
+.sk-sec-t b{flex:0 1 auto;min-width:4ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--fs-3);font-weight:var(--fw-semibold)}
+.sk-sec-t .sk-meta{flex:none;white-space:nowrap}
+.sk-chev{width:16px;height:16px;flex:none;color:var(--quiet);transition:transform var(--dur-chev) var(--ease-std)}
+.sk-chev path{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.sk-sec-t[aria-expanded='true'] .sk-chev{transform:rotate(90deg)}
+.sk-sec-b{display:flex;flex-direction:column;gap:var(--sp-1);padding:0 0 var(--sp-3)}
+.sk-sec-title{font-weight:var(--fw-semibold)}
+.sk-steps{display:flex;flex-direction:column}
+/* Rows: flat, no card; a hairline between rows */
+.sk-rows{display:flex;flex-direction:column}
+.sk-row{display:flex;align-items:flex-start;gap:var(--sp-1);padding:var(--sp-1_5) 0;border-top:var(--hairline) solid var(--line)}
+.sk-rows > .sk-row:first-child,.sk-steps > .sk-row:first-child{border-top:0}
+.sk-row.sk-sub{margin-inline-start:var(--sp-5)}
+.sk-num{flex:none;width:30px;padding-top:var(--sp-2);text-align:end;font-size:var(--fs-1);line-height:1.2;color:var(--faint);font-variant-numeric:tabular-nums}
+.sk-step .sk-num{width:34px}
+.sk-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:var(--sp-1)}
+/* Fields: borderless, soft fill; the accent ring only on focus. 16px keeps iOS from zooming */
+.sk-flat{display:block;width:100%;box-sizing:border-box;margin:0;padding:var(--sp-2) var(--sp-3);border:0;border-radius:var(--r-md);background:var(--raise);color:var(--text);font:16px/1.4 var(--sans);box-shadow:none;appearance:none}
+.sk-flat::placeholder{color:var(--faint)}
+.sk-flat:focus{outline:0;box-shadow:inset 0 0 0 1.5px var(--her)}
+.sk-cue{min-height:36px;font-weight:var(--fw-medium)}
+.sk-text{display:block;min-height:56px;resize:none;overflow:hidden;line-height:1.45}
+.sk-sec-title{min-height:40px}
+/* Star: a plain icon toggle; filled and in the accent colour when starred */
+.sk-starbtn{flex:none;width:32px;height:32px;margin-top:2px;display:grid;place-items:center;padding:0;border:0;border-radius:var(--r-md);background:transparent;color:var(--faint);cursor:pointer}
+.sk-starbtn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linejoin:round}
+.sk-starbtn[aria-pressed='true']{color:var(--her)}
+.sk-starbtn[aria-pressed='true'] svg{fill:currentColor}
+.sk-starbtn:focus-visible{outline:2px solid var(--focus);outline-offset:-2px}
+/* ⋯ menu button: a 36px icon (44px on touch); its menu is the Proprietary popover (sk-pmenu rows) */
+.study [data-ui='button'].sk-more{width:36px;height:36px;min-height:0;flex:none;margin-top:2px;color:var(--faint);background:transparent;box-shadow:none}
+.sk-more svg{width:18px;height:18px;fill:currentColor}
+.sk-prow.sk-danger{color:var(--bad)}
+.sk-prow[disabled]{opacity:.4}
+/* Add step / Add section: quiet text buttons under the rows */
+.study [data-ui='button'].sk-add{align-self:flex-start;height:36px;min-height:36px;margin:var(--sp-1) 0;padding:0 var(--sp-2);font-size:var(--fs-2);color:var(--quiet);background:transparent;box-shadow:none}
+.sk-add svg{width:16px;height:16px}
+/* sk-sort: the grip (drag starts only here; touch-action none). 44px on touch */
+.sk-grip{flex:none;width:28px;height:var(--tap);margin:0 -4px 0 -6px;display:grid;place-items:center;padding:0;border:0;border-radius:var(--r-md);background:transparent;color:var(--faint);cursor:grab;touch-action:none;user-select:none}
+.sk-grip svg{width:16px;height:16px;fill:currentColor}
+.sk-grip:focus-visible{outline:2px solid var(--focus);outline-offset:-2px}
+.sk-grip:active{cursor:grabbing}
+@media (pointer:coarse){.sk-grip{width:44px}.sk-starbtn{width:44px;height:44px;margin-top:0}.study [data-ui='button'].sk-more{width:44px;height:44px;margin-top:0}}
+/* while a row is dragged: the others glide to make room; the dragged row lifts and follows the pointer */
+.sk-sorting > [data-sort]{transition:transform var(--dur-2) var(--ease-std)}
+.sk-sorting > .sk-lift{transition:none;position:relative;z-index:var(--z-raised);background:var(--surface);box-shadow:var(--elev-2);border-radius:var(--r-md)}

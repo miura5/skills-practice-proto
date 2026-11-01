@@ -74,6 +74,8 @@
   }
   root.addEventListener('pointerdown', function (e) { tapAct = e.target.closest('[data-act]'); });
   root.addEventListener('focusout', tag);
+  // T-28: rows reorder by their grip (kit U.sortBind, sk-sort); the editor moves them (edit.onSort)
+  SP.ui.sortBind(root, function (list, from, to) { SP.screens.edit.onSort(app, list, from, to); });
 
   // T-18 Picker (Proprietary's popover chip): the native popover opens from its chip (popovertarget). Here:
   // aria-expanded follows the menu, the menu is placed under its chip (or as a bottom sheet on the phone, in CSS),

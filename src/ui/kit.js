@@ -226,7 +226,109 @@
 
 
   // ---- T-27..T-28 helpers (Lane A) ----
+  var GLYPH = {
+    grip: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="6" r="1.7"/><circle cx="15" cy="6" r="1.7"/><circle cx="9" cy="12" r="1.7"/><circle cx="15" cy="12" r="1.7"/><circle cx="9" cy="18" r="1.7"/><circle cx="15" cy="18" r="1.7"/></svg>',
+    more: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="18" cy="12" r="1.8"/></svg>',
+    chev: '<svg class="sk-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>'
+  };
+  // grip: the drag handle of a sortable row (sk-sort). Only this button starts a drag (sortBind).
+  function grip() { return '<button type="button" class="sk-grip" aria-label="Drag to reorder">' + GLYPH.grip + '</button>'; }
+  // starToggle: a star icon toggle; act toggleStar, data-id names the step.
+  function starToggle(on, id) {
+    return '<button type="button" class="sk-starbtn" aria-pressed="' + (on ? 'true' : 'false') + '" aria-label="Starred" data-act="toggleStar" data-id="' + esc(id) + '">' + icon('star') + '</button>';
+  }
+  // more(id, label, items): a ⋯ button that opens a Proprietary popover menu (the Picker's pattern; app.js places it).
+  // items = [{label, act, id, danger, disabled, data: {k: v} -> data-k}]; falsy items are skipped.
+  function more(id, label, items) {
+    var n = esc(id), pid = 'mn-' + n;
+    return '<button type="button" data-ui="button" class="icon sk-more" popovertarget="' + pid + '" aria-haspopup="menu" aria-expanded="false" aria-label="' + esc(label) + '">' + GLYPH.more + '</button>' +
+      '<div id="' + pid + '" class="popover sk-pmenu" popover="auto" role="menu" aria-label="' + esc(label) + '">' +
+      items.filter(Boolean).map(function (x) {
+        var data = Object.keys(x.data || {}).map(function (k) { return ' data-' + k + '="' + esc(x.data[k]) + '"'; }).join('');
+        return '<button type="button" role="menuitem" class="popover-i sk-prow' + (x.danger ? ' sk-danger' : '') + '" data-act="' + esc(x.act) +
+          '" data-id="' + esc(x.id == null ? '' : x.id) + '"' + data + (x.disabled ? ' disabled' : '') + '><span>' + esc(x.label) + '</span></button>';
+      }).join('') + '</div>';
+  }
+  // autosize: a textarea grows to its text (call on input and after a redraw).
+  function autosize(el) {
+    if (!el || el.tagName !== 'TEXTAREA') return;
+    el.style.height = 'auto';
+    el.style.height = el.scrollHeight + 'px';
+  }
+  // moveItem: moves arr[from] to index to, in place. Pure. Returns false (and changes nothing) for a bad or no-op move.
+  function moveItem(arr, from, to) {
+    if (!arr || from === to || from < 0 || to < 0 || from >= arr.length || to >= arr.length) return false;
+    arr.splice(to, 0, arr.splice(from, 1)[0]);
+    return true;
+  }
+  // sortBind(root, onDrop): drag-to-reorder for rows marked data-sort="<list>" data-sort-i="<index>" (sk-sort, D-25).
+  // A drag starts only on a .sk-grip (pointer capture). The row follows the pointer; the others make room; release
+  // calls onDrop(list, from, to) when the position changed. Escape or pointercancel cancels. Near the scroll
+  // container's edge it scrolls. Rows move only among siblings with the same data-sort.
+  function scroller(el) {
+    for (var p = el.parentElement; p && p !== document.body; p = p.parentElement) {
+      if (/auto|scroll/.test(getComputedStyle(p).overflowY) && p.scrollHeight > p.clientHeight) return p;
+    }
+    return document.scrollingElement || document.documentElement;
+  }
+  function sortBind(root, onDrop) {
+    var EDGE = 72;
+    root.addEventListener('pointerdown', function (e) {
+      var g = e.target.closest && e.target.closest('.sk-grip'), row = g && g.closest('[data-sort]');
+      if (!row || e.button !== 0) return;
+      e.preventDefault();
+      var list = row.dataset.sort, parent = row.parentElement, sc = scroller(row), doc = sc === document.scrollingElement || sc === document.documentElement;
+      var sibs = [].filter.call(parent.children, function (c) { return c.dataset && c.dataset.sort === list; })
+        .sort(function (a, b) { return a.dataset.sortI - b.dataset.sortI; });
+      var fi = sibs.indexOf(row);
+      var pos = sibs.map(function (c) { return { top: c.getBoundingClientRect().top + sc.scrollTop, h: c.offsetHeight }; });
+      var startY = e.clientY, startScroll = sc.scrollTop, last = e.clientY, to = fi, raf = 0;
+      parent.classList.add('sk-sorting');
+      row.classList.add('sk-lift');
+      try { g.setPointerCapture(e.pointerId); } catch (err) { /* the drag still follows the pointer without capture */ }
 
+      function place() {
+        var dy = (last + sc.scrollTop) - (startY + startScroll), mid = pos[fi].top + dy + pos[fi].h / 2, h = pos[fi].h;
+        row.style.transform = 'translateY(' + Math.round(dy) + 'px)';
+        to = 0;
+        sibs.forEach(function (c, k) { if (k !== fi && pos[k].top + pos[k].h / 2 < mid) to++; });
+        sibs.forEach(function (c, j) {
+          if (j === fi) return;
+          var t = 0;
+          if (fi < to && j > fi && j <= to) t = -h;
+          if (to < fi && j >= to && j < fi) t = h;
+          c.style.transform = t ? 'translateY(' + t + 'px)' : '';
+        });
+      }
+      function tick() {
+        var top = doc ? 0 : sc.getBoundingClientRect().top, bottom = doc ? window.innerHeight : sc.getBoundingClientRect().bottom;
+        var d = 0;
+        if (last < top + EDGE) d = -(top + EDGE - last) / 3;
+        else if (last > bottom - EDGE) d = (last - (bottom - EDGE)) / 3;
+        if (d) { sc.scrollTop += d; place(); }
+        raf = requestAnimationFrame(tick);
+      }
+      function end(commit) {
+        cancelAnimationFrame(raf);
+        g.removeEventListener('pointermove', move); g.removeEventListener('pointerup', up); g.removeEventListener('pointercancel', cancel);
+        document.removeEventListener('keydown', key, true);
+        sibs.forEach(function (c) { c.style.transform = ''; });
+        row.classList.remove('sk-lift');
+        parent.classList.remove('sk-sorting');
+        if (commit && to !== fi) onDrop(list, fi, to);
+      }
+      function move(ev) { last = ev.clientY; place(); }
+      function up() { end(true); }
+      function cancel() { end(false); }
+      function key(ev) { if (ev.key === 'Escape') { ev.preventDefault(); end(false); } }
+      g.addEventListener('pointermove', move);
+      g.addEventListener('pointerup', up);
+      g.addEventListener('pointercancel', cancel);
+      document.addEventListener('keydown', key, true);
+      raf = requestAnimationFrame(tick);
+      place();
+    });
+  }
 
-  SP.ui = { carousel: carousel, carouselBind: carouselBind, carouselMove: carouselMove, esc: esc, marked: marked, icon: icon, iconBtn: iconBtn, mastery: mastery, setRow: setRow, practice: practice, art: art, flip: flip, session: session, tabbar: tabbar, toggle: toggle, tags: tags, tagIntent: tagIntent, tagsFocus: tagsFocus, segbar: segbar, picker: picker, sceneTone: sceneTone, radio: radio, scopeRow: scopeRow };
+  SP.ui = { carousel: carousel, carouselBind: carouselBind, carouselMove: carouselMove, esc: esc, marked: marked, icon: icon, iconBtn: iconBtn, mastery: mastery, setRow: setRow, practice: practice, art: art, flip: flip, session: session, tabbar: tabbar, toggle: toggle, tags: tags, tagIntent: tagIntent, tagsFocus: tagsFocus, segbar: segbar, picker: picker, sceneTone: sceneTone, radio: radio, scopeRow: scopeRow, grip: grip, starToggle: starToggle, more: more, autosize: autosize, moveItem: moveItem, sortBind: sortBind, chevron: GLYPH.chev };
 })(window.SP);

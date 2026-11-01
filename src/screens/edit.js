@@ -1,6 +1,8 @@
-// screens/edit: add and edit cards or steps. Works on a draft copy; Save validates
-// (core/sets) and stores it. Editing a built-in set saves your copy; Reset brings back the original.
-// Procedures have scene tags (D-19): a Scenes field (sk-tags) under Title and a scene Picker per section.
+// screens/edit: the procedure and card-set editor (D-25). Works on a draft copy; Save validates
+// (core/sets) and stores it. Editing a built-in set saves your copy; Reset (the ⋯ menu) brings back the original.
+// Procedures: folding section rows (chevron, title, scene badge, ⋯), flat step rows (grip, number, star, cue, text).
+// Card sets: flat rows (grip, number, front, back). Rows reorder by their grip (U.sortBind -> onSort).
+// Numbers come from SP.core.numbers.of(draft) when that module is loaded (D-25); new steps carry no num.
 (function (SP) {
   'use strict';
   var U = SP.ui;
@@ -9,54 +11,95 @@
   function start(app, set, isNew) {
     var draft = JSON.parse(JSON.stringify(set));
     delete draft.builtin; delete draft.edited;
-    if (draft.kind === 'procedure') draft.scenes = draft.scenes || [];
-    app.update({ screen: 'edit', draft: draft, draftNew: !!isNew, confirm: false, setId: set.id, tagEdit: null });
+    if (draft.kind === 'procedure') {
+      draft.scenes = draft.scenes || [];
+      draft.sections.forEach(function (s) {
+        s.id = s.id || uid('sec');
+        s.steps.forEach(function (st) { st.id = st.id || uid('s'); });
+      });
+    } else draft.cards.forEach(function (c) { c.id = c.id || uid('c'); });
+    app.update({ screen: 'edit', draft: draft, draftNew: !!isNew, confirm: false, setId: set.id, tagEdit: null, open: {} });
   }
 
-  function field(label, path, value, multi) {
-    var v = U.esc(value || '');
-    return '<label class="sk-field">' + label + (multi
-      ? '<textarea data-edit="' + path + '" rows="3">' + v + '</textarea>'
-      : '<input data-edit="' + path + '" value="' + v + '" autocomplete="off">') + '</label>';
+  // A step is a sub-step when its flag says so. Built-in steps without the flag take it from an old letter num (13b).
+  function isSub(st) { return typeof st.sub === 'boolean' ? st.sub : /[b-z]$/i.test(String(st.num || '')); }
+
+  function field(label, path, value) {
+    return '<label class="sk-field">' + label + '<input data-edit="' + path + '" value="' + U.esc(value || '') + '" autocomplete="off"></label>';
+  }
+
+  // Move up / Move down items for a row at i of n in list (disabled at the ends).
+  function moves(list, i, n) {
+    return [
+      { label: 'Move up', act: 'moveRow', disabled: i === 0, data: { list: list, from: i, to: i - 1 } },
+      { label: 'Move down', act: 'moveRow', disabled: i === n - 1, data: { list: list, from: i, to: i + 1 } }
+    ];
   }
 
   function render(app) {
-    var d = app.state.draft, cards = d.kind === 'cards', live = SP.store.get(d.id);
-    var body = cards
-      ? d.cards.map(function (c, i) {
-        return '<div class="sk-edit"><div class="sk-edit-h"><b>Card ' + (i + 1) + '</b>' + U.iconBtn('trash', 'Remove card ' + (i + 1), 'delItem', ' data-id="' + i + '"') + '</div>' +
-          field('Front', 'cards.' + i + '.front', c.front) + field('Back · put [brackets] around the key words', 'cards.' + i + '.back', c.back, true) + '</div>';
-      }).join('') + '<button data-ui="button" data-kind="neutral" data-act="addItem">' + U.icon('plus') + 'Add card</button>'
-      : d.sections.map(function (s, si) {
-        return '<section class="stack">' + field('Section', 'sections.' + si + '.title', s.title) + scenePicker(d.scenes, si, s.scene) +
-          s.steps.map(function (st, j) {
-            var p = 'sections.' + si + '.steps.' + j + '.';
-            return '<div class="sk-edit"><div class="sk-edit-h"><b>Step</b>' +
-              '<label class="sk-check"><input type="checkbox" data-edit="' + p + 'star"' + (st.star ? ' checked' : '') + '>Starred</label>' +
-              U.iconBtn('trash', 'Remove step', 'delItem', ' data-id="' + si + '.' + j + '"') + '</div>' +
-              '<div class="row end"><div class="w72">' + field('No.', p + 'num', st.num) + '</div><div class="grow">' + field('Cue', p + 'cue', st.cue) + '</div></div>' +
-              field('Step · put [brackets] around the key words', p + 'text', st.text, true) + '</div>';
-          }).join('') +
-          '<button data-ui="button" data-kind="neutral" data-act="addItem" data-id="' + si + '">' + U.icon('plus') + 'Add step to ' + U.esc(s.title || 'this section') + '</button></section>';
-      }).join('') + '<button data-ui="button" data-kind="ghost" data-act="addSection">' + U.icon('plus') + 'Add section</button>';
-    var danger = !live ? '' : live.builtin
-      ? (live.edited ? '<button data-ui="button" data-kind="ghost" data-act="remove">' + (app.state.confirm ? 'Tap again to reset to the original' : 'Reset to the original') + '</button>' : '')
-      : '<button data-ui="button" data-kind="ghost" data-act="remove" class="sk-danger">' + (app.state.confirm ? 'Tap again to delete this set' : 'Delete set') + '</button>';
-    return '<main class="screen tight">' +
-      '<div class="sk-bar">' + U.iconBtn('close', 'Cancel', 'cancelEdit') + '<b>' + (app.state.draftNew ? 'New ' : 'Edit ') + (cards ? 'card set' : 'procedure') + '</b>' +
-      '<button data-ui="button" data-kind="primary" data-act="save" class="sk-pill">Save</button></div>' +
-      field('Title', 'title', d.title) +
-      (cards ? '' : U.tags('scenes', d.scenes, app.state.tagEdit, { label: 'Scenes', tones: true, placeholder: d.scenes.length ? 'Add a scene' : 'Type a scene, then comma' })) +
-      (live && live.builtin && !live.edited ? '<p class="sk-meta sk-flush">This is a built-in set. Saving keeps your copy; you can reset it later.</p>' : '') +
-      body + danger + '</main>';
-  }
+    var s = app.state, d = s.draft, cards = d.kind === 'cards', live = SP.store.get(d.id), open = s.open || {};
+    var nums = (!cards && SP.core.numbers && SP.core.numbers.of) ? SP.core.numbers.of(d) : {};
+    var body;
+    if (cards) {
+      body = '<div class="sk-rows">' + d.cards.map(function (c, i) {
+        var p = 'cards.' + i + '.';
+        return '<div class="sk-row" data-sort="cards" data-sort-i="' + i + '">' + U.grip() +
+          '<span class="sk-num">' + (i + 1) + '</span>' +
+          '<div class="sk-body"><input class="sk-flat" aria-label="Front" placeholder="Front" autocomplete="off" data-edit="' + p + 'front" value="' + U.esc(c.front) + '">' +
+          '<textarea class="sk-flat sk-text" rows="2" aria-label="Back" placeholder="Back · [brackets] mark key words" data-edit="' + p + 'back">' + U.esc(c.back) + '</textarea></div>' +
+          U.more('c-' + i, 'Card ' + (i + 1) + ' menu', moves('cards', i, d.cards.length).concat([
+            { label: 'Delete', act: 'delItem', id: String(i), danger: true }
+          ])) + '</div>';
+      }).join('') + '</div>' +
+        '<button data-ui="button" data-kind="ghost" class="sk-add" data-act="addItem">' + U.icon('plus') + 'Add card</button>';
+    } else {
+      body = '<div class="sk-secs">' + d.sections.map(function (sec, si) {
+        var isOpen = !!open[sec.id], n = sec.steps.length, sid = String(sec.id);
+        var head = '<div class="sk-sec-h">' + U.grip() +
+          '<button type="button" class="sk-sec-t" data-act="toggleSec" data-id="' + U.esc(sid) + '" aria-expanded="' + (isOpen ? 'true' : 'false') + '">' +
+          U.chevron + '<b>' + U.esc(sec.title || 'Untitled section') + '</b>' +
+          '<span class="sk-meta">' + n + (n === 1 ? ' step' : ' steps') + '</span></button>' +
+          (d.scenes.length ? U.picker('scene-' + si, sec.scene || '', [{ value: '', label: 'No scene' }].concat(d.scenes.map(function (t, i) {
+            return { value: t.id, label: t.label, tone: U.sceneTone(i) };
+          })), { label: 'Scene', act: 'pickScene' }) : '') +
+          U.more('sec-' + si, 'Section menu', moves('sections', si, d.sections.length).concat([
+            { label: 'Delete section', act: 'delSection', id: String(si), danger: true }
+          ])) + '</div>';
+        var rest = '';
+        if (isOpen) {
+          rest = '<div class="sk-sec-b">' +
+            '<input class="sk-flat sk-sec-title" aria-label="Section title" autocomplete="off" data-edit="sections.' + si + '.title" value="' + U.esc(sec.title) + '">' +
+            '<div class="sk-steps">' + sec.steps.map(function (st, j) {
+              var p = 'sections.' + si + '.steps.' + j + '.', sub = isSub(st), key = si + '.' + j;
+              return '<div class="sk-row sk-step' + (sub ? ' sk-sub' : '') + '" data-sort="steps-' + si + '" data-sort-i="' + j + '">' + U.grip() +
+                '<span class="sk-num">' + U.esc(nums[st.id] || '') + '</span>' + U.starToggle(!!st.star, key) +
+                '<div class="sk-body"><input class="sk-flat sk-cue" aria-label="Cue" placeholder="Cue" autocomplete="off" data-edit="' + p + 'cue" value="' + U.esc(st.cue) + '">' +
+                '<textarea class="sk-flat sk-text" rows="2" aria-label="Step text" placeholder="Put [brackets] around the key words" data-edit="' + p + 'text">' + U.esc(st.text) + '</textarea></div>' +
+                U.more('st-' + si + '-' + j, 'Step menu', moves('steps-' + si, j, n).concat([
+                  j === 0 ? null : { label: sub ? 'Undo sub-step' : 'Make sub-step', act: 'toggleSub', id: key },
+                  { label: 'Delete', act: 'delItem', id: key, danger: true }
+                ])) + '</div>';
+            }).join('') + '</div>' +
+            '<button data-ui="button" data-kind="ghost" class="sk-add" data-act="addItem" data-id="' + si + '">' + U.icon('plus') + 'Add step</button>' +
+            '</div>';
+        }
+        return '<section class="sk-sec" data-sort="sections" data-sort-i="' + si + '">' + head + rest + '</section>';
+      }).join('') + '</div>' +
+        '<button data-ui="button" data-kind="ghost" class="sk-add" data-act="addSection">' + U.icon('plus') + 'Add section</button>';
+    }
 
-  // Proprietary's Picker (kit U.picker): "No scene" + the set's scene tags, each in its scene colour
-  // (by its index in scenes). Hidden until there are tags. Choosing a row runs pickScene.
-  function scenePicker(scenes, si, current) {
-    if (!scenes.length) return '';
-    var opts = [{ value: '', label: 'No scene' }].concat(scenes.map(function (t, i) { return { value: t.id, label: t.label, tone: U.sceneTone(i) }; }));
-    return '<div class="sk-field"><span>Scene</span>' + U.picker('scene-' + si, current || '', opts, { label: 'Scene', act: 'pickScene' }) + '</div>';
+    var resetMenu = live && live.builtin && live.edited
+      ? U.more('set', 'Set menu', [{ label: s.confirm ? 'Tap again to reset to the original' : 'Reset to built-in', act: 'remove', danger: true }])
+      : '';
+    var del = live && !live.builtin
+      ? '<button data-ui="button" data-kind="ghost" data-act="remove" class="sk-danger">' + (s.confirm ? 'Tap again to delete this set' : 'Delete set') + '</button>'
+      : '';
+    return '<main class="screen tight">' +
+      '<div class="sk-bar">' + U.iconBtn('close', 'Cancel', 'cancelEdit') + '<b>' + (s.draftNew ? 'New ' : 'Edit ') + (cards ? 'card set' : 'procedure') + '</b>' +
+      '<button data-ui="button" data-kind="primary" data-act="save" class="sk-pill">Save</button>' + resetMenu + '</div>' +
+      field('Title', 'title', d.title) +
+      (cards ? '' : U.tags('scenes', d.scenes, s.tagEdit, { label: 'Scenes', tones: true, placeholder: d.scenes.length ? 'Add a scene' : 'Type a scene, then comma' })) +
+      body + del + '</main>';
   }
 
   // Applies an sk-tags intent (SP.ui.tagIntent, or a badge tap) to the draft's scenes.
@@ -88,6 +131,17 @@
     var path = el.dataset.edit.split('.'), o = app.state.draft;
     for (var i = 0; i < path.length - 1; i++) o = o[path[i]];
     o[path[path.length - 1]] = el.type === 'checkbox' ? el.checked : el.value;
+    if (el.tagName === 'TEXTAREA') U.autosize(el);
+  }
+
+  // Drag or menu move: list is 'sections', 'cards' or 'steps-<si>'. A first step is never a sub-step.
+  function onSort(app, list, from, to) {
+    var d = app.state.draft;
+    if (!d) return;
+    var arr = list === 'sections' ? d.sections : list === 'cards' ? d.cards : (d.sections[Number(list.split('-')[1])] || {}).steps;
+    if (!U.moveItem(arr, from, to)) return;
+    if (list.indexOf('steps-') === 0 && arr[0]) arr[0].sub = false;
+    app.render();
   }
 
   function tidy(d) {
@@ -95,6 +149,7 @@
     else d.sections = d.sections.map(function (s) {
       s.steps = s.steps.filter(function (st) { return (st.text || '').trim() || (st.cue || '').trim(); });
       if (!s.scene) delete s.scene;
+      if (s.steps[0]) s.steps[0].sub = false;   // a section's first step is never a sub-step
       return s;
     }).filter(function (s) { return s.steps.length; });
     return d;
@@ -111,10 +166,30 @@
       app.render();
       app.focus('#pkc-scene-' + si);
     },
+    toggleSec: function (app, el) {
+      var o = app.state.open || (app.state.open = {}), id = el.dataset.id;
+      o[id] = !o[id];
+      app.render();
+    },
+    toggleStar: function (app, el) {
+      var p = el.dataset.id.split('.'), st = app.state.draft.sections[Number(p[0])].steps[Number(p[1])];
+      st.star = !st.star;
+      app.render();
+    },
+    toggleSub: function (app, el) {
+      var p = el.dataset.id.split('.'), st = app.state.draft.sections[Number(p[0])].steps[Number(p[1])];
+      st.sub = !isSub(st);
+      app.render();
+    },
+    moveRow: function (app, el) { onSort(app, el.dataset.list, Number(el.dataset.from), Number(el.dataset.to)); },
     addItem: function (app, el) {
       var d = app.state.draft;
       if (d.kind === 'cards') d.cards.push({ id: uid('c'), front: '', back: '' });
-      else { var s = d.sections[Number(el.dataset.id)]; s.steps.push({ id: uid('s'), num: String(s.steps.length + 1), star: false, cue: '', text: '' }); }
+      else {
+        var si = Number(el.dataset.id);
+        d.sections[si].steps.push({ id: uid('s'), star: false, cue: '', text: '' });
+        app.state.open[d.sections[si].id] = true;
+      }
       app.render();
     },
     delItem: function (app, el) {
@@ -124,7 +199,13 @@
       app.render();
     },
     addSection: function (app) {
-      app.state.draft.sections.push({ id: uid('sec'), title: 'New section', steps: [{ id: uid('s'), num: '1', star: false, cue: '', text: '' }] });
+      var sec = { id: uid('sec'), title: 'New section', steps: [{ id: uid('s'), star: false, cue: '', text: '' }] };
+      app.state.draft.sections.push(sec);
+      app.state.open[sec.id] = true;
+      app.render();
+    },
+    delSection: function (app, el) {
+      app.state.draft.sections.splice(Number(el.dataset.id), 1);
       app.render();
     },
     save: function (app) {
@@ -146,5 +227,10 @@
     }
   };
 
-  SP.screens.edit = { start: start, render: render, actions: actions, onEdit: onEdit, onTag: onTag };
+  // After each draw: size the step and card text areas to their text.
+  function after(app, el) {
+    [].forEach.call(el.querySelectorAll('textarea'), function (t) { U.autosize(t); });
+  }
+
+  SP.screens.edit = { start: start, render: render, actions: actions, onEdit: onEdit, onTag: onTag, onSort: onSort, after: after };
 })(window.SP);
