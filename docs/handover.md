@@ -3,7 +3,7 @@
 Last updated 2026-11-01 by the D-19 batch chat (build manager). No agent is running.
 
 ## Where things stand
-- Live: v0.7.0 at https://claude.ai/artifact/UUj5psocojXR1xkK2QVAbh (same link every release; version 14).
+- Live: v0.7.1 at https://claude.ai/artifact/UUj5psocojXR1xkK2QVAbh (same link every release; version 14).
 - Tests: `node tests/core.test.js` passes 328.
 - Shipped today (v0.5.0): chunked learning, D-19 + D-21, tasks T-14..T-17 all ticked.
   - Chunks: card groups of 7; procedure scenes (Med Admin 9 chunks, NG tube 9). Smart rounds go

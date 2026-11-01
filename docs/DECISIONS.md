@@ -145,6 +145,7 @@ Matt hands it to a new chat by attaching the repo; CLAUDE.md sets the role.
 - [x] T-26 Picker chip / rows: remove leftover native button border, shadow and highlight (D-25). Done 2026-11-01 (Lane B).
 - [x] T-27 Editor redesign: folding section rows with scene badge, flat step rows, star icon, grip + ⋯ menu, header ⋯ (D-25). Done 2026-11-01 (Lane A).
 - [x] T-28 sk-sort: Study kit drag-to-reorder from a grip only (pointer + keyboard-free fallback via menu) (D-25). Done 2026-11-01 (Lane A).
+- [x] T-29 Editor section header: step range + compact scene badge, aligned (D-27). Done 2026-11-01 (build manager).
 
 ## D-10 build notes (2026-11-01)
 - Bands: 100% Right; 60%+ row stays open with blanks; 34-59% Shaky; under 34% Missed.
@@ -322,3 +323,11 @@ Build notes and review fixes:
   below), since the badge cut titles to "As…" on phones; the editor's section wrapper is .sk-esec, not
   .sk-sec (that class is the set screen's section label); a Picker menu opened by tap no longer shows
   the focus ring on the current row (focusVisible:false).
+
+## D-27 · Editor section header: range + quiet badge (Matt, 2026-11-01, v0.7.1)
+Replaces D-26's two-line header. Each section row: chevron, title, its step range in small muted tabular
+numbers ("2–7", "13a–13d", one step = "1"), then the scene badge. The badge is the Study kit Picker at a new
+generic size, data-size="sm" (U.picker o.size; 24px, fs-1; a larger invisible tap area on touch). From 600px
+it sits on the same line, pinned right before the ⋯ so badges line up; on phones it drops under the title,
+aligned with the title's first letter. "n steps" left the row (the screen reader label keeps it).
+

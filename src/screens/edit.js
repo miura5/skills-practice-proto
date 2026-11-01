@@ -55,13 +55,16 @@
     } else {
       body = '<div class="sk-secs">' + d.sections.map(function (sec, si) {
         var isOpen = !!open[sec.id], n = sec.steps.length, sid = String(sec.id);
-        var head = '<div class="sk-sec-h">' + U.grip() + '<div class="sk-sec-m">' +
-          '<button type="button" class="sk-sec-t" data-act="toggleSec" data-id="' + U.esc(sid) + '" aria-expanded="' + (isOpen ? 'true' : 'false') + '">' +
-          U.chevron + '<b>' + U.esc(sec.title || 'Untitled section') + '</b></button>' +
-          '<div class="sk-sec-sub"><span class="sk-meta">' + n + (n === 1 ? ' step' : ' steps') + '</span>' +
+        var first = sec.steps.length ? nums[sec.steps[0].id] : '', last = sec.steps.length ? nums[sec.steps[sec.steps.length - 1].id] : '';
+        var range = !first ? '' : first === last ? first : first + '\u2013' + last;
+        var head = '<div class="sk-sec-h">' + U.grip() +
+          '<button type="button" class="sk-sec-t" data-act="toggleSec" data-id="' + U.esc(sid) + '" aria-expanded="' + (isOpen ? 'true' : 'false') + '"' +
+          ' aria-label="' + U.esc((sec.title || 'Untitled section') + ', ' + n + (n === 1 ? ' step' : ' steps')) + '">' +
+          U.chevron + '<b>' + U.esc(sec.title || 'Untitled section') + '</b>' +
+          (range ? '<span class="sk-range">' + U.esc(range) + '</span>' : '') + '</button>' +
           (d.scenes.length ? U.picker('scene-' + si, sec.scene || '', [{ value: '', label: 'No scene' }].concat(d.scenes.map(function (t, i) {
             return { value: t.id, label: t.label, tone: U.sceneTone(i) };
-          })), { label: 'Scene', act: 'pickScene' }) : '') + '</div></div>' +
+          })), { label: 'Scene', act: 'pickScene', size: 'sm' }) : '') +
           U.more('sec-' + si, 'Section menu', moves('sections', si, d.sections.length).concat([
             { label: 'Delete section', act: 'delSection', id: String(si), danger: true }
           ])) + '</div>';

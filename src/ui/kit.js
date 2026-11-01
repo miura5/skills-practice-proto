@@ -189,7 +189,7 @@
     o = o || {};
     var n = esc(id), cur = options.filter(function (x) { return x.value === value; })[0] || options[0] || { label: '' };
     var pid = 'pk-' + n;
-    return '<button type="button" id="pkc-' + n + '" data-ui="chip" class="sk-picker"' + (cur.tone ? ' data-tone="' + esc(cur.tone) + '"' : '') +
+    return '<button type="button" id="pkc-' + n + '" data-ui="chip" class="sk-picker"' + (o.size ? ' data-size="' + esc(o.size) + '"' : '') + (cur.tone ? ' data-tone="' + esc(cur.tone) + '"' : '') +
       ' popovertarget="' + pid + '" aria-haspopup="menu" aria-expanded="false" aria-label="' + esc(o.label ? o.label + ': ' : '') + esc(cur.label) + '">' +
       (cur.tone ? '<i class="sk-pdot" aria-hidden="true"></i>' : '') + '<span class="sk-picker-l">' + esc(cur.label) + '</span>' +
       '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg></button>' +
