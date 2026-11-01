@@ -1,0 +1,198 @@
+/* =====================================================================================================
+   STUDY KIT v2: the second layer on top of Proprietary.
+   Layer 1, Proprietary (proprietary.css): token NAMES, spacing grid, type steps, motion, and the
+   components Button, Badge, Meter (gauge). Unchanged.
+   Layer 2, Study kit (this file):
+     1. a Study THEME: new VALUES for Proprietary's colour tokens, light and dark (the prototype's LCH),
+        plus a roomier density: --ts 1.12 and bigger radii. It sets values only, never component rules.
+     2. six study components, prefixed sk-, built only from Proprietary tokens:
+        sk-top, sk-practice, sk-flip, sk-session, sk-wheel, sk-grade (+ sk-stat on Results).
+   ===================================================================================================== */
+
+/* ---------- 1. Study theme ---------- */
+.study{
+  --ts:1.12; --r-md:10px; --r-lg:14px; --r-xl:18px; --r-card:22px;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --sk-gap:28px;   /* the negative space between sections */
+  /* Proprietary's type steps, re-resolved at the study root so the larger --ts takes effect */
+  --fs-1:calc(12px * var(--ts)); --fs-2:calc(13px * var(--ts)); --fs-3:calc(14px * var(--ts));
+  --fs-4:calc(15px * var(--ts)); --fs-5:calc(18px * var(--ts));
+}
+.study[data-mode='light']{
+  --bg:lch(96.5% 1.5 280); --chrome:var(--bg); --surface:lch(100% 0 0); --raise:lch(97.5% 1.5 280);
+  --hover:lch(95% 2 280); --sel:lch(93% 9 282); --line:lch(92% 2.5 280); --line2:lch(88% 2.5 280);
+  --text:lch(13% 2 280); --quiet:lch(45% 4 280); --faint:lch(50% 4 280); --focus:lch(20% 2 280 / .55);
+  --her:lch(47% 48 282); --on-her:lch(100% 0 0); --accent-bg:lch(93% 9 282); --art:lch(95% 6 282);
+  --ok:lch(50% 45 145); --ok-bg:lch(94% 12 145); --warn:lch(55% 50 75); --warn-bg:lch(95% 12 85);
+  --bad:lch(50% 55 30); --bad-bg:lch(95% 8 30); --fam:lch(52% 55 45);
+  --sk-shadow:0 1px 2px lch(13% 2 280 / .06),0 8px 28px lch(13% 2 280 / .06);
+  color-scheme:light;
+}
+.study[data-mode='dark']{
+  --bg:lch(9% 1.5 280); --chrome:var(--bg); --surface:lch(14% 1.5 280); --raise:lch(17% 2 280);
+  --hover:lch(18% 2 280); --sel:lch(20% 14 282); --line:lch(20% 2.5 280); --line2:lch(25% 2.5 280);
+  --text:lch(95% 1 280); --quiet:lch(68% 3 280); --faint:lch(62% 3 280); --focus:lch(92% 1 280 / .55);
+  --her:lch(58% 48 282); --on-her:lch(100% 0 0); --accent-bg:lch(20% 14 282); --art:lch(19% 10 282);
+  --ok:lch(66% 45 145); --ok-bg:lch(21% 14 145); --warn:lch(76% 45 80); --warn-bg:lch(21% 12 80);
+  --bad:lch(66% 50 30); --bad-bg:lch(22% 14 30); --fam:lch(66% 50 48);
+  --sk-shadow:none;
+  color-scheme:dark;
+}
+.study{background:var(--bg);color:var(--text);font-family:var(--sans);transition:background var(--dur-2),color var(--dur-2)}
+.study [data-ui='button']{border-radius:var(--r-lg);height:44px;min-height:44px;font-size:var(--fs-3)}
+.study [data-ui='button'].icon{width:44px;padding:0}
+.study [data-ui='button'][data-kind='neutral']{background:var(--surface);box-shadow:inset 0 0 0 1px var(--line2)}
+.study [data-ui='button'][data-kind='primary']{background:var(--her);color:var(--on-her)}
+.study .gauge{background:var(--line)}
+.study .gauge > [data-tone='ok']{background:var(--ok)}
+.study .gauge > [data-tone='warn']{background:var(--warn)}
+.study .gauge > [data-tone='bad']{background:var(--bad)}
+.sk-h2{margin:0;font-size:var(--fs-5);font-weight:600;letter-spacing:-.01em}
+.sk-meta{font-size:var(--fs-2);color:var(--quiet)}
+
+/* ---------- 2a. sk-top: page header, title + one quiet meta line + actions ---------- */
+.sk-top{display:flex;align-items:flex-start;gap:var(--sp-2)}
+.sk-top h1{margin:0;font-size:24px;font-weight:700;letter-spacing:-.02em;line-height:1.15}
+
+/* ---------- 2b. sk-practice: a mode card with its illustration ---------- */
+.sk-practice{display:flex;flex-direction:column;gap:6px;padding:16px;border:0;border-radius:var(--r-xl);background:var(--surface);box-shadow:0 0 0 1px var(--line),var(--sk-shadow);color:var(--text);text-align:left;cursor:pointer;font:inherit}
+.sk-practice:hover{box-shadow:0 0 0 1px var(--line2),var(--sk-shadow)}
+.sk-practice:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.sk-practice b{font-size:var(--fs-4);font-weight:600}
+.sk-practice span{font-size:var(--fs-1);color:var(--quiet);line-height:1.35}
+.sk-art{margin-top:8px;height:92px;border-radius:var(--r-lg);background:var(--art);display:grid;place-items:center;color:var(--her)}
+.sk-art svg{width:120px;height:72px}
+
+/* ---------- 2c. sk-flip: the flashcard (front asks, back answers) ---------- */
+.sk-flip{position:relative;width:100%;border:0;padding:0;background:none;cursor:pointer;perspective:1200px;font:inherit;color:inherit}
+.sk-flip-in{position:relative;display:grid;min-height:var(--sk-flip-h,240px);transition:transform var(--dur-4) var(--ease-std);transform-style:preserve-3d}
+.sk-flip[aria-pressed='true'] .sk-flip-in{transform:rotateY(180deg)}
+.sk-face{grid-area:1/1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:28px;border-radius:var(--r-card);background:var(--surface);box-shadow:0 0 0 1px var(--line),var(--sk-shadow);backface-visibility:hidden;text-align:center}
+.sk-face.back{transform:rotateY(180deg)}
+.sk-face small{font-size:var(--fs-1);color:var(--quiet)}
+.sk-face .ask{font-size:26px;font-weight:700;letter-spacing:-.02em}
+.sk-face .ans{font-size:20px;font-weight:600;line-height:1.4;letter-spacing:-.01em}
+.sk-face .num{font-size:var(--fs-1);font-weight:600;color:var(--her);font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion:reduce){.sk-flip-in{transition:none}}
+.sk-pager{display:flex;align-items:center;gap:var(--sp-3)}
+.sk-pager output{font-size:var(--fs-3);font-variant-numeric:tabular-nums;min-width:44px;text-align:center}
+
+/* ---------- 2d. sk-session: ✕, round meter with its count, theme ---------- */
+.sk-session{display:flex;align-items:center;gap:var(--sp-2);height:56px}
+.sk-session .gauge{flex:1;height:8px;border-radius:99px}
+.sk-count{font:600 var(--fs-1)/1 var(--sans);font-variant-numeric:tabular-nums;color:#fff;background:var(--ok);padding:4px 8px;border-radius:99px}
+
+/* ---------- 2e. sk-wheel: Type it's focus list ---------- */
+.sk-wheel{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.sk-row{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:var(--r-lg);font-size:var(--fs-3);line-height:1.4;transition:opacity var(--dur-3)}
+.sk-row .n{font-size:var(--fs-1);font-weight:600;color:var(--faint);font-variant-numeric:tabular-nums;min-width:18px;padding-top:2px}
+.sk-row[data-result='right']{background:var(--ok-bg)}
+.sk-row[data-result='shaky']{background:var(--warn-bg)}
+.sk-row[data-result='missed']{background:var(--bad-bg)}
+.sk-row[data-result] .n{color:var(--x)}
+.sk-row[data-result='right']{--x:var(--ok)} .sk-row[data-result='shaky']{--x:var(--warn)} .sk-row[data-result='missed']{--x:var(--bad)}
+.sk-row[data-d='far']{opacity:.35}
+.sk-row[data-d='near']{opacity:.6}
+.sk-row.focus{flex-direction:column;gap:12px;background:var(--surface);box-shadow:0 0 0 1.5px var(--her),var(--sk-shadow);padding:16px;border-radius:var(--r-xl)}
+.sk-row .tag{margin-left:auto;font-size:var(--fs-1);font-weight:600;color:var(--x)}
+.sk-input{width:100%;box-sizing:border-box;min-height:84px;resize:none;border:0;border-radius:var(--r-md);background:var(--raise);padding:12px;color:var(--text);font:16px/1.45 var(--sans);box-shadow:inset 0 0 0 1px var(--line)}
+.sk-input:focus{outline:0;box-shadow:inset 0 0 0 1.5px var(--her)}
+.sk-input::placeholder{color:var(--faint)}
+
+/* ---------- 2f. sk-grade: Missed / Shaky / Got it ---------- */
+.sk-grade{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--sp-2)}
+.sk-grade > button{height:58px;border:0;border-radius:var(--r-lg);background:var(--surface);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--x) 55%,var(--line2));color:var(--text);font:600 var(--fs-4) var(--sans);cursor:pointer}
+.sk-grade > button[data-tone='ok']{background:var(--ok);color:#fff;box-shadow:none}
+.sk-grade > button:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+
+/* ---------- Results: sk-stat ---------- */
+.sk-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--sp-2)}
+.sk-stat{display:flex;flex-direction:column;align-items:center;gap:2px;padding:16px 8px;border-radius:var(--r-lg);background:var(--x-bg)}
+.sk-stat b{font-size:28px;font-weight:700;color:var(--x);font-variant-numeric:tabular-nums}
+.sk-stat span{font-size:var(--fs-1);color:var(--quiet)}
+
+/* ---------- 2g. sk-tabbar: Home / Library ---------- */
+.sk-tabbar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));height:76px;padding:6px 24px 18px;box-sizing:border-box;background:var(--surface);box-shadow:0 -1px 0 var(--line)}
+.sk-tabbar > button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border:0;background:none;color:var(--faint);font:500 var(--fs-1) var(--sans);cursor:pointer;border-radius:var(--r-lg)}
+.sk-tabbar > button svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.sk-tabbar > button[aria-current='page']{color:var(--her)}
+.sk-tabbar > button:focus-visible{outline:2px solid var(--focus)}
+
+/* ---------- 2h. sk-set: a set in a list (card set or procedure) ---------- */
+.sk-set{display:flex;align-items:center;gap:14px;width:100%;padding:12px;border:0;border-radius:var(--r-xl);background:var(--surface);box-shadow:0 0 0 1px var(--line);color:var(--text);text-align:left;font:inherit;cursor:pointer}
+.sk-set:hover{box-shadow:0 0 0 1px var(--line2),var(--sk-shadow)}
+.sk-set:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.sk-ico{width:44px;height:44px;flex:none;border-radius:12px;display:grid;place-items:center;background:var(--accent-bg);color:var(--her)}
+.sk-ico[data-kind='procedure']{background:var(--ok-bg);color:var(--ok)}
+.sk-ico svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.sk-set-b{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.sk-set-b b{font-size:var(--fs-3);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sk-set-b span{font-size:var(--fs-1);color:var(--quiet)}
+.sk-set .gauge{width:56px;height:6px;border-radius:99px;flex:none}
+
+/* ---------- 2i. sk-jump: "Jump back in" ---------- */
+.sk-jump{display:flex;flex-direction:column;gap:14px;padding:20px;border-radius:var(--r-card);background:var(--surface);box-shadow:0 0 0 1px var(--line),var(--sk-shadow);position:relative;overflow:hidden}
+.sk-jump b{font-size:20px;font-weight:700;letter-spacing:-.01em}
+.sk-jump .gauge{height:10px;border-radius:99px;width:70%}
+.sk-jump-art{position:absolute;right:-18px;bottom:-14px;width:150px;height:110px;color:var(--her);opacity:.9}
+
+/* ---------- 2j. sk-bar: a sub-screen header with a back button ---------- */
+.sk-bar{display:flex;align-items:center;gap:var(--sp-2);height:56px}
+.sk-bar b{flex:1;font-size:var(--fs-4);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* the study theme tunes Proprietary's Segmented */
+.study [data-ui='segmented']{display:flex;padding:3px;border-radius:12px;background:var(--line);gap:2px}
+.study [data-ui='segmented'] > button{flex:1;height:36px;border:0;border-radius:10px;background:none;color:var(--quiet);font:500 var(--fs-2) var(--sans);cursor:pointer}
+.study [data-ui='segmented'] > button[aria-pressed='true']{background:var(--surface);color:var(--text);box-shadow:0 1px 2px lch(0% 0 0 / .08)}
+.study [data-ui='badge']{font-size:var(--fs-1)}
+
+
+/* ---------- added for the working prototype ---------- */
+.study .gauge > [data-tone='fam']{background:var(--fam)}
+.sk-art .art-face{fill:var(--art)} .sk-art .art-back{fill:var(--surface)}
+.sk-key{background:none;color:inherit;font-weight:600;text-decoration:underline;text-decoration-color:color-mix(in srgb,var(--her) 55%,transparent);text-underline-offset:3px}
+
+/* sk-legend: the ladder's counts under a mastery meter */
+.sk-legend{display:flex;gap:14px;font-size:var(--fs-1);color:var(--quiet)}
+.sk-legend i{display:inline-block;width:8px;height:8px;border-radius:99px;margin-right:6px;background:var(--x)}
+
+/* sk-item: one step or card in a set's list */
+.sk-item{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:var(--r-lg);background:var(--surface);box-shadow:0 0 0 1px var(--line);font-size:var(--fs-3);line-height:1.45}
+.sk-item .n{font-size:var(--fs-1);font-weight:600;color:var(--faint);min-width:26px;padding-top:2px;font-variant-numeric:tabular-nums}
+.sk-item .b{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.sk-item .b b{font-weight:600}
+.sk-dot{width:8px;height:8px;border-radius:99px;flex:none;margin-top:7px;background:var(--line2)}
+.sk-dot[data-s='weak']{background:var(--warn)} .sk-dot[data-s='familiar']{background:var(--fam)} .sk-dot[data-s='learned']{background:var(--ok)}
+.sk-star{color:var(--fam);font-size:var(--fs-1);font-weight:700}
+.sk-sec{margin:14px 0 2px;font-size:var(--fs-1);font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--faint)}
+
+/* sk-sheet: a bottom sheet over a scrim (Proprietary's Sheet, drawn open by the app) */
+.sk-scrim{position:absolute;inset:0;background:var(--scrim, rgba(0,0,0,.4));z-index:20}
+.sk-sheet{position:absolute;left:0;right:0;bottom:0;z-index:21;max-height:88%;overflow-y:auto;background:var(--surface);border-radius:22px 22px 0 0;box-shadow:0 -8px 40px rgba(0,0,0,.18);padding:8px 20px 28px;display:flex;flex-direction:column;gap:18px}
+.sk-sheet-h{display:flex;align-items:center;justify-content:space-between;height:52px}
+.sk-sheet-h h2{margin:0;font-size:var(--fs-4);font-weight:600}
+
+/* sk-switch and sk-field: themed versions of Proprietary's Field */
+.sk-switch{display:flex;align-items:center;gap:12px;min-height:48px;cursor:pointer}
+.sk-switch > span{flex:1;display:flex;flex-direction:column;gap:2px;font-size:var(--fs-3)}
+.sk-switch small{font-size:var(--fs-1);color:var(--quiet)}
+.sk-switch input{position:absolute;opacity:0;width:1px;height:1px}
+.sk-switch i{width:44px;height:26px;border-radius:99px;background:var(--line2);position:relative;flex:none;transition:background var(--dur-2)}
+.sk-switch i::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:99px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2);transition:transform var(--dur-2)}
+.sk-switch input:checked + i{background:var(--her)} .sk-switch input:checked + i::after{transform:translateX(18px)}
+.sk-switch input:focus-visible + i{outline:2px solid var(--focus);outline-offset:2px}
+.sk-field{display:flex;flex-direction:column;gap:6px;font-size:var(--fs-2);color:var(--quiet)}
+.sk-field input,.sk-field select,.sk-field textarea{font:16px/1.4 var(--sans);color:var(--text);background:var(--raise);border:0;border-radius:var(--r-md);padding:10px 12px;box-shadow:inset 0 0 0 1px var(--line)}
+.sk-field textarea{resize:vertical;min-height:64px}
+.sk-field :focus{outline:0;box-shadow:inset 0 0 0 1.5px var(--her)}
+
+/* sk-edit: one editable step or card */
+.sk-edit{display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:var(--r-lg);background:var(--surface);box-shadow:0 0 0 1px var(--line)}
+.sk-edit-h{display:flex;align-items:center;gap:8px}
+.sk-edit-h b{flex:1;font-size:var(--fs-2);color:var(--faint)}
+.sk-check{display:flex;align-items:center;gap:6px;font-size:var(--fs-2);color:var(--quiet)}
+
+/* sk-note: feedback under a checked answer */
+.sk-note{font-size:var(--fs-1);color:var(--quiet)}
+.sk-toast{position:absolute;left:20px;right:20px;bottom:96px;z-index:30;padding:12px 16px;border-radius:var(--r-lg);background:var(--text);color:var(--bg);font-size:var(--fs-2)}
+.gauge.sk-big{height:10px;border-radius:99px}

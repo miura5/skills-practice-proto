@@ -1,0 +1,15 @@
+/* Page layout only: the frame and each screen's column. Components live in ds/. */
+html,body{margin:0;height:100%}
+body{background:var(--sk-desk, #e9e9ef)}
+@media (prefers-color-scheme: dark){ body{--sk-desk:#0b0b0d} }
+#app{height:100%}
+.frame{position:relative;max-width:480px;height:100dvh;margin:0 auto;display:flex;flex-direction:column;overflow:hidden}
+.screen{flex:1;min-height:0;overflow-y:auto;padding:24px 20px 32px;display:flex;flex-direction:column;gap:var(--sk-gap)}
+.screen.tight{gap:16px;padding-top:4px}
+.stack{display:flex;flex-direction:column;gap:12px}
+.row{display:flex;align-items:center;gap:8px}
+.grow{flex:1}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.center{text-align:center}
+.sr{position:absolute;left:-9999px}
+.doc{white-space:pre-wrap;font:13px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--surface);padding:16px;border-radius:var(--r-lg);box-shadow:0 0 0 1px var(--line);overflow-x:auto}

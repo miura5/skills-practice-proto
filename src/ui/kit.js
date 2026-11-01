@@ -1,0 +1,85 @@
+// ui/kit: Study kit components as markup helpers (D-02). Each returns an HTML string that uses
+// Proprietary's data-ui components and the sk- classes from ds/study.css. No state, no events:
+// buttons carry data-act="<action>" and app.js routes the click.
+(function (SP) {
+  'use strict';
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  // [key words] shown as marked text
+  function marked(raw) { return esc(raw).replace(/\[([^\]]+)\]/g, '<mark class="sk-key">$1</mark>'); }
+
+  var PATHS = {
+    close: '<path d="M6 6l12 12M18 6L6 18"/>',
+    back: '<path d="M15 6l-6 6 6 6"/>',
+    next: '<path d="M9 6l6 6-6 6"/>',
+    plus: '<path d="M12 5v14M5 12h14"/>',
+    theme: '<circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/>',
+    home: '<path d="M4 11l8-7 8 7v9a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/>',
+    library: '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+    cards: '<rect x="7" y="4" width="13" height="16" rx="2"/><path d="M4 7v11a2 2 0 0 0 2 2"/>',
+    procedure: '<path d="M4 6l2 2 3-3M4 13l2 2 3-3M12 7h8M12 14h8M12 20h8M5 20h1"/>',
+    options: '<path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/>',
+    edit: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/>',
+    trash: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',
+    star: '<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>'
+  };
+  function icon(name) { return '<svg viewBox="0 0 24 24" aria-hidden="true">' + (PATHS[name] || '') + '</svg>'; }
+  function iconBtn(name, label, act, extra) {
+    return '<button data-ui="button" class="icon" aria-label="' + esc(label) + '" data-act="' + act + '"' + (extra || '') + '>' + icon(name) + '</button>';
+  }
+
+  // Meter with the ladder's colours: learned (ok), familiar (fam), weak (warn)
+  function mastery(t, cls) {
+    var pc = function (n) { return t.total ? (100 * n / t.total).toFixed(1) : 0; };
+    return '<span class="gauge ' + (cls || '') + '" role="img" aria-label="' + t.learned + ' learned of ' + t.total + '">' +
+      '<i data-tone="ok" style="width:' + pc(t.learned) + '%"></i><i data-tone="fam" style="width:' + pc(t.familiar) + '%"></i><i data-tone="warn" style="width:' + pc(t.weak) + '%"></i></span>';
+  }
+
+  function setRow(s, t) {
+    var count = s.kind === 'cards' ? t.total + ' cards' : t.total + ' steps';
+    return '<button class="sk-set" data-act="open" data-id="' + esc(s.id) + '">' +
+      '<span class="sk-ico" data-kind="' + s.kind + '">' + icon(s.kind) + '</span>' +
+      '<span class="sk-set-b"><b>' + esc(s.title) + '</b><span>' + count + ' · ' + t.learned + ' learned' + (s.edited ? ' · edited' : '') + '</span></span>' +
+      mastery(t) + '</button>';
+  }
+
+  var ART = {
+    flip: '<svg viewBox="0 0 120 72" aria-hidden="true"><rect x="10" y="20" width="56" height="42" rx="6" class="art-back" transform="rotate(-8 38 41)"/><rect x="28" y="8" width="58" height="44" rx="6" class="art-face" stroke="currentColor" stroke-width="2.5"/><text x="57" y="38" text-anchor="middle" font-size="20" font-weight="700" fill="currentColor" font-family="system-ui">?</text><circle cx="92" cy="54" r="12" fill="currentColor"/><path d="M86 54h11M93 49l5 5-5 5" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    type: '<svg viewBox="0 0 120 72" aria-hidden="true"><rect x="16" y="6" width="88" height="24" rx="6" class="art-face" stroke="currentColor" stroke-width="2.5"/><rect x="24" y="15" width="40" height="6" rx="3" fill="currentColor"/><rect x="70" y="12" width="2" height="12" fill="currentColor"/><g class="art-back"><rect x="16" y="38" width="15" height="10" rx="2"/><rect x="35" y="38" width="15" height="10" rx="2"/><rect x="54" y="38" width="15" height="10" rx="2"/><rect x="73" y="38" width="15" height="10" rx="2"/><rect x="92" y="38" width="12" height="10" rx="2"/><rect x="30" y="54" width="60" height="10" rx="2"/></g></svg>'
+  };
+  function practice(title, desc, art, act) {
+    return '<button class="sk-practice" data-act="' + act + '"><b>' + esc(title) + '</b><span>' + esc(desc) + '</span><div class="sk-art">' + ART[art] + '</div></button>';
+  }
+
+  function flip(o) {
+    return '<button class="sk-flip" aria-pressed="' + (o.flipped ? 'true' : 'false') + '" aria-label="Flashcard, tap to flip" data-act="' + o.act + '" style="--sk-flip-h:' + (o.h || 220) + 'px">' +
+      '<div class="sk-flip-in">' +
+      '<div class="sk-face front"><small>' + esc(o.lead) + '</small><span class="ask">' + esc(o.ask) + '</span><small>Tap to flip</small></div>' +
+      '<div class="sk-face back"><span class="num">' + esc(o.label) + '</span><span class="ans">' + esc(o.answer) + '</span></div>' +
+      '</div></button>';
+  }
+
+  function session(done, total) {
+    var pc = total ? Math.round(100 * done / total) : 0;
+    return '<div class="sk-session">' + iconBtn('close', 'End round', 'end') +
+      '<div class="gauge" role="progressbar" aria-label="Round progress" aria-valuenow="' + pc + '" aria-valuemin="0" aria-valuemax="100"><i data-tone="ok" style="width:' + pc + '%"></i></div>' +
+      '<span class="sk-count">' + done + ' / ' + total + '</span>' + iconBtn('options', 'Options', 'options') + '</div>';
+  }
+
+  function tabbar(current) {
+    var tab = function (id, label) {
+      return '<button aria-current="' + (current === id ? 'page' : 'false') + '" data-act="tab" data-id="' + id + '">' + icon(id) + label + '</button>';
+    };
+    return '<nav class="sk-tabbar" aria-label="Main">' + tab('home', 'Home') + tab('library', 'Library') + '</nav>';
+  }
+
+  function toggle(name, label, on, note) {
+    return '<label class="sk-switch"><span><b>' + esc(label) + '</b>' + (note ? '<small>' + esc(note) + '</small>' : '') + '</span>' +
+      '<input type="checkbox" role="switch" data-opt="' + name + '"' + (on ? ' checked' : '') + '><i aria-hidden="true"></i></label>';
+  }
+
+  SP.ui = { esc: esc, marked: marked, icon: icon, iconBtn: iconBtn, mastery: mastery, setRow: setRow, practice: practice, flip: flip, session: session, tabbar: tabbar, toggle: toggle };
+})(window.SP);
