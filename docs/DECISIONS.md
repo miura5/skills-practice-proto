@@ -130,10 +130,10 @@ Matt hands it to a new chat by attaching the repo; CLAUDE.md sets the role.
 - [x] T-11 Bug: carousel left arrow unfilled and dead at the last slide (D-18). Fixed in v0.4.1: slides and arrows shared z-index 1, so later DOM painted over prev; track now isolates, arrows z 2, 56px desktop gutter.
 - [x] T-12 Carousel: pre-T-11 slide width (85% of track - 40px), centred snap with symmetric padding, art .75 in the carousel only, arrows 6px from the edge (D-18). Shipped v0.4.2.
 - [x] T-13 Set overview mode cards: captions removed (U.practice(title, art, act)); art pinned to the card bottom so both align. Shipped v0.4.2. Build manager review passed.
-- [x] T-14 Core chunking: src/core/chunks.js (chunks, stages, Smart round list) + tests (D-19). Batch 1 of 4. Done 2026-11-01 (79 tests), not yet published.
-- [x] T-15 Data + Edit: scene tags in set data; sk-tags tag input (Study kit, generic); Proprietary Picker per section; seed Med Admin + NG tube scenes from the old prototype (D-19). Batch 2 of 4. Done 2026-11-01 (Lane A), not yet published.
-- [ ] T-16 Rounds + screens: Smart rounds, segmented session bar (Study kit), scene in the prompt, Options Practice Smart / Whole set / Section, Results "Next: <chunk>" (D-19). Batch 3 of 4. Go given (D-20), in a lane.
-- [x] T-17 Grading simplification: strict order; remove the nearby-step stage and the stored strict/before/anytime rules; update tests (D-19). Batch 4 of 4. Done 2026-11-01 (Lane C, 89 tests), not yet published.
+- [x] T-14 Core chunking: src/core/chunks.js (chunks, stages, Smart round list) + tests (D-19). Batch 1 of 4. Done 2026-11-01.
+- [x] T-15 Data + Edit: scene tags in set data; sk-tags tag input (Study kit, generic); Proprietary Picker per section; seed Med Admin + NG tube scenes from the old prototype (D-19). Batch 2 of 4. Done 2026-11-01 (Lane A).
+- [x] T-16 Rounds + screens: Smart rounds, segmented session bar (Study kit), scene in the prompt, Options Practice Smart / Whole set / Section, Results "Next: <chunk>" (D-19). Batch 3 of 4. Done 2026-11-01 (Lane B).
+- [x] T-17 Grading simplification: strict order; remove the nearby-step stage and the stored strict/before/anytime rules; update tests (D-19). Batch 4 of 4. Done 2026-11-01 (Lane C).
 
 ## D-10 build notes (2026-11-01)
 - Bands: 100% Right; 60%+ row stays open with blanks; 34-59% Shaky; under 34% Missed.
@@ -232,3 +232,21 @@ each an agent in its own git worktree, each owning its files; the build manager 
 - Lane C = T-17: grade.js, keys.js, the content files' grading.strict/before/anytime keys only, about.js.
 Shared files (tests, study.css, kit.js) have one marked insertion point per lane.
 
+
+## D-21 · Chunked learning shipped (2026-11-01, v0.5.0; T-14..T-17, built in lanes per D-20)
+Build notes on choices the D-19 design left open:
+- Chunks (core/chunks.js): a scene over 12 steps splits into "<label> 1, 2, 3" at section boundaries; a single
+  section is never split. Run lists the whole set in set order (scenes can pull later sections forward in Learn).
+  Seeded: Med Admin 9 chunks (Med room and Giving the meds split in 3), NG tube 9.
+- Smart (core/rounds.js plan/build): Starred and Skip learned also filter link steps; link steps stay first.
+  Starred only can give an empty Smart round when the chunk has no starred steps (the usual toast). An old
+  saved Section option still means that section. Changing Options mid-round keeps the round's chunk.
+- The prompt names the chunk in Learn and Link (and in rounds saved before D-19); not in Run or non-Smart rounds.
+  Link steps show their own chunk's label. Results shows "Next: <chunk>" after a Smart round.
+- sk-segbar: segments sized by item count; learned chunks full (--learned), the current one fills (--her).
+- sk-tags on Proprietary's Chip. Backspace on the empty input pulls the last tag back to text with its id kept;
+  committing it empty removes it and clears its sections. A duplicate label is ignored. Scene Picker = native
+  select with data-ui="picker" (iOS wheel), not Proprietary's popover chip; Matt can ask for the popover.
+- Grading (D-10 superseded in part): no nearby stage, no stored strict/before/anytime rules. 1876 sampled
+  answers that never hit the old nearby stage grade the same as before.
+- Fixed in passing: finishing a round logged a TypeError (the store redraw ran on the mode screen with no item).
