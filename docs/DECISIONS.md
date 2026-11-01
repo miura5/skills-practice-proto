@@ -141,10 +141,10 @@ Matt hands it to a new chat by attaching the repo; CLAUDE.md sets the role.
 - [x] T-22 Options "Scope": Smart / Whole set / Custom (D-22). Done 2026-11-01 (Lane C).
 - [x] T-23 Custom scope editor sk-scope + core/scope.js + tests (D-22). Done 2026-11-01 (Lane C).
 - [x] T-24 sk-segbar min segment width + right fade (D-24). Done 2026-11-01 (build manager).
-- [ ] T-25 Step numbering: core/numbers.js (generated nums, sub-steps, per part) + sets.items uses it + tests (D-25). Lane B.
-- [ ] T-26 Picker chip / rows: remove leftover native button border, shadow and highlight (D-25). Lane B.
-- [ ] T-27 Editor redesign: folding section rows with scene badge, flat step rows, star icon, grip + ⋯ menu, header ⋯ (D-25). Lane A.
-- [ ] T-28 sk-sort: Study kit drag-to-reorder from a grip only (pointer + keyboard-free fallback via menu) (D-25). Lane A.
+- [x] T-25 Step numbering: core/numbers.js (generated nums, sub-steps, per part) + sets.items uses it + tests (D-25). Done 2026-11-01 (Lane B).
+- [x] T-26 Picker chip / rows: remove leftover native button border, shadow and highlight (D-25). Done 2026-11-01 (Lane B).
+- [x] T-27 Editor redesign: folding section rows with scene badge, flat step rows, star icon, grip + ⋯ menu, header ⋯ (D-25). Done 2026-11-01 (Lane A).
+- [x] T-28 sk-sort: Study kit drag-to-reorder from a grip only (pointer + keyboard-free fallback via menu) (D-25). Done 2026-11-01 (Lane A).
 
 ## D-10 build notes (2026-11-01)
 - Bands: 100% Right; 60%+ row stays open with blanks; 34-59% Shaky; under 34% Missed.
@@ -311,3 +311,14 @@ Also confirmed by Matt: a bare step number in Custom ranges covers all its lette
 - Bugs: Starred checkbox styles fought (gone with the icon); Picker chip showed the native button border.
 Lanes: A = T-27, T-28 (edit.js, app.js); B = T-25, T-26 (core/numbers.js, sets.js, index.html, Picker CSS).
 API between them: SP.core.numbers.of(set) -> {stepId: '13a', ...}; sets.items() uses it for num.
+
+## D-26 · Cleaner editor shipped (2026-11-01, v0.7.0; T-25..T-28, Haiku lanes)
+Build notes and review fixes:
+- core/numbers.js generates every built-in number exactly as stored (all 154 steps checked in tests).
+  Parts restart numbering; letters past z go aa, ab. Edit's Make sub-step stores step.sub explicitly.
+- sk-sort (kit U.sortBind): drag only from .sk-grip, Escape cancels, auto-scroll; Move up/down in ⋯ menus
+  covers moves across sections. Header ⋯ holds Reset to built-in; Delete set stays at the bottom (custom sets).
+- Review fixes by the build manager: section header is two lines (full title; "n steps" + scene badge
+  below), since the badge cut titles to "As…" on phones; the editor's section wrapper is .sk-esec, not
+  .sk-sec (that class is the set screen's section label); a Picker menu opened by tap no longer shows
+  the focus ring on the current row (focusVisible:false).

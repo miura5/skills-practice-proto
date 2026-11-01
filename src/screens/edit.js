@@ -55,13 +55,13 @@
     } else {
       body = '<div class="sk-secs">' + d.sections.map(function (sec, si) {
         var isOpen = !!open[sec.id], n = sec.steps.length, sid = String(sec.id);
-        var head = '<div class="sk-sec-h">' + U.grip() +
+        var head = '<div class="sk-sec-h">' + U.grip() + '<div class="sk-sec-m">' +
           '<button type="button" class="sk-sec-t" data-act="toggleSec" data-id="' + U.esc(sid) + '" aria-expanded="' + (isOpen ? 'true' : 'false') + '">' +
-          U.chevron + '<b>' + U.esc(sec.title || 'Untitled section') + '</b>' +
-          '<span class="sk-meta">' + n + (n === 1 ? ' step' : ' steps') + '</span></button>' +
+          U.chevron + '<b>' + U.esc(sec.title || 'Untitled section') + '</b></button>' +
+          '<div class="sk-sec-sub"><span class="sk-meta">' + n + (n === 1 ? ' step' : ' steps') + '</span>' +
           (d.scenes.length ? U.picker('scene-' + si, sec.scene || '', [{ value: '', label: 'No scene' }].concat(d.scenes.map(function (t, i) {
             return { value: t.id, label: t.label, tone: U.sceneTone(i) };
-          })), { label: 'Scene', act: 'pickScene' }) : '') +
+          })), { label: 'Scene', act: 'pickScene' }) : '') + '</div></div>' +
           U.more('sec-' + si, 'Section menu', moves('sections', si, d.sections.length).concat([
             { label: 'Delete section', act: 'delSection', id: String(si), danger: true }
           ])) + '</div>';
@@ -83,7 +83,7 @@
             '<button data-ui="button" data-kind="ghost" class="sk-add" data-act="addItem" data-id="' + si + '">' + U.icon('plus') + 'Add step</button>' +
             '</div>';
         }
-        return '<section class="sk-sec" data-sort="sections" data-sort-i="' + si + '">' + head + rest + '</section>';
+        return '<section class="sk-esec" data-sort="sections" data-sort-i="' + si + '">' + head + rest + '</section>';
       }).join('') + '</div>' +
         '<button data-ui="button" data-kind="ghost" class="sk-add" data-act="addSection">' + U.icon('plus') + 'Add section</button>';
     }

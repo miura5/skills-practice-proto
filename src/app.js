@@ -93,7 +93,7 @@
     pop.style.setProperty('--pop-x', Math.round(x) + 'px');
     pop.style.setProperty('--pop-y', Math.round(y) + 'px');
     var cur = pop.querySelector('[aria-checked="true"]') || pop.querySelector('button');
-    if (cur) cur.focus({ preventScroll: true });
+    if (cur) cur.focus({ preventScroll: true, focusVisible: false });   // no ring unless the keyboard moves on
   }, true);
 
   root.addEventListener('click', function (e) {
