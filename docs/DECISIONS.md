@@ -128,6 +128,8 @@ Matt hands it to a new chat by attaching the repo; CLAUDE.md sets the role.
 - [x] T-09 Set overview: remove the Resume card; Start over moves to the bottom of the in-round Options sheet in red. Home keeps the round card (D-17). Shipped v0.4.0.
 - [x] T-10 Home "Jump back in" as an sk-carousel (Study kit): cards, arrows on desktop, swipe on phone, dots (D-18). Shipped v0.4.0.
 - [x] T-11 Bug: carousel left arrow unfilled and dead at the last slide (D-18). Fixed in v0.4.1: slides and arrows shared z-index 1, so later DOM painted over prev; track now isolates, arrows z 2, 56px desktop gutter.
+- [ ] T-12 Carousel after T-11 (Matt): cards narrower and off-centre on desktop; restore width and centre the current card. Illustrations at 75% opacity in the carousel only (D-18). In progress.
+- [ ] T-13 Set overview mode cards: remove the caption under each mode; align the two illustrations (Type it sits higher than Next Step). In progress.
 
 ## D-10 build notes (2026-11-01)
 - Bands: 100% Right; 60%+ row stays open with blanks; 34-59% Shaky; under 34% Missed.

@@ -13,6 +13,12 @@ Repo: public, prototype only. Keep it light; no extra safeguards.
 - This chat is the build manager. It plans, keeps docs/DECISIONS.md and docs/handover.md,
   and hands each coding task to ONE coding subagent with a clear brief (the task, the files,
   the tests that must pass). Small fixes it can make itself.
+- The build manager keeps the codebase's structure: it reads the project context first, turns
+  every bug or request into a backlog task (docs/DECISIONS.md Tasks), delegates the coding to an
+  agent, and REVIEWS the agent's diff when it returns, before shipping. The review checks the
+  two-layer design system (Proprietary untouched; all looks in Study kit sk- components with
+  tokens; no static inline styles in screens) and the repo structure (content / core / screens /
+  app split, tests for core logic). Drift found in review is fixed before shipping.
 - One build manager at a time. If docs/handover.md says another chat is mid-task, ask Matt
   which chat continues.
 
@@ -23,7 +29,8 @@ Repo: public, prototype only. Keep it light; no extra safeguards.
    on tasks that are still marked "Waiting for Matt's go".
 
 ## Shipping a change
-1. Code + a test line for every grading change (tests/core.test.js).
+1. Code + a test line for every grading change (tests/core.test.js). Build manager reviews the
+   agent's diff (see Roles) before step 2.
 2. `node tests/core.test.js` passes.
 3. Republish the artifact to the SAME link: the Artifact tool, publish with `url` set to the
    live artifact above, `file_path` index.html, `root` the repo folder, and `files` listing
