@@ -12,7 +12,6 @@
       '<button data-ui="button" data-kind="primary" aria-label="New set" data-act="newSet" class="icon sk-pill">' + U.icon('plus') + '</button></header>' +
       '<div data-ui="segmented" role="group" aria-label="Show">' + seg('all', 'All') + seg('cards', 'Card sets') + seg('procedure', 'Procedures') + '</div>' +
       '<div class="stack g10">' + (sets.length ? sets.map(function (s) { return U.setRow(s, app.tally(s)); }).join('') : '<p class="sk-meta center">Nothing here yet.</p>') + '</div>' +
-      '<button data-ui="button" data-kind="ghost" data-act="go" data-id="about" class="self-center">How this prototype is built</button>' +
       '</main>' + U.tabbar('library');
   }
 
