@@ -124,6 +124,9 @@ Matt hands it to a new chat by attaching the repo; CLAUDE.md sets the role.
 - [x] T-05 Type it layout without scrolling (D-14). Shipped 2026-11-01 as v0.3.2 (Matt: works on iPhone).
 - [x] T-06 Smooth transition to the next item: procedures slide vertically (Next Step, Type it), card sets slide horizontally (Flashcards, Type it) (D-15). Shipped 2026-11-01 as v0.3.3.
 - [x] T-07 Study kit clean-up + ladder colours (D-16). Shipped 2026-11-01 as v0.3.4.
+- [ ] T-08 One round per set, shared across modes: any mode continues the saved round at its number (D-17). In progress.
+- [ ] T-09 Set overview: remove the Resume card; Start over moves to the bottom of the in-round Options sheet in red. Home keeps the round card (D-17). In progress.
+- [ ] T-10 Home "Jump back in" as an sk-carousel (Study kit): cards, arrows on desktop, swipe on phone, dots (D-18). In progress.
 
 ## D-10 build notes (2026-11-01)
 - Bands: 100% Right; 60%+ row stays open with blanks; 34-59% Shaky; under 34% Missed.
