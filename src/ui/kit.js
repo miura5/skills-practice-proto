@@ -51,8 +51,8 @@
     type: '<svg viewBox="0 0 120 72" aria-hidden="true"><rect x="16" y="6" width="88" height="24" rx="6" class="art-face" stroke="currentColor" stroke-width="2.5"/><rect x="24" y="15" width="40" height="6" rx="3" fill="currentColor"/><rect x="70" y="12" width="2" height="12" fill="currentColor"/><g class="art-back"><rect x="16" y="38" width="15" height="10" rx="2"/><rect x="35" y="38" width="15" height="10" rx="2"/><rect x="54" y="38" width="15" height="10" rx="2"/><rect x="73" y="38" width="15" height="10" rx="2"/><rect x="92" y="38" width="12" height="10" rx="2"/><rect x="30" y="54" width="60" height="10" rx="2"/></g></svg>'
   };
   function art(name) { return ART[name]; }
-  function practice(title, desc, art, act) {
-    return '<button class="sk-practice" data-act="' + act + '"><b>' + esc(title) + '</b><span>' + esc(desc) + '</span><div class="sk-art">' + ART[art] + '</div></button>';
+  function practice(title, art, act) {
+    return '<button class="sk-practice" data-act="' + act + '"><b>' + esc(title) + '</b><div class="sk-art">' + ART[art] + '</div></button>';
   }
 
   function flip(o) {

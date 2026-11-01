@@ -74,8 +74,8 @@
 .sk-practice:hover{box-shadow:0 0 0 1px var(--line2),var(--sk-shadow)}
 .sk-practice:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 .sk-practice b{font-size:var(--fs-4);font-weight:600}
-.sk-practice span{font-size:var(--fs-1);color:var(--quiet);line-height:1.35}
-.sk-art{margin-top:8px;height:92px;border-radius:var(--r-lg);background:var(--art);display:grid;place-items:center;color:var(--her)}
+.sk-practice > .sk-art{margin-top:auto;flex:none}   /* T-13: art pinned to the card's bottom; grid rows give equal card heights */
+.sk-art{height:92px;border-radius:var(--r-lg);background:var(--art);display:grid;place-items:center;color:var(--her)}
 .sk-art svg{width:120px;height:72px}
 
 /* ---------- 2c. sk-flip: the flashcard (front asks, back answers) ---------- */
@@ -257,27 +257,30 @@
 .sk-q b{font-size:var(--fs-4)}
 
 /* ---------- T-10: sk-carousel, a horizontal row of large cards (Home's Jump back in) ----------
-   Scroll-snap track (native swipe), slides ~85% wide so the next one peeks. Arrow buttons only on
+   Scroll-snap track (native swipe). T-12: slides are 85% of (track - 40px), the pre-T-11 width, and snap
+   centred: the track's symmetric inline padding (7.5% + 17px) is exactly the room either side of a centred
+   slide, so the first and last slides centre too and neighbours peek equally. Arrow buttons only on
    hover-capable fine pointers, dots under the row. app.js routes carPrev / carNext / carGo. */
 .sk-carousel{position:relative;margin:0 -20px}
-.sk-track{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;scroll-padding:0 20px;padding:4px 20px 8px;scrollbar-width:none;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+.sk-track{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;padding:4px calc(7.5% + 17px) 8px;scrollbar-width:none;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
 .sk-track::-webkit-scrollbar{display:none}
-.sk-slide{flex:0 0 85%;scroll-snap-align:start;display:flex}
-.sk-slide:only-child{flex-basis:100%}
+.sk-slide{flex:0 0 100%;scroll-snap-align:center;display:flex}
+.sk-track:has(> .sk-slide:only-child){padding-left:20px;padding-right:20px}
 .sk-slide > .sk-jump{flex:1;min-height:228px}
 .sk-car-prev,.sk-car-next{display:none}
 @media (hover:hover) and (pointer:fine){
-  /* T-11: arrows sit in a 56px gutter beside the current card (not over its text); the track is its own
+  /* T-11/T-12: arrows sit over the peeking neighbours (not the current card's text); the track is its own
      stacking context so the slides' z-indexed content can never cover the prev arrow. */
-  .study .sk-track{isolation:isolate;padding-left:56px;padding-right:56px;scroll-padding:0 56px}
+  .study .sk-track{isolation:isolate}
   .study .sk-carousel [data-ui='button'].sk-car-prev,.study .sk-carousel [data-ui='button'].sk-car-next{display:inline-flex;position:absolute;top:calc(50% - 30px);z-index:2;border-radius:99px;background:var(--surface);cursor:pointer;box-shadow:0 0 0 1px var(--line2),var(--sk-shadow)}
   .study .sk-carousel [data-ui='button'].sk-car-prev:not(:disabled):hover,.study .sk-carousel [data-ui='button'].sk-car-next:not(:disabled):hover{background:var(--sel)}
-  .study .sk-carousel .sk-car-prev{left:10px} .study .sk-carousel .sk-car-next{right:10px}
+  .study .sk-carousel .sk-car-prev{left:6px} .study .sk-carousel .sk-car-next{right:6px}
   .study .sk-carousel [data-ui='button'].sk-car-prev:disabled,.study .sk-carousel [data-ui='button'].sk-car-next:disabled{display:none}
 }
 .sk-dots{display:flex;justify-content:center;gap:6px;padding-top:6px}
 .sk-dots button{width:8px;height:8px;padding:0;border:0;border-radius:99px;background:var(--line2);cursor:pointer;transition:width var(--dur-2) var(--ease-out),background var(--dur-2)}
 .sk-dots button[aria-current='true']{width:20px;background:var(--her)}
+.sk-carousel .sk-jump-art{opacity:.75}
 .sk-jump-art svg{width:100%;height:100%;display:block}
 .sk-jump .sk-jump-art .art-face{fill:var(--art)} .sk-jump .sk-jump-art .art-back{fill:var(--accent-bg)}
 .sk-jump > *:not(.sk-jump-art){position:relative;z-index:1}

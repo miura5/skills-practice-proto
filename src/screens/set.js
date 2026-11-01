@@ -47,8 +47,8 @@
       U.mastery(t, 'sk-big') +
       '<div class="sk-legend"><span><i data-s="learned"></i>Learned ' + t.learned + '</span><span><i data-s="familiar"></i>Familiar ' + t.familiar + '</span><span><i data-s="weak"></i>Weak ' + t.weak + '</span></div></header>' +
       '<section class="stack"><div class="row"><h2 class="sk-h2 grow">Practice</h2><span class="sk-meta">' + inRound + ' of ' + items.length + ' in a round</span></div>' + roundNote(app) + '<div class="two">' +
-      U.practice(cards ? 'Flashcards' : 'Next Step', cards ? 'See the front, recall it, flip to check' : 'Say the next step, reveal, grade yourself', 'flip', 'startNext') +
-      U.practice('Type it', cards ? 'Type the back from memory' : 'Type the steps from memory', 'type', 'startType') +
+      U.practice(cards ? 'Flashcards' : 'Next Step', 'flip', 'startNext') +
+      U.practice('Type it', 'type', 'startType') +
       '</div></section>' +
       '<section class="stack"><h2 class="sk-h2">' + (cards ? 'Cards' : 'Full skill') + ' <span class="sk-meta">· ' + items.length + (cards ? ' cards' : ' steps') + '</span></h2>' + previewCard(app, items) + '</section>' +
       '<section class="stack g8"><h2 class="sk-h2">' + (cards ? 'All cards' : 'Steps') + '</h2>' + list(app, items) + '</section>' +
