@@ -1,6 +1,6 @@
 # Handover
 
-Last updated 2026-11-01 by the chat that shipped v0.4.0. No chat is managing right now.
+Last updated 2026-11-01 by the chat that shipped v0.4.1. No chat is managing right now.
 
 ## Where things stand
 - v0.2.0 is live at https://claude.ai/artifact/UUj5psocojXR1xkK2QVAbh (same link). It adds Grading v2 (D-10, T-01):
@@ -13,6 +13,7 @@ Last updated 2026-11-01 by the chat that shipped v0.4.0. No chat is managing rig
 - v0.3.4 (D-16, T-07): Study kit clean-up; ladder Learned green, Familiar yellow, Weak red.
 - v0.4.0 (D-17, D-18, T-08..T-10): one shared round per set across modes; Start over in the
   in-round Options sheet; Home carousel. "Mixed" Results header untested in a browser.
+- v0.4.1 (T-11): carousel arrows fixed on desktop (solid, clickable at every slide).
 - Matt: all styling goes through the two layers (Proprietary + Study kit). No inline styles.
 - Matt says v0.2.0 grading looks good.
 - Tests: `node tests/core.test.js` passes 45.

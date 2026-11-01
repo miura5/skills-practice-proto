@@ -267,8 +267,12 @@
 .sk-slide > .sk-jump{flex:1;min-height:228px}
 .sk-car-prev,.sk-car-next{display:none}
 @media (hover:hover) and (pointer:fine){
-  .study .sk-carousel [data-ui='button'].sk-car-prev,.study .sk-carousel [data-ui='button'].sk-car-next{display:inline-flex;position:absolute;top:calc(50% - 30px);z-index:1;border-radius:99px;box-shadow:inset 0 0 0 1px var(--line2),var(--sk-shadow)}
-  .study .sk-carousel .sk-car-prev{left:8px} .study .sk-carousel .sk-car-next{right:8px}
+  /* T-11: arrows sit in a 56px gutter beside the current card (not over its text); the track is its own
+     stacking context so the slides' z-indexed content can never cover the prev arrow. */
+  .study .sk-track{isolation:isolate;padding-left:56px;padding-right:56px;scroll-padding:0 56px}
+  .study .sk-carousel [data-ui='button'].sk-car-prev,.study .sk-carousel [data-ui='button'].sk-car-next{display:inline-flex;position:absolute;top:calc(50% - 30px);z-index:2;border-radius:99px;background:var(--surface);cursor:pointer;box-shadow:0 0 0 1px var(--line2),var(--sk-shadow)}
+  .study .sk-carousel [data-ui='button'].sk-car-prev:not(:disabled):hover,.study .sk-carousel [data-ui='button'].sk-car-next:not(:disabled):hover{background:var(--sel)}
+  .study .sk-carousel .sk-car-prev{left:10px} .study .sk-carousel .sk-car-next{right:10px}
   .study .sk-carousel [data-ui='button'].sk-car-prev:disabled,.study .sk-carousel [data-ui='button'].sk-car-next:disabled{display:none}
 }
 .sk-dots{display:flex;justify-content:center;gap:6px;padding-top:6px}

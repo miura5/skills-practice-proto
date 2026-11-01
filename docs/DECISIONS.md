@@ -127,7 +127,7 @@ Matt hands it to a new chat by attaching the repo; CLAUDE.md sets the role.
 - [x] T-08 One round per set, shared across modes: any mode continues the saved round at its number (D-17). Shipped v0.4.0.
 - [x] T-09 Set overview: remove the Resume card; Start over moves to the bottom of the in-round Options sheet in red. Home keeps the round card (D-17). Shipped v0.4.0.
 - [x] T-10 Home "Jump back in" as an sk-carousel (Study kit): cards, arrows on desktop, swipe on phone, dots (D-18). Shipped v0.4.0.
-- [ ] T-11 Bug (Matt, PC): carousel left arrow has no fill, card text shows through/overlaps it; at the last slide the left arrow can't be clicked (no hover/pointer) (D-18). In progress.
+- [x] T-11 Bug: carousel left arrow unfilled and dead at the last slide (D-18). Fixed in v0.4.1: slides and arrows shared z-index 1, so later DOM painted over prev; track now isolates, arrows z 2, 56px desktop gutter.
 
 ## D-10 build notes (2026-11-01)
 - Bands: 100% Right; 60%+ row stays open with blanks; 34-59% Shaky; under 34% Missed.
