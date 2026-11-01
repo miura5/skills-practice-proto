@@ -25,9 +25,9 @@
     var map = Object.assign({}, SP.store.progress(app.set.id));
     map[it.id] = P.apply(map[it.id], result, how);
     SP.store.saveProgress(app.set.id, map);
-    r.res.push({ id: it.id, result: result });
+    r.res.push({ id: it.id, result: result, hinted: !!(note && note.hinted) });
     if (note) r.notes[it.id] = note;
-    r.i += 1; r.flip = false; r.hint = false;
+    r.i += 1; r.flip = false; r.hint = false; r.open = null; r.nearby = null;
     if (r.i >= r.ids.length) { r.t1 = Date.now(); app.update({ screen: 'done' }); }
     else { app.render(); app.focus('#answer'); }
   }
@@ -50,7 +50,7 @@
     var stat = function (k, label, tone) { return '<div class="sk-stat" style="--x:var(--' + tone + ');--x-bg:var(--' + tone + '-bg)"><b>' + n(k) + '</b><span>' + label + '</span></div>'; };
     var row = function (x) {
       var it = app.byId[x.id];
-      return '<li class="sk-row" data-result="' + x.result + '"><span class="n">' + U.esc(it.num) + '</span><span style="flex:1">' + U.esc(cards ? it.front : (it.cue || it.answer)) + '</span><span class="tag">' + TAG[x.result] + '</span></li>';
+      return '<li class="sk-row" data-result="' + x.result + '"><span class="n">' + U.esc(it.num) + '</span><span style="flex:1">' + U.esc(cards ? it.front : (it.cue || it.answer)) + '</span><span class="tag">' + TAG[x.result] + (x.hinted ? ' <span class="sk-hinted">hinted</span>' : '') + '</span></li>';
     };
     return '<main class="screen">' +
       '<header class="sk-top"><div class="grow stack" style="gap:6px"><span class="sk-meta">' + U.esc(app.set.title) + ' · ' + modeName(app) + ' · ' + mins + ' min</span><h1>Round done</h1></div></header>' +

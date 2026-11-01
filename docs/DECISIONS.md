@@ -64,7 +64,7 @@ real build can move screens to components without touching core/ or content/.
 
 # Proposed (not built yet)
 
-## D-10 · Grading v2: accept close answers, the way the old prototype did (proposed 2026-11-01)
+## D-10 · Grading v2: accept close answers, the way the old prototype did (built 2026-11-01, v0.2.0)
 Why: in v0.1.0 a correct answer to Med Admin step 1 came back Shaky, and a correct answer
 after a hint was always shown as Shaky. Two causes, found by running Matt's exact answer:
 1. Bug: a full stop stays stuck to the word before it ("mrn." is not "mrn"), so whole key
@@ -117,5 +117,12 @@ before shipping, Matt decides anything big, nothing of his deleted.
 Matt hands it to a new chat by attaching the repo; CLAUDE.md sets the role.
 
 # Tasks
-- [ ] T-01 Grading v2 (D-10). Waiting for Matt's go.
+- [x] T-01 Grading v2 (D-10). Shipped 2026-11-01 as v0.2.0, 41 tests.
 - [x] T-02 Repo + CLAUDE.md + handover (D-11).
+
+## D-10 build notes (2026-11-01)
+- Bands: 100% Right; 60%+ row stays open with blanks; 34-59% Shaky; under 34% Missed.
+- A synonym counts for a two-word key part if it covers half of it ("pulse ox" = "SpO2 probe").
+- The hint shows only first words; typing just those grades Shaky, the full key words grade Right + hinted.
+- Order rules (strict/before/anytime) are stored in content but not used until the whole-checklist matcher.
+- Rules came from the old prototype's skills/med-admin.js and skills/ngt.js typeMode blocks, copied as is.

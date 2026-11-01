@@ -72,7 +72,7 @@
     if (e.target.dataset.opt) SP.screens.set.onOption(app, e.target);
   });
   root.addEventListener('keydown', function (e) {
-    if (e.target.id === 'answer' && e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); SP.screens.type.check(app); }
+    if ((e.target.id === 'answer' || (e.target.classList && e.target.classList.contains('sk-blank'))) && e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); SP.screens.type.check(app); }
     if (e.target.id === 'newTitle' && e.key === 'Enter') { e.preventDefault(); actions.createSet(app); }
     if (e.key === 'Escape' && app.state.sheet) actions.closeSheet(app);
   });

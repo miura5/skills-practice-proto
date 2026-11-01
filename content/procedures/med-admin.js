@@ -749,6 +749,290 @@ SP.content.add({
    ]
   }
  ],
+ "grading": {
+  "loose": {
+   "9": {
+    "1 patient at a time": [
+     "one patient",
+     "single patient",
+     "one at a time",
+     "1 patient"
+    ],
+    "distraction-free": [
+     "no distraction",
+     "no distractions",
+     "without distraction",
+     "without distractions",
+     "free of distraction",
+     "quiet",
+     "no interruptions"
+    ]
+   },
+   "11": {
+    "1st": null
+   },
+   "13b": {
+    "2nd": null
+   },
+   "14n": {
+    "2nd": null
+   },
+   "15c": {
+    "2nd": null
+   },
+   "18": {
+    "3rd": null
+   },
+   "25n": {
+    "safety cap": [
+     "safety mechanism",
+     "safety device",
+     "safety feature",
+     "safety"
+    ]
+   },
+   "26l": {
+    "safety device": [
+     "safety mechanism",
+     "safety cap",
+     "safety feature",
+     "safety"
+    ]
+   },
+   "30": {
+    "immediately after": [
+     "immediately",
+     "right after",
+     "right away",
+     "right when"
+    ]
+   }
+  },
+  "require": {
+   "11": {
+    "1st check against the MAR": [
+     "1st",
+     "check",
+     "compare",
+     "mar"
+    ]
+   },
+   "13b": {
+    "2nd check": [
+     "2nd",
+     "check",
+     "compare",
+     "mar"
+    ]
+   },
+   "14n": {
+    "2nd check": [
+     "2nd",
+     "check",
+     "compare",
+     "mar"
+    ]
+   },
+   "15c": {
+    "2nd check": [
+     "2nd",
+     "check",
+     "compare",
+     "mar"
+    ]
+   },
+   "18": {
+    "3rd check": [
+     "3rd",
+     "check",
+     "compare",
+     "mar",
+     "label"
+    ]
+   },
+   "23": {
+    "hand hygiene": [
+     "hand hygiene"
+    ],
+    "clean gloves": [
+     "gloves"
+    ]
+   },
+   "25i": {
+    "Z-track 1–1½ in": [
+     "z track"
+    ],
+    "90°": [
+     "90"
+    ]
+   },
+   "26i": {
+    "45°": [
+     "45"
+    ]
+   },
+   "28": {
+    "remove gloves": [
+     "remove gloves"
+    ],
+    "hand hygiene": [
+     "hand hygiene"
+    ]
+   }
+  },
+  "anytime": [
+   "10",
+   "25c"
+  ],
+  "before": [
+   [
+    "8",
+    "11"
+   ],
+   [
+    "8",
+    "13b"
+   ],
+   [
+    "8",
+    "14a"
+   ],
+   [
+    "8",
+    "15a"
+   ],
+   [
+    "11",
+    "13b"
+   ],
+   [
+    "11",
+    "14n"
+   ],
+   [
+    "11",
+    "15c"
+   ],
+   [
+    "13b",
+    "18"
+   ],
+   [
+    "14n",
+    "18"
+   ],
+   [
+    "15c",
+    "18"
+   ],
+   [
+    "16",
+    "24b"
+   ],
+   [
+    "16",
+    "25i"
+   ],
+   [
+    "16",
+    "26i"
+   ],
+   [
+    "17",
+    "24b"
+   ],
+   [
+    "17",
+    "25i"
+   ],
+   [
+    "17",
+    "26i"
+   ],
+   [
+    "18",
+    "24b"
+   ],
+   [
+    "18",
+    "25i"
+   ],
+   [
+    "18",
+    "26i"
+   ],
+   [
+    "23",
+    "24b"
+   ],
+   [
+    "23",
+    "25f"
+   ],
+   [
+    "23",
+    "26e"
+   ],
+   [
+    "25n",
+    "28"
+   ],
+   [
+    "26l",
+    "28"
+   ],
+   [
+    "27",
+    "28"
+   ],
+   [
+    "28",
+    "30"
+   ]
+  ],
+  "strict": [
+   [
+    "14e",
+    "14f",
+    "14g",
+    "14h",
+    "14i",
+    "14j",
+    "14k",
+    "14l",
+    "14m",
+    "14n"
+   ],
+   [
+    "15g",
+    "15h",
+    "15i",
+    "15j",
+    "15k",
+    "15l",
+    "15m",
+    "15n",
+    "15o",
+    "15p",
+    "15q"
+   ],
+   [
+    "25i",
+    "25j",
+    "25k",
+    "25l",
+    "25m",
+    "25n"
+   ],
+   [
+    "26h",
+    "26i",
+    "26j",
+    "26k",
+    "26l"
+   ]
+  ]
+ },
  "synonyms": {
   "antiseptic": [
    "alcohol",
