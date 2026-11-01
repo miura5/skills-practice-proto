@@ -1,7 +1,7 @@
-// core/rounds: which items a round asks, from the set's Options (D-07), the Smart plan (D-19) and the
-// Scope (D-22). Practice: 'smart' (default: the current chunk from core/chunks, link steps first, or
-// the whole set in Run), 'whole' (every item), or 'custom' (the steps picked in the scope editor,
-// core/scope). An old saved section option (pre-D-22) means 'custom' with that section's steps.
+// core/rounds: which items a round asks, from the set's Options (D-07), the Smart plan (D-19, D-28) and the
+// Scope (D-22). Practice: 'smart' (default: the current chunk from core/chunks, or the whole set in Run),
+// 'whole' (every item), or 'custom' (the steps picked in the scope editor, core/scope). An old saved section
+// option (pre-D-22) means 'custom' with that section's steps.
 // Starred only, skip learned and weak first still apply; shuffle applies to card sets only.
 (function (SP) {
   'use strict';
@@ -16,15 +16,15 @@
     return o.practice === 'whole' || o.practice === 'custom' ? o.practice : 'smart';
   }
 
-  // The round's plan: { practice, stage, chunk, label, ids, link }. stage is 'learn' | 'link' | 'run'
-  // for Smart and null otherwise; chunk is the chunk id (null in Run). An old section that no longer
-  // exists falls back to Smart; Smart without a set asks the whole list.
+  // The round's plan: { practice, stage, chunk, label, ids }. stage is 'learn' | 'run' for Smart and null
+  // otherwise; chunk is the chunk id (null in Run). An old section that no longer exists falls back to
+  // Smart; Smart without a set asks the whole list.
   function plan(items, opts, progress, set) {
     var pr = practiceOf(opts), sec = S.legacy(opts);
     if (sec && !(items || []).some(function (it) { return it.section === sec; })) pr = 'smart';
-    if (pr !== 'smart' || !set) return { practice: pr, stage: null, chunk: null, label: null, ids: null, link: [] };
+    if (pr !== 'smart' || !set) return { practice: pr, stage: null, chunk: null, label: null, ids: null };
     var s = SP.core.chunks.smart(set, progress || {});
-    return { practice: 'smart', stage: s.stage, chunk: s.chunk ? s.chunk.id : null, label: s.label, ids: s.ids, link: s.link };
+    return { practice: 'smart', stage: s.stage, chunk: s.chunk ? s.chunk.id : null, label: s.label, ids: s.ids };
   }
 
   // build(items, opts, progress, set, basis): the items to ask, in order. progress drives the filters;
@@ -48,17 +48,14 @@
       if (o.skipLearned && (p[it.id] || {}).state === 'learned') return false;
       return true;
     });
-    // Link steps stay first, in plan order; shuffle and weak first only reorder the rest.
-    var head = list.filter(function (it) { return pl.link.indexOf(it.id) >= 0; });
-    var body = list.filter(function (it) { return pl.link.indexOf(it.id) < 0; });
     if (o.shuffle && (set ? set.kind === 'cards' : true)) {
-      body = body.map(function (x) { return [Math.random(), x]; }).sort(function (a, b) { return a[0] - b[0]; }).map(function (x) { return x[1]; });
+      list = list.map(function (x) { return [Math.random(), x]; }).sort(function (a, b) { return a[0] - b[0]; }).map(function (x) { return x[1]; });
     }
     if (o.weakFirst) {
-      var weak = body.filter(function (it) { return (p[it.id] || {}).state === 'weak'; });
-      body = weak.concat(body.filter(function (it) { return weak.indexOf(it) < 0; }));
+      var weak = list.filter(function (it) { return (p[it.id] || {}).state === 'weak'; });
+      list = weak.concat(list.filter(function (it) { return weak.indexOf(it) < 0; }));
     }
-    return head.concat(body);
+    return list;
   }
 
   // A round as saved between visits: JSON-safe, without the on-screen bits (flip, hint, open blanks).
@@ -99,6 +96,16 @@
     return r;
   }
 
+  // stale (D-28): a saved Smart learn round whose chunk is already done or gone is replaced by the current
+  // chunk. Old 'link' rounds (pre-D-28) are always stale. Run rounds, non-Smart rounds and no save: false.
+  function stale(saved, set, progress) {
+    if (!saved) return false;
+    if (saved.stage === 'link') return true;
+    if (saved.stage !== 'learn') return false;
+    var c = SP.core.chunks.list(set).filter(function (x) { return x.id === saved.chunk; })[0];
+    return !c || SP.core.chunks.isLearned(c, progress || {});
+  }
+
   // The mode label for Results: the one mode used, or 'mixed' when answers came from both.
   function modeOf(r) {
     var seen = {};
@@ -114,5 +121,5 @@
     return m;
   }
 
-  SP.core.rounds = { build: build, selected: S.selected, plan: plan, practiceOf: practiceOf, basisOf: basisOf, DEFAULTS: DEFAULTS, snapshot: snapshot, restore: restore, pick: pick, modeOf: modeOf };
+  SP.core.rounds = { build: build, selected: S.selected, plan: plan, practiceOf: practiceOf, basisOf: basisOf, DEFAULTS: DEFAULTS, snapshot: snapshot, restore: restore, pick: pick, stale: stale, modeOf: modeOf };
 })((typeof window !== 'undefined' ? window : globalThis).SP);

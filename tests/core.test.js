@@ -1,6 +1,6 @@
 // Run: node tests/core.test.js  (no dependencies). Every grading bug gets a line here (D-05).
 global.SP = { core: {}, content: { list: [], add(s) { this.list.push(s); } } };
-['text', 'numbers', 'sets', 'keys', 'grade', 'progress', 'chunks', 'scope', 'rounds'].forEach((f) => require('../src/core/' + f + '.js'));
+['text', 'numbers', 'sets', 'keys', 'grade', 'progress', 'chunks', 'scope', 'rounds', 'sync'].forEach((f) => require('../src/core/' + f + '.js'));
 ['procedures/med-admin', 'procedures/ngt', 'cards/pharm-antibiotics', 'cards/lab-values'].forEach((f) => require('../content/' + f + '.js'));
 const { sets, grade, progress, rounds, chunks } = SP.core;
 let pass = 0, fail = 0;
@@ -96,7 +96,7 @@ ok('chunks: 14 cards = 7 + 7', sizes(C.list(cardSet(14))) === '7,7');
 ok('chunks: 15 cards = 7 + 8', sizes(C.list(cardSet(15))) === '7,8');
 const c11 = C.list(cardSet(11));
 ok('chunks: card ids and labels', c11.map((c) => c.id).join() === 'k1,k2' && c11[0].label === 'Cards 1–7' && c11[1].label === 'Cards 8–11' && c11[1].ids[0] === 'c8' && c11[0].sections.length === 0);
-ok('chunks: constants', C.MAX === 12 && C.CARD_SIZE === 7);
+ok('chunks: constants', C.MAX === undefined && C.CARD_SIZE === 7);
 const steps = (sec, n) => Array.from({ length: n }, (_, i) => ({ id: sec + (i + 1), text: 'do ' + sec + ' ' + (i + 1) }));
 const sec = (id, n, scene) => ({ id, title: 'T ' + id, steps: steps(id, n), scene });
 const proc = { id: 'pr', kind: 'procedure', title: 'P', scenes: [{ id: 'room', label: 'Med room' }, { id: 'bed', label: 'Bedside' }],
@@ -111,25 +111,25 @@ ok('chunks: ids together = all items', pc.reduce((a, c) => a.concat(c.ids), []).
 const big = { id: 'bg', kind: 'procedure', title: 'B', scenes: [{ id: 's', label: 'Prep' }, { id: 'h', label: 'Huge' }],
   sections: [sec('a', 5, 's'), sec('b', 5, 's'), sec('c', 4, 's'), sec('d', 9, 's'), sec('e', 15, 'h'), sec('f', 13)] };
 const bc = C.list(big);
-ok('chunks: scene over 12 splits at section boundaries', bc.slice(0, 3).map((c) => c.id + '=' + c.sections.join('')).join() === 'scene:s:1=ab,scene:s:2=c,scene:s:3=d' && bc[0].label === 'Prep 1' && bc[2].label === 'Prep 3');
-ok('chunks: single big section not split', bc[3].id === 'scene:h' && bc[3].label === 'Huge' && bc[3].ids.length === 15 && bc[4].id === 'sec:f' && bc[4].ids.length === 13);
+ok('chunks: scene over 12 steps is one chunk, never split (D-28)', bc.map((c) => c.id).join() === 'scene:s,scene:h,sec:f' && bc[0].label === 'Prep' && bc[0].ids.length === 23 && bc[0].sections.join() === 'a,b,c,d');
+ok('chunks: big single scene and untagged section unchanged', bc[1].id === 'scene:h' && bc[1].label === 'Huge' && bc[1].ids.length === 15 && bc[2].id === 'sec:f' && bc[2].ids.length === 13);
 const pm = { b1: { state: 'familiar' }, b2: { state: 'learned' }, b3: { state: 'weak' }, d1: { state: 'new' } };
 const seg = C.segments(pc, pm);
 ok('chunks: segments count Familiar or better', seg[1].total === 5 && seg[1].ready === 2 && seg[0].ready === 0 && seg[1].label === 'Med room' && seg.length === 5);
 ok('chunks: isLearned', !C.isLearned(pc[1], pm) && C.isLearned(pc[0], { a1: { state: 'familiar' }, a2: { state: 'learned' } }));
 let sm = C.smart(proc, {});
-ok('smart: first chunk = learn', sm.stage === 'learn' && sm.index === 0 && sm.chunk.id === 'sec:a' && sm.ids.join() === 'a1,a2' && sm.link.length === 0 && sm.label === 'T a' && sm.next === 'Med room');
+ok('smart: first chunk = learn', sm.stage === 'learn' && sm.index === 0 && sm.chunk.id === 'sec:a' && sm.ids.join() === 'a1,a2' && sm.label === 'T a' && sm.next === 'Med room');
 const fam = (list) => list.reduce((m, id) => (m[id] = { state: 'familiar' }, m), {});
 sm = C.smart(proc, fam(['a1', 'a2', 'c1', 'c2']));
-ok('smart: link = last 3 of previous chunk + current', sm.stage === 'link' && sm.index === 1 && sm.link.join() === 'a1,a2' && sm.ids.join() === 'a1,a2,b1,b2,b3,d1,d2' && sm.label === 'Med room' && sm.next === 'T f');
+ok('smart: next chunk after a learned one, no link', sm.stage === 'learn' && sm.index === 1 && sm.chunk.id === 'scene:room' && sm.ids.join() === 'b1,b2,b3,d1,d2' && sm.label === 'Med room' && sm.next === 'T f' && !('link' in sm));
 sm = C.smart(proc, fam(['a1', 'a2', 'b1', 'b2', 'b3', 'd1', 'd2']));
-ok('smart: link takes only the last 3', sm.chunk.id === 'scene:bed' && sm.link.join() === 'b3,d1,d2' && sm.ids.join() === 'b3,d1,d2,c1,c2');
+ok('smart: one chunk at a time, the scene is not split', sm.chunk.id === 'scene:bed' && sm.index === 2 && sm.ids.join() === 'c1,c2' && sm.next === 'T f');
 sm = C.smart(proc, fam(['a1', 'a2', 'b1', 'b2', 'b3', 'd1', 'd2', 'c1', 'c2', 'f1', 'f2']));
 ok('smart: last chunk next = Whole set', sm.chunk.id === 'sec:g' && sm.next === 'Whole set');
 sm = C.smart(proc, fam(sets.items(proc).map((i) => i.id)));
-ok('smart: all learned = run, whole set in set order', sm.stage === 'run' && sm.chunk === null && sm.index === -1 && sm.link.length === 0 && sm.label === 'Whole set' && sm.next === null && sm.ids.join() === sets.items(proc).map((i) => i.id).join());
+ok('smart: all learned = run, whole set in set order', sm.stage === 'run' && sm.chunk === null && sm.index === -1 && sm.label === 'Whole set' && sm.next === null && sm.ids.join() === sets.items(proc).map((i) => i.id).join());
 sm = C.smart(cardSet(14), fam(['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7']));
-ok('smart: cards never link', sm.stage === 'learn' && sm.index === 1 && sm.link.length === 0 && sm.ids.join() === 'c8,c9,c10,c11,c12,c13,c14' && sm.next === 'Whole set');
+ok('smart: cards: second chunk, no link', sm.stage === 'learn' && sm.index === 1 && !('link' in sm) && sm.ids.join() === 'c8,c9,c10,c11,c12,c13,c14' && sm.next === 'Whole set');
 ok('smart: one chunk still learns first', C.smart(cardSet(3), {}).stage === 'learn');
 const empty = C.smart({ id: 'em', kind: 'procedure', title: 'E', sections: [] }, {});
 ok('smart: empty set = run with no ids', empty.stage === 'run' && empty.ids.length === 0 && empty.chunk === null && empty.next === null && empty.label === 'Whole set');
@@ -156,7 +156,7 @@ ok('t15 tagId: slug of the label', sets.tagId('Med room', []) === 'med-room' && 
 ok('t15 tagId: unique against taken', sets.tagId('Med room', ['med-room']) === 'med-room-2' && sets.tagId('Med room', ['med-room', 'med-room-2']) === 'med-room-3');
 ok('t15 tagId: valid scene id', /^[a-z0-9-]{1,60}$/.test(sets.tagId('Ünïcode & 2 things!', [])));
 ok('t15 items carry scene', item('med-admin', '1').scene === 'review' && sets.items(set('ngt')).every((i) => i.scene) && sets.items(t15proc([{ id: 'a', label: 'A' }], ['', 'a']))[0].scene === null && sets.items(t15proc([{ id: 'a', label: 'A' }], ['', 'a']))[1].scene === 'a');
-ok('t15 seeded med-admin chunks', chunks.list(set('med-admin')).map((c) => c.label).join('|') === 'Review and assess|Med room 1|Med room 2|Med room 3|Walking in|Giving the meds 1|Giving the meds 2|Giving the meds 3|Walking out');
+ok('t15 seeded med-admin chunks', chunks.list(set('med-admin')).map((c) => c.label).join('|') === 'Review and assess|Med room|Walking in|Giving the meds|Walking out' && chunks.list(set('med-admin'))[1].ids.length === 41);
 ok('t15 seeded ngt chunks', chunks.list(set('ngt')).map((c) => c.label).join('|') === 'Assess|Plan|Set up|Pass the tube|Secure and finish|Evaluate and document|Removal: assess and plan|Removal: set up|Removal: take it out');
 ok('t15 seeded: every section has a scene', ['med-admin', 'ngt'].every((id) => set(id).sections.every((x) => x.scene)));
 // ---- T-17 tests (Lane C: strict grading) ----
@@ -188,15 +188,15 @@ const t16Map = (pairs) => Object.keys(pairs).reduce((m, id) => (m[id] = { state:
 const t16A = t16Map({ a1: 'familiar', a2: 'learned' });
 ok('t16 DEFAULTS: practice smart, no section', rounds.DEFAULTS.practice === 'smart' && !('section' in rounds.DEFAULTS));
 ok('t16 build smart (default) = first chunk', t16Ids(rounds.build(t16Items, {}, {}, t16Proc)) === 'a1,a2');
-ok('t16 build smart = link steps + current chunk', t16Ids(rounds.build(t16Items, { practice: 'smart' }, t16A, t16Proc)) === 'a1,a2,b1,b2,b3');
+ok('t16 build smart = current chunk only (no link, D-28)', t16Ids(rounds.build(t16Items, { practice: 'smart' }, t16A, t16Proc)) === 'b1,b2,b3');
 ok('t16 build whole = all items in order', t16Ids(rounds.build(t16Items, { practice: 'whole' }, t16A, t16Proc)) === t16Ids(t16Items));
 ok('t16 build section = that section', t16Ids(rounds.build(t16Items, { practice: 'c' }, {}, t16Proc)) === 'c1,c2');
 ok('t16 old section option still means that section (now Custom, D-22)', t16Ids(rounds.build(t16Items, { section: 'b' }, {}, t16Proc)) === 'b1,b2,b3' && rounds.practiceOf({ section: 'b', practice: 'smart' }) === 'custom');
 ok('t16 old section all = smart', rounds.practiceOf({ section: 'all' }) === 'smart' && t16Ids(rounds.build(t16Items, { section: 'all' }, {}, t16Proc)) === 'a1,a2');
 ok('t16 unknown section falls back to smart', rounds.plan(t16Items, { practice: 'gone' }, {}, t16Proc).practice === 'smart' && t16Ids(rounds.build(t16Items, { section: 'gone' }, {}, t16Proc)) === 'a1,a2');
 ok('t16 smart + starred only', t16Ids(rounds.build(t16Items, { starred: true }, t16A, t16Proc)) === 'b2');
-ok('t16 smart + skip learned drops learned link steps', t16Ids(rounds.build(t16Items, { skipLearned: true }, t16A, t16Proc)) === 'a1,b1,b2,b3');
-ok('t16 weak first keeps link steps first', t16Ids(rounds.build(t16Items, { weakFirst: true }, Object.assign({ b3: { state: 'weak' } }, t16A), t16Proc)) === 'a1,a2,b3,b1,b2');
+ok('t16 smart + skip learned drops learned steps of the chunk', t16Ids(rounds.build(t16Items, { skipLearned: true }, Object.assign({ b2: { state: 'learned' } }, t16A), t16Proc)) === 'b1,b3');
+ok('t16 weak first reorders the chunk', t16Ids(rounds.build(t16Items, { weakFirst: true }, Object.assign({ b3: { state: 'weak' } }, t16A), t16Proc)) === 'b3,b1,b2');
 ok('t16 shuffle ignored for procedures', t16Ids(rounds.build(t16Items, { practice: 'whole', shuffle: true }, {}, t16Proc)) === t16Ids(t16Items));
 const t16Cards = { id: 't16c', kind: 'cards', title: 'C', cards: Array.from({ length: 14 }, (_, i) => ({ id: 'q' + (i + 1), front: 'f' + i, back: 'b' + i })) };
 const t16CItems = sets.items(t16Cards), t16Sh = rounds.build(t16CItems, { shuffle: true }, {}, t16Cards);
@@ -205,13 +205,13 @@ const t16All = t16Map(t16Items.reduce((m, i) => (m[i.id] = 'familiar', m), {}));
 ok('t16 run = whole set', t16Ids(rounds.build(t16Items, {}, t16All, t16Proc)) === t16Ids(t16Items));
 ok('t16 no set = whole list (legacy call)', rounds.build(t16Items, {}, {}).length === t16Items.length);
 let t16P = rounds.plan(t16Items, {}, t16A, t16Proc);
-ok('t16 plan: link stage, chunk id and label', t16P.stage === 'link' && t16P.chunk === 'scene:room' && t16P.label === 'Med room' && t16P.link.join() === 'a1,a2');
+ok('t16 plan: learn stage, chunk id and label, no link', t16P.stage === 'learn' && t16P.chunk === 'scene:room' && t16P.label === 'Med room' && !('link' in t16P));
 ok('t16 plan: learn, run, and null when not smart', rounds.plan(t16Items, {}, {}, t16Proc).stage === 'learn' && rounds.plan(t16Items, {}, t16All, t16Proc).stage === 'run' &&
   rounds.plan(t16Items, {}, t16All, t16Proc).chunk === null && rounds.plan(t16Items, { practice: 'whole' }, {}, t16Proc).stage === null);
-ok('t16 basis: the plan from a round\'s before-states', t16Ids(rounds.build(t16Items, {}, t16All, t16Proc, rounds.basisOf({ before: { a1: 'familiar', a2: 'familiar' } }))) === 'a1,a2,b1,b2,b3');
-const t16Live = { mode: 'next', ids: ['a1', 'a2', 'b1', 'b2', 'b3'], i: 1, res: [{ id: 'a1', result: 'right' }], notes: {}, before: {}, t0: 1, stage: 'link', chunk: 'scene:room', label: 'Med room', nearby: { id: 'x' } };
+ok('t16 basis: the plan from a round\'s before-states', t16Ids(rounds.build(t16Items, {}, t16All, t16Proc, rounds.basisOf({ before: { a1: 'familiar', a2: 'familiar' } }))) === 'b1,b2,b3');
+const t16Live = { mode: 'next', ids: ['a1', 'a2', 'b1', 'b2', 'b3'], i: 1, res: [{ id: 'a1', result: 'right' }], notes: {}, before: {}, t0: 1, stage: 'learn', chunk: 'scene:room', label: 'Med room', nearby: { id: 'x' } };
 const t16Snap = rounds.snapshot(t16Live), t16Back = rounds.restore(t16Snap, t16Items);
-ok('t16 snapshot/restore keep stage, chunk and label', t16Snap.stage === 'link' && t16Back.stage === 'link' && t16Back.chunk === 'scene:room' && t16Back.label === 'Med room');
+ok('t16 snapshot/restore keep stage, chunk and label', t16Snap.stage === 'learn' && t16Back.stage === 'learn' && t16Back.chunk === 'scene:room' && t16Back.label === 'Med room');
 ok('t16 pick keeps the plan', rounds.pick(t16Snap, t16Items, 'type').chunk === 'scene:room');
 const t16None = rounds.restore(rounds.snapshot(Object.assign({}, t16Live, { stage: null, chunk: null, label: null })), t16Items);
 ok('t16 non-smart round restores with stage null', t16None.stage === null && t16None.chunk === null);
@@ -334,6 +334,30 @@ ok('kit: escape and grip helpers are exported', typeof SP.ui.sortBind === 'funct
 
 
 // ---- T-30..T-31 tests (Lane A) ----
+{
+  // T-30: a saved Smart round is stale when its learn chunk is done or gone (D-28).
+  ok('stale: learn round whose chunk is not done = not stale', rounds.stale({ stage: 'learn', chunk: 'sec:a' }, proc, {}) === false);
+  ok('stale: learn round whose chunk is done = stale', rounds.stale({ stage: 'learn', chunk: 'sec:a' }, proc, fam(['a1', 'a2'])) === true);
+  ok('stale: learn round whose chunk is gone = stale', rounds.stale({ stage: 'learn', chunk: 'scene:gone' }, proc, {}) === true);
+  ok('stale: old link round is always stale', rounds.stale({ stage: 'link', chunk: 'scene:room' }, proc, {}) === true);
+  ok('stale: run, non-smart and no round are not stale', rounds.stale({ stage: 'run', chunk: null }, proc, {}) === false && rounds.stale({ stage: null, chunk: null }, proc, {}) === false && rounds.stale({}, proc, {}) === false && rounds.stale(null, proc, {}) === false);
+  // T-31: sync merge (D-28). Progress merges per item; other records by u.
+  const SY = SP.core.sync;
+  const syL = { a: { state: 'weak', last: 5 }, b: { state: 'familiar', last: 9 }, c: { state: 'new', last: 3 } };
+  const syR = { a: { state: 'learned', last: 7 }, b: { state: 'new', last: 3 }, d: { state: 'weak', last: 1 } };
+  const sy1 = SY.merge('progress', syL, syR), sy2 = SY.merge('progress', syR, syL);
+  ok('sync progress: per item, larger last wins', sy1.a.state === 'learned' && sy1.b.state === 'familiar' && sy1.c.state === 'new' && sy1.d.state === 'weak');
+  ok('sync progress: same result in either direction', ['a', 'b', 'c', 'd'].every((k) => JSON.stringify(sy1[k]) === JSON.stringify(sy2[k])));
+  ok('sync progress: items on one side only are kept', Object.keys(sy1).sort().join() === 'a,b,c,d');
+  ok('sync progress: missing last counts as 0', SY.merge('progress', { a: { state: 'weak' } }, { a: { state: 'familiar', last: 1 } }).a.state === 'familiar');
+  ok('sync progress: tie goes to remote', SY.merge('progress', { a: { state: 'weak', last: 2 } }, { a: { state: 'familiar', last: 2 } }).a.state === 'familiar');
+  ok('sync rounds: newest round wins, either order', SY.merge('rounds', { u: 5, ids: ['x'] }, { u: 9, ids: ['y'] }).ids[0] === 'y' && SY.merge('rounds', { u: 9, ids: ['y'] }, { u: 5, ids: ['x'] }).ids[0] === 'y');
+  ok('sync rounds: a newer cleared tombstone wins', SY.merge('rounds', { u: 5, ids: ['x'] }, { cleared: true, u: 6 }).cleared === true);
+  ok('sync: missing u counts as 0', SY.merge('sets', { title: 'a' }, { u: 1, title: 'b' }).title === 'b' && SY.merge('settings', { u: 2, x: 1 }, { x: 2 }).x === 1);
+  ok('sync: tie on u goes to remote', SY.merge('settings', { u: 3, v: 'l' }, { u: 3, v: 'r' }).v === 'r');
+  ok('sync: meta newest wins', SY.merge('meta', { u: 1, theme: 'dark' }, { u: 2, theme: 'light' }).theme === 'light');
+  ok('sync: null local or remote gives the other side', SY.merge('rounds', null, { u: 1 }).u === 1 && SY.merge('rounds', { u: 1 }, null).u === 1 && SY.merge('progress', null, { a: { last: 1 } }).a.last === 1 && SY.merge('progress', { a: { last: 1 } }, null).a.last === 1 && SY.merge('rounds', null, null) === null);
+}
 
 
 // ---- T-32..T-35 tests (Lane B) ----

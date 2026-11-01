@@ -1,14 +1,14 @@
-// core/chunks: chunked learning (D-19). A set splits into chunks; the Smart round works through them.
+// core/chunks: chunked learning (D-19, v2 in D-28). A set splits into chunks; a Smart round works through them.
 //   cards:     fixed chunks of 7 in set order; a last chunk under 4 joins the one before.
 //   procedure: scenes. set.scenes = [{id, label}]; a section has at most one section.scene.
-//              A scene = all sections with its tag, ordered by its first section. An untagged
-//              section (or one with an unknown scene id) is its own chunk. A scene over MAX steps
-//              splits at section boundaries; a single section is never split.
-// Stages (from progress, no setting): learn the chunk -> link (procedures: last 3 of the previous
-// chunk + this one) -> run the whole set once every chunk is Familiar or better.
+//              A scene = all sections with its tag, ordered by its first section, never split (one
+//              scene = one chunk however long). An untagged section (or one with an unknown scene id)
+//              is its own chunk.
+// Smart (D-28): learn the first chunk that is not all Familiar or better, one chunk per round; once every
+// chunk is done, run the whole set once. No Link steps.
 (function (SP) {
   'use strict';
-  var MAX = 12, CARD_SIZE = 7, CARD_MIN = 4, LINK = 3, WHOLE = 'Whole set';
+  var CARD_SIZE = 7, CARD_MIN = 4, WHOLE = 'Whole set';
 
   function ids(list) { return list.map(function (it) { return it.id; }); }
 
@@ -44,23 +44,11 @@
       if (done[tag]) return;
       done[tag] = 1;
       var members = secs.filter(function (s) { return s.scene === tag; });
-      // Pack sections greedily into parts of at most MAX steps.
-      var parts = [], cur = [], size = 0;
-      members.forEach(function (s) {
-        var n = bySec[s.id].length;
-        if (cur.length && size + n > MAX) { parts.push(cur); cur = []; size = 0; }
-        cur.push(s); size += n;
-      });
-      if (cur.length) parts.push(cur);
-      var label = scenes[tag].label || tag;
-      parts.forEach(function (p, n) {
-        var one = parts.length === 1;
-        out.push({
-          id: 'scene:' + tag + (one ? '' : ':' + (n + 1)),
-          label: one ? label : label + ' ' + (n + 1),
-          ids: p.reduce(function (acc, s) { return acc.concat(ids(bySec[s.id])); }, []),
-          sections: p.map(function (s) { return s.id; })
-        });
+      out.push({
+        id: 'scene:' + tag,
+        label: scenes[tag].label || tag,
+        ids: members.reduce(function (acc, s) { return acc.concat(ids(bySec[s.id])); }, []),
+        sections: members.map(function (s) { return s.id; })
       });
     });
     return out;
@@ -84,21 +72,21 @@
 
   function isLearned(chunk, map) { return ready(chunk, map) === chunk.ids.length; }
 
+  // The Smart plan: { stage, chunk, index, ids, label, next }.
+  //   learn: chunk = the first chunk not learned; ids = exactly its ids; next = the label of the following
+  //          chunk not learned, or 'Whole set'.
+  //   run:   every chunk learned; ids = the whole set in set order; chunk null, index -1, next null.
   function smart(set, map) {
     var chunks = list(set);
     var index = -1;
     for (var i = 0; i < chunks.length; i++) if (!isLearned(chunks[i], map)) { index = i; break; }
     if (index < 0) {
-      // Run is the whole set in set order (scene chunks can reorder sections).
       var whole = set ? ids(SP.core.sets.items(set)) : [];
-      return { stage: 'run', chunk: null, index: -1, ids: whole, link: [], label: WHOLE, next: null };
+      return { stage: 'run', chunk: null, index: -1, ids: whole, label: WHOLE, next: null };
     }
-    var chunk = chunks[index], link = [];
-    if (index > 0 && set.kind !== 'cards') link = chunks[index - 1].ids.slice(-LINK);
-    var next = WHOLE;
+    var chunk = chunks[index], next = WHOLE;
     for (var j = index + 1; j < chunks.length; j++) if (!isLearned(chunks[j], map)) { next = chunks[j].label; break; }
-    return { stage: link.length ? 'link' : 'learn', chunk: chunk, index: index, ids: link.concat(chunk.ids),
-      link: link, label: chunk.label, next: next };
+    return { stage: 'learn', chunk: chunk, index: index, ids: chunk.ids.slice(), label: chunk.label, next: next };
   }
 
   function of(set, itemId) {
@@ -107,5 +95,5 @@
     return null;
   }
 
-  SP.core.chunks = { list: list, segments: segments, isLearned: isLearned, smart: smart, of: of, MAX: MAX, CARD_SIZE: CARD_SIZE };
+  SP.core.chunks = { list: list, segments: segments, isLearned: isLearned, smart: smart, of: of, CARD_SIZE: CARD_SIZE };
 })((typeof window !== 'undefined' ? window : globalThis).SP);
