@@ -310,6 +310,58 @@
 
 
 /* ---------- T-18: scene colours + Picker popover (Lane A) ---------- */
+/* Scene colours (D-22): six hues, given to a scene tag by its position in the set (index mod 6). --scene-N is the
+   ink (dot, edit ring); --scene-N-bg the soft wash behind a chip. Light and dark, scoped like the theme block above. */
+.study[data-mode='light']{
+  --scene-1:lch(54% 52 25);  --scene-1-bg:lch(93% 12 25);
+  --scene-2:lch(62% 50 80);  --scene-2-bg:lch(94% 13 80);
+  --scene-3:lch(56% 46 150); --scene-3-bg:lch(93% 12 150);
+  --scene-4:lch(56% 40 200); --scene-4-bg:lch(93% 9 200);
+  --scene-5:lch(54% 52 330); --scene-5-bg:lch(93% 11 330);
+  --scene-6:lch(52% 44 255); --scene-6-bg:lch(93% 10 255);
+}
+.study[data-mode='dark']{
+  --scene-1:lch(74% 50 25);  --scene-1-bg:lch(24% 14 25);
+  --scene-2:lch(82% 46 80);  --scene-2-bg:lch(25% 13 80);
+  --scene-3:lch(75% 46 150); --scene-3-bg:lch(24% 13 150);
+  --scene-4:lch(74% 40 200); --scene-4-bg:lch(24% 10 200);
+  --scene-5:lch(74% 50 330); --scene-5-bg:lch(24% 13 330);
+  --scene-6:lch(72% 44 255); --scene-6-bg:lch(24% 12 255);
+}
+/* a tone names its ink (--sc) and wash (--sc-bg); the tone is set by the kit (sceneTone) */
+[data-tone='scene-1']{--sc:var(--scene-1);--sc-bg:var(--scene-1-bg)}
+[data-tone='scene-2']{--sc:var(--scene-2);--sc-bg:var(--scene-2-bg)}
+[data-tone='scene-3']{--sc:var(--scene-3);--sc-bg:var(--scene-3-bg)}
+[data-tone='scene-4']{--sc:var(--scene-4);--sc-bg:var(--scene-4-bg)}
+[data-tone='scene-5']{--sc:var(--scene-5);--sc-bg:var(--scene-5-bg)}
+[data-tone='scene-6']{--sc:var(--scene-6);--sc-bg:var(--scene-6-bg)}
+/* sk-tags: a scene chip is its colour (wash, and a dot before its name); the rename input takes the wash too */
+.sk-tags .sk-tag[data-tone]{background:var(--sc-bg)}
+.sk-tag[data-tone]::before{content:"";width:8px;height:8px;margin-left:var(--sp-3);border-radius:var(--r-round);background:var(--sc);flex:none}
+.sk-tag[data-tone] .sk-tag-l{padding-left:var(--sp-1_5)}
+.sk-tags input.sk-tags-edit[data-tone]{background:var(--sc-bg)}
+/* sk-picker: the Picker chip (Proprietary's chip, a button); a scene tone washes it and its dot shows the ink */
+.sk-picker{align-self:flex-start;gap:var(--sp-1_5);padding:var(--sp-1) var(--sp-3);font-size:var(--fs-2);font-weight:var(--fw-medium);
+  background:var(--raise);color:var(--text);box-shadow:inset 0 0 0 1px var(--line2);max-width:100%;box-sizing:border-box}
+.sk-picker[data-tone]{background:var(--sc-bg);box-shadow:none}
+.sk-picker-l{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sk-picker svg{width:var(--sp-3);height:var(--sp-3);flex:none;color:var(--quiet)}
+.sk-pdot{display:inline-block;width:8px;height:8px;border-radius:var(--r-round);background:var(--sc);flex:none}
+/* sk-pmenu: the Picker's popover menu (Proprietary's .popover); rows are .popover-i buttons, 44 px on touch */
+.sk-pmenu{min-width:200px;max-height:min(360px,calc(100dvh - 16px))}
+.sk-prow{display:flex;align-items:center;gap:var(--sp-2);min-height:var(--sp-8);margin:0;padding:0 var(--sp-2);border:0;border-radius:var(--r-md);
+  background:none;box-shadow:none;font:inherit;font-size:var(--fs-3);color:var(--text);text-align:start;cursor:pointer;box-sizing:border-box}
+.sk-prow > span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sk-prow:hover,.sk-prow:focus-visible{background:var(--hover)}
+.sk-prow:focus-visible{outline:2px solid var(--focus);outline-offset:-2px}
+.sk-prow .sk-pdot{margin-left:var(--sp-1)}
+.sk-prow[data-value='']{color:var(--quiet)}
+@media (max-width:599px),(pointer:coarse){.sk-prow{min-height:var(--tap)}}
+/* phone: the menu is a bottom sheet (sk-pmenu rises from the foot), not a float under the chip */
+@media (max-width:599px){
+  .sk-pmenu{left:0;right:0;top:auto;bottom:0;width:auto;min-width:0;max-width:none;max-height:70dvh;
+    border-radius:var(--r-xl) var(--r-xl) 0 0;padding:var(--sp-2) var(--sp-2) calc(var(--sp-3) + env(safe-area-inset-bottom,0px))}
+}
 
 
 /* ---------- T-19..T-20: round header, sk-segbar v2 (Lane B) ---------- */

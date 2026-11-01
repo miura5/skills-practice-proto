@@ -75,9 +75,30 @@
   root.addEventListener('pointerdown', function (e) { tapAct = e.target.closest('[data-act]'); });
   root.addEventListener('focusout', tag);
 
+  // T-18 Picker (Proprietary's popover chip): the native popover opens from its chip (popovertarget). Here:
+  // aria-expanded follows the menu, the menu is placed under its chip (or as a bottom sheet on the phone, in CSS),
+  // and focus goes to the current row. A row tap closes the menu (below). Esc and outside taps close it natively.
+  root.addEventListener('toggle', function (e) {
+    var pop = e.target, chip = pop.id && root.querySelector('[popovertarget="' + pop.id + '"]');
+    if (!chip || !pop.classList.contains('sk-pmenu')) return;
+    var open = e.newState === 'open';
+    chip.setAttribute('aria-expanded', open ? 'true' : 'false');
+    if (!open) return;
+    var r = chip.getBoundingClientRect(), vw = document.documentElement.clientWidth, vh = window.innerHeight;
+    var w = pop.offsetWidth, h = pop.offsetHeight;
+    var x = Math.max(8, Math.min(r.left, vw - w - 8)), y = r.bottom + 6;
+    if (y + h > vh - 8) y = Math.max(8, r.top - h - 6);
+    pop.style.setProperty('--pop-x', Math.round(x) + 'px');
+    pop.style.setProperty('--pop-y', Math.round(y) + 'px');
+    var cur = pop.querySelector('[aria-checked="true"]') || pop.querySelector('button');
+    if (cur) cur.focus({ preventScroll: true });
+  }, true);
+
   root.addEventListener('click', function (e) {
     var el = e.target.closest('[data-act]');
     tapAct = null;
+    var pop = e.target.closest('.sk-pmenu');
+    if (el && pop && pop.matches(':popover-open')) pop.hidePopover();   // a Picker row closes its menu
     if (!el || el.disabled) return;
     var fn = actions[el.dataset.act];
     if (fn) { e.preventDefault(); fn(app, el, e); }
@@ -95,6 +116,13 @@
     if ((e.target.id === 'answer' || (e.target.classList && e.target.classList.contains('sk-blank'))) && e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); SP.screens.type.check(app); }
     if (e.target.id === 'newTitle' && e.key === 'Enter') { e.preventDefault(); actions.createSet(app); }
     if (e.key === 'Escape' && app.state.sheet) actions.closeSheet(app);
+    var menu = e.target.closest && e.target.closest('.sk-pmenu');   // Picker rows: arrows move between them
+    if (menu && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
+      e.preventDefault();
+      var rows = [].slice.call(menu.querySelectorAll('.sk-prow')), at = rows.indexOf(e.target);
+      var nxt = rows[(at + (e.key === 'ArrowDown' ? 1 : -1) + rows.length) % rows.length];
+      if (nxt) nxt.focus();
+    }
   });
 
   SP.app = app;
