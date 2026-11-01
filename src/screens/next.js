@@ -19,7 +19,7 @@
         label: cards ? it.front : 'Step ' + it.num + (it.star ? ' ★' : ''), answer: it.answer
       }) + '</div></div>' +
       (r.flip
-        ? '<div class="sk-grade"><button data-tone="bad" data-act="grade" data-id="missed">Missed</button><button data-tone="warn" data-act="grade" data-id="shaky">Shaky</button><button data-tone="ok" data-act="grade" data-id="right">Got it</button></div>'
+        ? '<div class="sk-grade"><button data-tone="bad" data-act="grade" data-id="missed">Missed</button><button data-tone="warn" data-act="grade" data-id="shaky">Shaky</button><button data-tone="ok" data-act="grade" data-id="right">Right</button></div>'
         : '<p class="sk-meta sk-say">Say it out loud, then flip</p>') +
       '</main>';
   }
