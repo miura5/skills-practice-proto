@@ -47,10 +47,11 @@
       ? '<p class="sk-fill">' + blanks(it, open) + '</p><span class="sk-meta">Almost: fill in what’s missing.</span>'
       : '<label for="answer" class="sr">Your answer</label>' +
         '<textarea id="answer" class="sk-input" rows="3" autocomplete="off" autocapitalize="off" placeholder="' + (cards ? 'Type what’s on the back…' : 'Type the step…') + '"></textarea>' + hint + msg;
+    var enter = R.enter(seen, r, cards);
     return U.session(r.i, r.ids.length) +
       '<main class="screen" style="gap:12px;padding-top:8px">' +
       '<span class="sk-meta center">' + U.esc(app.set.title) + ' · Type it</span>' +
-      '<ol class="sk-wheel">' +
+      '<ol class="sk-wheel"' + enter + '>' +
       '<li class="sk-row focus">' +
       '<div class="row" style="align-items:baseline;gap:12px"><span class="n" style="color:var(--her)">' + U.esc(it.num) + '</span>' +
       '<span class="stack" style="gap:2px"><span class="sk-meta">' + U.esc(lead) + '</span><b style="font-size:var(--fs-4)">' + U.esc(cards ? it.front : 'What’s the next step?') + '</b></span></div>' +
@@ -62,6 +63,7 @@
 
   // Grade, or hold the row open for the missing parts. A hinted right answer stays Right
   // (tagged hinted); record() with how 'hint' caps the ladder at Familiar (D-06).
+  var seen = {};   // last round + index drawn (T-06)
   function done(app, g) {
     var r = app.state.round, hinted = r.hint;
     r.open = null; r.nearby = null;

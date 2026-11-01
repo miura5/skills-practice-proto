@@ -30,6 +30,13 @@
     return true;
   }
 
+  // T-06: ' data-enter="up|left"' when this draw shows a different item than the last draw
+  // (a new round or a new index), '' on any other re-render. memo is the screen's own {}.
+  // A save redraws again straight after the advance, so draws in the next 200ms keep the class.
+  function enter(memo, r, cards) {
+    if (memo.r !== r || memo.i !== r.i) { memo.r = r; memo.i = r.i; memo.t = Date.now(); }
+    return Date.now() - memo.t < 200 ? ' data-enter="' + (cards ? 'left' : 'up') + '"' : '';
+  }
   function current(app) {
     var r = app.state.round;
     return r && app.byId[r.ids[r.i]];
@@ -94,5 +101,5 @@
     toSet: function (app) { app.update({ screen: 'set', round: null }); }
   };
 
-  SP.screens.round = { start: start, resume: resume, current: current, record: record, refilter: refilter, render: results, modeName: modeName, actions: actions };
+  SP.screens.round = { start: start, resume: resume, current: current, enter: enter, record: record, refilter: refilter, render: results, modeName: modeName, actions: actions };
 })(window.SP);

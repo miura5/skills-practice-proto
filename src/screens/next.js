@@ -4,18 +4,20 @@
   'use strict';
   var U = SP.ui, R = SP.screens.round;
 
+  var seen = {};   // last round + index drawn, so only a move to a new item animates (T-06)
   function render(app) {
     var r = app.state.round, it = R.current(app), cards = app.set.kind === 'cards';
+    var enter = R.enter(seen, r, cards);
     return U.session(r.i, r.ids.length) +
       '<main class="screen" style="gap:20px;padding-top:8px">' +
       '<span class="sk-meta center">' + U.esc(app.set.title) + ' · ' + R.modeName(app) + '</span>' +
       '<div class="grow" style="display:flex;flex-direction:column;justify-content:center">' +
-      U.flip({
+      '<div class="sk-enter"' + enter + '>' + U.flip({
         act: 'flipCard', flipped: r.flip, h: 380,
         lead: cards ? 'Card ' + it.num : (it.prev ? 'After: ' + (it.prev.cue || it.prev.answer) : 'Start of the checklist'),
         ask: cards ? it.front : 'What’s next?',
         label: cards ? it.front : 'Step ' + it.num + (it.star ? ' ★' : ''), answer: it.answer
-      }) + '</div>' +
+      }) + '</div></div>' +
       (r.flip
         ? '<div class="sk-grade"><button data-tone="bad" data-act="grade" data-id="missed">Missed</button><button data-tone="warn" data-act="grade" data-id="shaky">Shaky</button><button data-tone="ok" data-act="grade" data-id="right">Got it</button></div>'
         : '<p class="sk-meta center" style="margin:0;height:58px;display:flex;align-items:center;justify-content:center">Say it out loud, then flip</p>') +

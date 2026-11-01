@@ -212,3 +212,15 @@
 .sk-blank:focus{outline:0;border-bottom-color:var(--her)}
 .sk-nearby{display:block;padding:8px 12px;border-radius:var(--r-md);background:var(--warn-bg);color:var(--text);font-size:var(--fs-2)}
 .sk-hinted{font-size:var(--fs-1);font-weight:500;color:var(--quiet);border:1px solid var(--line2);border-radius:99px;padding:0 6px;margin-left:4px}
+
+/* T-06: moving to the next item. Procedures rise into place (a list moving up); cards are dealt
+   in from the right. Runs once on the draw that shows a new item (screens/round enter()). */
+@keyframes sk-enter-up { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+@keyframes sk-enter-left { from { opacity: 0; transform: translateX(32px); } to { opacity: 1; transform: none; } }
+@keyframes sk-enter-fade { from { opacity: 0; } to { opacity: 1; } }
+.study [data-enter="up"].sk-enter, .study .sk-wheel[data-enter="up"] > .focus { animation: sk-enter-up var(--dur-4) var(--ease-out) both; }
+.study [data-enter="left"].sk-enter, .study .sk-wheel[data-enter="left"] > .focus { animation: sk-enter-left var(--dur-4) var(--ease-out) both; }
+.study .sk-wheel[data-enter] > li:not(.focus) { animation: sk-enter-fade var(--dur-4) var(--ease-out) both; animation-delay: 60ms; }
+@media (prefers-reduced-motion: reduce) {
+  .study [data-enter].sk-enter, .study .sk-wheel[data-enter] > li { animation: sk-enter-fade var(--dur-2) linear both !important; animation-delay: 0s !important; }
+}

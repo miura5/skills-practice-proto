@@ -122,7 +122,7 @@ Matt hands it to a new chat by attaching the repo; CLAUDE.md sets the role.
 - [x] T-03 Resume a round (D-12). Shipped 2026-11-01 as v0.3.0, 45 tests.
 - [x] T-04 Type it: keep the current row in view above the phone keyboard (D-13). Shipped 2026-11-01 as v0.3.1.
 - [x] T-05 Type it layout without scrolling (D-14). Shipped 2026-11-01 as v0.3.2 (Matt: works on iPhone).
-- [ ] T-06 Smooth transition to the next item: procedures slide vertically (Next Step, Type it), card sets slide horizontally (Flashcards, Type it) (D-15). In progress.
+- [x] T-06 Smooth transition to the next item: procedures slide vertically (Next Step, Type it), card sets slide horizontally (Flashcards, Type it) (D-15). Shipped 2026-11-01 as v0.3.3.
 
 ## D-10 build notes (2026-11-01)
 - Bands: 100% Right; 60%+ row stays open with blanks; 34-59% Shaky; under 34% Missed.
@@ -150,3 +150,8 @@ Why: D-13's scroll pinning did nothing on Matt's iPhone in the claude.ai app.
 Decision: no scroll tricks. The focus row is the first row under the meta line; the last answer is
 one compact line below it (result, hinted, Missing: max 2 lines); older answers only on Results;
 1-2 faded upcoming rows. after() just resets scrollTop to 0. Supersedes D-13's pin.
+
+## D-15 · Item transitions (2026-11-01, v0.3.3)
+Decision: enter-only CSS animation (240ms, --ease-out) on each advance. Procedures: up 24px + fade.
+Cards: in from the right 32px + fade. round.enter() decides (index changed, 200ms window to survive
+the store's redraw). No slide-out, so input stays instant. Reduced motion: fade only.
