@@ -1,5 +1,5 @@
-// screens/type: Type it. The wheel shows the last answers, the focused row with the answer box,
-// and what's coming. Enter or Check grades with core/grade; Hint caps the item at Familiar.
+// screens/type: Type it. The focused row with the answer box comes first, then the
+// last answer as one line, then what's coming. Enter or Check grades with core/grade; Hint caps the item at Familiar.
 (function (SP) {
   'use strict';
   var U = SP.ui, R = SP.screens.round;
@@ -25,14 +25,16 @@
 
   function render(app) {
     var r = app.state.round, it = R.current(app), cards = app.set.kind === 'cards';
-    var past = r.res.slice(-3).map(function (x, k, arr) {
-      var p = app.byId[x.id], note = r.notes[x.id];
-      return '<li class="sk-row" data-result="' + x.result + '" data-d="' + (arr.length - k >= 3 ? 'far' : arr.length - k === 2 ? 'near' : '') + '">' +
-        '<span class="n">' + U.esc(p.num) + '</span><span style="flex:1;display:flex;flex-direction:column;gap:4px">' +
-        '<span>' + (cards ? '<b>' + U.esc(p.front) + ':</b> ' : '') + U.marked(p.raw) + '</span>' +
-        (note && note.missing && note.missing.length && x.result !== 'right' ? '<span class="sk-note">Missing: ' + U.esc(note.missing.join(', ')) + '</span>' : '') +
-        '</span><span class="tag">' + TAG[x.result] + (x.hinted ? ' <span class="sk-hinted">hinted</span>' : '') + '</span></li>';
-    }).join('');
+    // Only the last answer, as one compact line under the focus row (T-05): nothing tall above it.
+    var last = r.res[r.res.length - 1], fb = '';
+    if (last) {
+      var p = app.byId[last.id], note = r.notes[last.id];
+      var miss = note && note.missing && note.missing.length && last.result !== 'right' ? note.missing.join(', ') : '';
+      fb = '<li class="sk-row sk-last" data-result="' + last.result + '"><span class="n">' + U.esc(p.num) + '</span>' +
+        '<span class="sk-last-body"><span class="sk-last-label">' + U.esc(cards ? p.front : (p.cue || p.answer)) + '</span>' +
+        (miss ? '<span class="sk-note sk-clamp">Missing: ' + U.esc(miss) + '</span>' : '') +
+        '</span><span class="tag">' + TAG[last.result] + (last.hinted ? ' <span class="sk-hinted">hinted</span>' : '') + '</span></li>';
+    }
     var upcoming = r.ids.slice(r.i + 1, r.i + 3).map(function (id, k) {
       var u = app.byId[id];
       return '<li class="sk-row" data-d="' + (k ? 'far' : 'near') + '"><span class="n">' + U.esc(u.num) + '</span><span style="flex:1;color:var(--faint)">' + (cards ? U.esc(u.front) : '· · ·') + '</span></li>';
@@ -48,14 +50,14 @@
     return U.session(r.i, r.ids.length) +
       '<main class="screen" style="gap:12px;padding-top:8px">' +
       '<span class="sk-meta center">' + U.esc(app.set.title) + ' · Type it</span>' +
-      '<ol class="sk-wheel">' + past +
+      '<ol class="sk-wheel">' +
       '<li class="sk-row focus">' +
       '<div class="row" style="align-items:baseline;gap:12px"><span class="n" style="color:var(--her)">' + U.esc(it.num) + '</span>' +
       '<span class="stack" style="gap:2px"><span class="sk-meta">' + U.esc(lead) + '</span><b style="font-size:var(--fs-4)">' + U.esc(cards ? it.front : 'What’s the next step?') + '</b></span></div>' +
       box +
       '<div class="row">' + (open ? '' : '<button data-ui="button" data-kind="ghost" data-act="hint">Hint</button>') + '<button data-ui="button" data-kind="ghost" data-act="skip">Skip</button><span class="grow"></span>' +
       '<button data-ui="button" data-kind="primary" data-act="check" style="padding:0 22px">Check</button></div></li>' +
-      upcoming + '</ol></main>';
+      fb + upcoming + '</ol></main>';
   }
 
   // Grade, or hold the row open for the missing parts. A hinted right answer stays Right
@@ -93,39 +95,12 @@
     hint: function (app) {
       var box = document.getElementById('answer'), keep = box ? box.value : '';
       app.state.round.hint = true; app.render();
-      var b2 = document.getElementById('answer'); if (b2) { b2.value = keep; b2.focus(); }
+      var b2 = document.getElementById('answer'); if (b2) { b2.value = keep; b2.focus({ preventScroll: true }); }
     }
   };
 
-  // Keep the current row at the top of the list, just under the progress bar, so the answer box
-  // sits above the phone keyboard without scrolling (Matt, 2026-11-01).
-  // Bottom room is sized to fit, so the row can always reach the top (even the last item) with
-  // no big empty area. iOS may scroll the window when the keyboard opens: reset it and re-pin.
-  function pin(screen) {
-    var row = screen.querySelector('.sk-row.focus');
-    if (!row || !row.isConnected) return;
-    screen.style.paddingBottom = '';
-    var base = parseFloat(getComputedStyle(screen).paddingBottom) || 0;
-    var top = row.getBoundingClientRect().top - screen.getBoundingClientRect().top + screen.scrollTop - 8;
-    var room = screen.scrollHeight - top;
-    if (room < screen.clientHeight) screen.style.paddingBottom = (base + screen.clientHeight - room) + 'px';
-    screen.scrollTop = Math.max(0, top);
-    if (window.scrollY) window.scrollTo(0, 0);
-  }
-  var vvBound = false;
-  function after(app, screen) {
-    pin(screen);
-    requestAnimationFrame(function () { pin(screen); });
-    if (!vvBound && window.visualViewport) {
-      vvBound = true;
-      var re = function () {
-        var s = document.querySelector('.screen');
-        if (s && app.state.screen === 'type') pin(s);
-      };
-      visualViewport.addEventListener('resize', re);
-      visualViewport.addEventListener('scroll', function () { if (window.scrollY) window.scrollTo(0, 0); });
-    }
-  }
+  // Each new item starts at the top; the focus row is drawn first so it sits above the keyboard.
+  function after(app, screen) { screen.scrollTop = 0; }
 
   SP.screens.type = { after: after, render: render, actions: actions, check: check };
 })(window.SP);
