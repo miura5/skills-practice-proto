@@ -130,6 +130,10 @@ Matt hands it to a new chat by attaching the repo; CLAUDE.md sets the role.
 - [x] T-11 Bug: carousel left arrow unfilled and dead at the last slide (D-18). Fixed in v0.4.1: slides and arrows shared z-index 1, so later DOM painted over prev; track now isolates, arrows z 2, 56px desktop gutter.
 - [x] T-12 Carousel: pre-T-11 slide width (85% of track - 40px), centred snap with symmetric padding, art .75 in the carousel only, arrows 6px from the edge (D-18). Shipped v0.4.2.
 - [x] T-13 Set overview mode cards: captions removed (U.practice(title, art, act)); art pinned to the card bottom so both align. Shipped v0.4.2. Build manager review passed.
+- [ ] T-14 Core chunking: src/core/chunks.js (chunks, stages, Smart round list) + tests (D-19). Batch 1 of 4.
+- [ ] T-15 Data + Edit: scene tags in set data; sk-tags tag input (Study kit, generic); Proprietary Picker per section; seed Med Admin + NG tube scenes from the old prototype (D-19). Batch 2 of 4.
+- [ ] T-16 Rounds + screens: Smart rounds, segmented session bar (Study kit), scene in the prompt, Options Practice Smart / Whole set / Section, Results "Next: <chunk>" (D-19). Batch 3 of 4.
+- [ ] T-17 Grading simplification: strict order; remove the nearby-step stage and the stored strict/before/anytime rules; update tests (D-19). Batch 4 of 4.
 
 ## D-10 build notes (2026-11-01)
 - Bands: 100% Right; 60%+ row stays open with blanks; 34-59% Shaky; under 34% Missed.
@@ -181,3 +185,40 @@ note; Start over is the last item in the in-round Options sheet, red, no confirm
 Decision: Study kit sk-carousel (scroll-snap track, 85% slides, arrows only on fine pointers,
 tappable dots), markup via U.carousel. Home's Jump back in: last set, then sets with a saved
 round, then others, max 5; Resume round or Continue; practice art bottom-right.
+
+## D-19 · Chunked learning: scenes, chunks, stages; strict order (approved by Matt 2026-11-01)
+Why: start-to-finish recall from "After: …" alone was harder than the old prototype's scenes.
+Chunking (working memory), context cues and part-then-whole training support learning by scene first,
+then joining scenes, then full runs, which match the checkoff.
+Decision:
+- One concept for both set types: chunks.
+  - Cards: fixed chunks of 7 in set order; a last chunk under 4 joins the one before.
+  - Procedures: scenes. A set has a list of scene tags {id, label}; each section has at most one
+    scene id (a scene can hold many sections; a section never has two scenes). A scene = all sections
+    with its tag; scenes run in the order of their first section. An untagged section is its own
+    chunk. A scene over ~12 steps splits at a section boundary.
+- Stages per chunk, from progress (no setting):
+  1. Learn: the round is the chunk; procedures show the scene in the prompt ("Med room · After: …").
+     Done when every item in the chunk is Familiar or better.
+  2. Link (procedures only): the next chunk's round starts with the last 3 steps of the previous chunk.
+  3. Run: when every chunk is past Learn, the default round is the whole set, start to finish.
+- Rounds stay one-per-set and shared across modes (D-17); a round = the current chunk. Results shows
+  "Next: <chunk>". Existing saved rounds are kept until finished or Start over. Progress is per item, kept.
+- Session bar: one segment per chunk, current one filling; a plain bar in Run. New Study kit component.
+- Options: "Practice: Smart (default) / Whole set / Section" replaces the Section select. Starred,
+  weak-first, skip-learned stay; shuffle applies to cards only (procedures are strict).
+- Strict order, always. No free order. A Type it answer is graded only against the current step.
+  Remove D-10's recognise / "nearby step" stage and the stored strict/before/anytime rules. Keep
+  synonyms, loose allowances, required wording, typo allowance and part-by-part blanks.
+- Edit: no separate scene manager. Edit procedure gets a "Scenes" field under Title using a new
+  Study kit component sk-tags: comma or Enter turns text into a badge; Backspace on empty pulls the
+  last badge back to text; tap a badge to edit it in place; blur or comma commits; x removes (clears
+  that scene from its sections). Tags keep a stable id, so renaming keeps assignments; badge order
+  doesn't matter. sk-tags is generic (no scene logic), built only from Proprietary tokens and its
+  Badge/Chip, so it can move to Proprietary later. Each section gets Proprietary's Picker
+  (data-ui="picker"): "No scene" + the tags.
+- Built-in scenes for Med Admin and NG tube come from the old prototype artifact
+  (https://claude.ai/artifact/JCf1xzWxc33pHtw6RWHwUn, its skills/*.js scene lists).
+Batch rule (Matt): T-14..T-17 run in order, one agent each; after each task the build manager commits,
+pushes and PAUSES for Matt's go. The build manager reviews the whole batch's diff at the end (design
+system + structure), then republishes once.

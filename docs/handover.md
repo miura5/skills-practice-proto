@@ -1,38 +1,43 @@
 # Handover
 
-Last updated 2026-11-01 by the chat that shipped v0.4.2. No chat is managing right now.
+Last updated 2026-11-01 by the chat that shipped v0.4.2 and planned D-19. No agent is running.
 
 ## Where things stand
-- v0.2.0 is live at https://claude.ai/artifact/UUj5psocojXR1xkK2QVAbh (same link). It adds Grading v2 (D-10, T-01):
-  full-stop fix, part-by-part credit, typo allowance, two-stage grading with inline blanks,
-  "nearby step" message, Right + "hinted" tag. Build notes are at the end of DECISIONS.md.
-- v0.3.0 (D-12, T-03): a round in progress is saved per set; Resume on the set screen and Home.
-- v0.3.2 (D-14, T-05): Type it draws the current row first, last answer as a compact line below.
-  D-13's scroll pin failed on iPhone. Matt confirmed v0.3.2 works on iPhone.
-- v0.3.3 (D-15, T-06): items slide in (procedures up, cards from the right). Needs Matt's check.
-- v0.3.4 (D-16, T-07): Study kit clean-up; ladder Learned green, Familiar yellow, Weak red.
-- v0.4.0 (D-17, D-18, T-08..T-10): one shared round per set across modes; Start over in the
-  in-round Options sheet; Home carousel. "Mixed" Results header untested in a browser.
-- v0.4.1 (T-11): carousel arrows fixed on desktop (solid, clickable at every slide).
-- v0.4.2 (T-12, T-13): carousel centred at the old width, art .75 there; mode cards without
-  captions, art aligned.
-- Process (CLAUDE.md Roles): every request becomes a task, an agent codes it, the build manager
-  reviews the diff for design-system and structure drift before shipping.
-- Matt: all styling goes through the two layers (Proprietary + Study kit). No inline styles.
-- Matt says v0.2.0 grading looks good.
-- Tests: `node tests/core.test.js` passes 45.
-- Not yet clicked through in a real browser. Matt is the first to try it.
-- Saving to the account is set up but not yet confirmed with real data.
+- Live: v0.4.2 at https://claude.ai/artifact/UUj5psocojXR1xkK2QVAbh (same link every release).
+- Tests: `node tests/core.test.js` passes 48.
+- Shipped today: Grading v2 (D-10), resume rounds (D-12), Type it current row first (D-14, works on
+  iPhone), item transitions (D-15), Study kit clean-up + ladder colours (D-16), one shared round per
+  set + Start over in Options (D-17), Home carousel sk-carousel (D-18, T-11..T-13 fixes).
+- Account saving is set up; not yet confirmed with real data (list data/users/me via ArtifactData).
 
-## Next
-- Get Matt's feedback on v0.2.0 grading before his revalidation (Wed 11/4). Fix what he reports.
-- Confirm account saving: after Matt does a round, list the artifact's data under
-  data/users/me (ArtifactData tool) and tell him what arrived.
-- If close answers still fail too often: the claude.ai sample capability as a fallback (D-10).
+## In progress: the D-19 batch (chunked learning), approved by Matt
+Read D-19 in docs/DECISIONS.md first; it is the full design. Tasks, in this order:
+1. T-14 Core chunking (src/core/chunks.js + tests).
+2. T-15 Data + Edit: scene tags, sk-tags (generic Study kit tag input), Proprietary Picker per section,
+   seed Med Admin + NG tube scenes from the old prototype.
+3. T-16 Rounds + screens: Smart rounds, segmented session bar, scene in prompt, Options Practice,
+   Results "Next: <chunk>".
+4. T-17 Grading: strict order; remove the nearby-step stage and stored order rules.
+Batch rule: one agent per task; after each task commit + push, then PAUSE and wait for Matt's go
+(he checks his usage). Review the whole batch's diff once at the end, then republish once.
+Check the Tasks list in DECISIONS.md for which tasks are ticked.
+
+## How we work (CLAUDE.md Roles)
+- Every request or bug becomes a backlog task in DECISIONS.md, an agent codes it, the build manager
+  reviews the diff for drift before shipping: Proprietary (ds/proprietary.css) untouched; all looks
+  in Study kit sk- components with tokens (ds/study.css); no static inline styles in screens (only
+  computed values like gauge widths); content / core / screens / app split; tests for core logic.
+- Republish: Artifact publish with url = live link, file_path index.html, root = repo, files = every
+  changed file. Read any live file first if this chat hasn't seen it (the tool refuses otherwise).
+- The repo's commit check flags an agent's in-progress files; leave them uncommitted until shipped.
+- file:// test pages show "Â·" for "·" (no charset there); the live artifact is fine. Ignore it.
 
 ## Things Matt said that matter
-- Old prototype (for reference only, don't copy its structure): "Skills Practice",
-  https://claude.ai/artifact/JCf1xzWxc33pHtw6RWHwUn. Grading in tm* functions.
+- Strict order always; hints are the help. Learners can reorder steps in Edit if they want.
+- Chunking should feel natural (from progress), not a toggle; Options keeps an override.
+- All styling through the two layers (Proprietary + Study kit). sk-tags may later move to Proprietary.
+- Revalidation is Wed 11/4.
+- Old prototype (reference only): https://claude.ai/artifact/JCf1xzWxc33pHtw6RWHwUn
 - Rebuild outline: https://claude.ai/artifact/YTKc8MPEFekfaNYdC7vydp
 - Design mock-ups: https://claude.ai/artifact/CKY7aAw1o71ZwUammgp9E9
 - Keep it a prototype: no unnecessary safeguards, no production workflow.
