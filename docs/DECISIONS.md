@@ -396,3 +396,15 @@ hidden below 360px; carousel arrows centred around the dots; Custom chips = Prop
 Not bugs: editor ⋯ menu as a bottom sheet on phones; Type it hint shows only first words (D-10); one-line cue
 inputs clip long text.
 
+
+## D-32 · Relaxed grading, "I was correct", Smart switch, Reset data (Matt, 2026-11-02, v0.9.0)
+- Grading relaxed: a key phrase of 2+ words counts when half its words (or synonyms) are said; "dose" also
+  takes volume / ml / draw up. Bands: all = Right, 50%+ = open blanks, 25%+ = Shaky, less = Missed.
+- Type it: the last-answer row shows "I was correct" on Missed / Shaky. It turns the answer Right and redoes
+  the progress step from the item's state before it (rec.prev, rec.how).
+- Placeholder card sets Pharm: Antibiotics and Normal lab values removed from the app; kept as test fixtures
+  (tests/fixtures/).
+- Options: Scope is Whole set / Custom. Smart is its own switch (opts.smart): scene by scene inside the scope,
+  then the whole scope ("Whole set" or "Custom set"). Old saves: practice 'smart' = Whole set + Smart on.
+- Home: Reset data (confirm) clears all saved sets, progress, Options, rounds and meta (store.reset).
+- Built by the build manager alone (small batch, no lanes). Tests 361.

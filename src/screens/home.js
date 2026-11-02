@@ -34,10 +34,18 @@
       U.carousel('jump', jump.map(function (s) { return slide(app, s); })) + '</section>' +
       '<section class="stack"><div class="row"><h2 class="sk-h2 grow">Recents</h2><button data-ui="button" data-kind="ghost" data-act="tab" data-id="library">See all</button></div>' +
       recents.map(function (s) { return U.setRow(s, app.tally(s)); }).join('') + '</section>' +
+      '<button data-ui="button" data-kind="ghost" data-act="resetData" class="sk-danger sk-tall">Reset data</button>' +
       '</main>' + U.tabbar('home');
   }
 
     var actions = {
+    // D-32: clears all saved progress, Options, rounds and edits after one confirm.
+    resetData: function (app) {
+      if (!window.confirm('Reset data? This clears all your progress, Options, rounds and edited sets.')) return;
+      SP.store.reset();
+      app.update({ screen: 'home', round: null, sheet: null });
+      app.toast('Data reset');
+    },
     // Open the set, then step straight back into its saved round.
     resumeLast: function (app, el) {
       SP.store.saveMeta({ last: el.dataset.id });

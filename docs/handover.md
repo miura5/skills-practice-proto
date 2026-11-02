@@ -1,10 +1,14 @@
 # Handover
 
-Last updated 2026-11-01 by the D-19 batch chat (build manager). No agent is running.
+Last updated 2026-11-02 by the D-32 chat (build manager). No agent is running.
+
+## v0.9.0 (D-32)
+Relaxed grading, "I was correct" on Missed/Shaky rows, placeholder card sets removed, Smart is a switch on
+top of Whole set / Custom, Reset data on Home. Matt is testing it himself next.
 
 ## Where things stand
-- Live: v0.8.2 at https://claude.ai/artifact/UUj5psocojXR1xkK2QVAbh (same link every release; version 14).
-- Tests: `node tests/core.test.js` passes 353.
+- Live: v0.9.0 (before: v0.8.2) at https://claude.ai/artifact/UUj5psocojXR1xkK2QVAbh (same link every release; version 14).
+- Tests: `node tests/core.test.js` passes 361.
 - Shipped today (v0.5.0): chunked learning, D-19 + D-21, tasks T-14..T-17 all ticked.
   - Chunks: card groups of 7; procedure scenes (Med Admin 9 chunks, NG tube 9). Smart rounds go
     Learn -> Link (last 3 steps of the previous chunk) -> Run (whole set) from progress.

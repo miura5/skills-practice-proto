@@ -19,11 +19,20 @@
   // The round's plan: { practice, stage, chunk, label, ids }. stage is 'learn' | 'run' for Smart and null
   // otherwise; chunk is the chunk id (null in Run). An old section that no longer exists falls back to
   // Smart; Smart without a set asks the whole list.
+  // D-32: Smart is its own switch (opts.smart), on top of the Scope (whole / custom). Saves from before
+  // D-32 have no switch: practice 'smart' means on, anything else off.
+  function smartOn(opts) {
+    var o = opts || {};
+    return typeof o.smart === 'boolean' ? o.smart : practiceOf(o) === 'smart';
+  }
+  function scopeOf(opts) { return practiceOf(opts) === 'custom' ? 'custom' : 'whole'; }
+
   function plan(items, opts, progress, set) {
-    var pr = practiceOf(opts), sec = S.legacy(opts);
+    var pr = practiceOf(opts), sec = S.legacy(opts), o = opts || {};
     if (sec && !(items || []).some(function (it) { return it.section === sec; })) pr = 'smart';
-    if (pr !== 'smart' || !set) return { practice: pr, stage: null, chunk: null, label: null, ids: null };
-    var s = SP.core.chunks.smart(set, progress || {});
+    var on = typeof o.smart === 'boolean' ? o.smart : pr === 'smart';
+    if (!on || !set) return { practice: pr === 'smart' && set ? 'whole' : pr, stage: null, chunk: null, label: null, ids: null };
+    var s = SP.core.chunks.smart(set, progress || {}, pr === 'custom' ? S.selected(o, items) : null);
     return { practice: 'smart', stage: s.stage, chunk: s.chunk ? s.chunk.id : null, label: s.label, ids: s.ids };
   }
 
@@ -131,5 +140,5 @@
     return m;
   }
 
-  SP.core.rounds = { build: build, selected: S.selected, plan: plan, practiceOf: practiceOf, basisOf: basisOf, DEFAULTS: DEFAULTS, snapshot: snapshot, restore: restore, pick: pick, stale: stale, modeOf: modeOf, newer: newer };
+  SP.core.rounds = { build: build, selected: S.selected, plan: plan, practiceOf: practiceOf, smartOn: smartOn, scopeOf: scopeOf, basisOf: basisOf, DEFAULTS: DEFAULTS, snapshot: snapshot, restore: restore, pick: pick, stale: stale, modeOf: modeOf, newer: newer };
 })((typeof window !== 'undefined' ? window : globalThis).SP);

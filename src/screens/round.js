@@ -171,11 +171,12 @@
     var r = app.state.round, it = current(app), now = Date.now();
     r.active = (r.active || 0) + Math.min(ACTIVE_CAP, Math.max(0, now - (r.last || r.t0 || now)));
     r.last = now;
-    var map = Object.assign({}, SP.store.progress(app.set.id));
+    var map = Object.assign({}, SP.store.progress(app.set.id)), prev = map[it.id] || null;
     map[it.id] = P.apply(map[it.id], result, how);
     SP.store.saveProgress(app.set.id, map);
     var rec = { id: it.id, mode: r.mode, result: result, hinted: !!(note && note.hinted) };
     if (note && note.typed) rec.typed = note.typed;
+    rec.prev = prev; rec.how = how;   // D-32: kept so "I was correct" can redo the progress step
     r.res.push(rec);
     if (note) r.notes[it.id] = note;
     r.i += 1; r.flip = false; r.hint = false; r.open = null;
@@ -237,9 +238,10 @@
   // T-32c: the Results button after a Smart round. Still in the same learn chunk -> Again: <chunk>;
   // otherwise the next chunk, or the whole set once every chunk is learned (Again when this was a Run round).
   function nextLabel(r, p, app) {
-    var s = SP.core.chunks.smart(app.set, p), learn = r.stage === 'learn' || r.stage === 'link';
+    var o = SP.store.settings(app.set.id), only = SP.core.rounds.scopeOf(o) === 'custom' ? SP.core.scope.selected(o, app.items) : null;
+    var s = SP.core.chunks.smart(app.set, p, only), learn = r.stage === 'learn' || r.stage === 'link';
     if (learn && s.chunk && s.chunk.id === r.chunk) return 'Again: ' + r.label;
-    if (s.stage === 'run') return (r.stage === 'run' ? 'Again: ' : 'Next: ') + 'Whole set';
+    if (s.stage === 'run') return (r.stage === 'run' ? 'Again: ' : 'Next: ') + s.label;
     return 'Next: ' + s.label;
   }
 
@@ -265,11 +267,22 @@
     startType: function (app) { start(app, 'type'); },
     again: function (app) { fresh(app, app.state.round.mode); },
     // D-22: after a Smart round, a fresh Smart round in the same mode (whatever Scope is saved).
-    continue: function (app) { fresh(app, app.state.round.mode, Object.assign({}, SP.store.settings(app.set.id), { practice: 'smart', section: null })); },
+    continue: function (app) { fresh(app, app.state.round.mode, Object.assign({}, SP.store.settings(app.set.id), { smart: true })); },
     // Options sheet, in a round: drop the saved round and begin a fresh one in the same mode.
     startOver: function (app) { var m = app.state.round.mode; clearSaved(app); app.state.round = null; fresh(app, m); },
     resume: function (app) { if (!resume(app)) app.toast('That round can’t be picked up any more.'); },
     end: function (app) { app.update({ screen: 'set', round: null }); },
+    // D-32: "I was correct" on the last Missed / Shaky answer: it counts as Right instead.
+    overrule: function (app) {
+      var r = app.state.round, x = r && r.res[r.res.length - 1];
+      if (!x || x.result === 'right') return;
+      var map = Object.assign({}, SP.store.progress(app.set.id));
+      map[x.id] = P.apply(x.prev, 'right', x.how === 'next' ? 'next' : x.hinted ? 'hint' : 'type');
+      SP.store.saveProgress(app.set.id, map);
+      x.result = 'right'; x.overruled = true;
+      if (r.notes[x.id]) r.notes[x.id].missing = [];
+      save(app, r); app.render(); app.focus('#answer');
+    },
     toSet: function (app) { app.update({ screen: 'set', round: null }); }
   };
 

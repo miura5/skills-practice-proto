@@ -178,6 +178,14 @@
   function saveRound(id, r) { put('rounds', id, r); }
   // A tombstone, not a delete: an old copy of the round arriving later cannot bring it back.
   function clearRound(id) { var r = cache.rounds[id]; if (r && !r.cleared) put('rounds', id, { cleared: true }); }
+  // D-32: Reset data: every saved record goes (sets, progress, settings, rounds, meta) on this account / browser.
+  function reset() {
+    ['sets', 'progress', 'settings', 'rounds'].forEach(function (name) {
+      Object.keys(cache[name]).forEach(function (id) { delete cache[name][id]; delete received[keyOf(name, id)]; backend.remove && backend.remove(name, id); });
+    });
+    cache.meta = {}; delete received.meta; backend.remove && backend.remove('meta', null);
+    emit();
+  }
   function meta() { return cache.meta || {}; }
   function saveMeta(patch) { put('meta', null, Object.assign({}, cache.meta, patch)); }
 
@@ -187,6 +195,6 @@
     all: all, get: get, saveSet: saveSet, removeSet: removeSet, newId: newId, isBuiltin: isBuiltin,
     progress: progress, saveProgress: saveProgress, settings: settings, saveSettings: saveSettings,
     round: round, saveRound: saveRound, clearRound: clearRound,
-    meta: meta, saveMeta: saveMeta
+    meta: meta, saveMeta: saveMeta, reset: reset
   };
 })(window.SP);

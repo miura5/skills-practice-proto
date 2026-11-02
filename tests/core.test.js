@@ -1,7 +1,8 @@
 // Run: node tests/core.test.js  (no dependencies). Every grading bug gets a line here (D-05).
 global.SP = { core: {}, content: { list: [], add(s) { this.list.push(s); } } };
 ['text', 'numbers', 'sets', 'keys', 'grade', 'progress', 'chunks', 'scope', 'rounds', 'sync'].forEach((f) => require('../src/core/' + f + '.js'));
-['procedures/med-admin', 'procedures/ngt', 'cards/pharm-antibiotics', 'cards/lab-values'].forEach((f) => require('../content/' + f + '.js'));
+['procedures/med-admin', 'procedures/ngt'].forEach((f) => require('../content/' + f + '.js'));
+['pharm-antibiotics', 'lab-values'].forEach((f) => require('./fixtures/' + f + '.js'));   // D-32: test-only card sets
 const { sets, grade, progress, rounds, chunks } = SP.core;
 let pass = 0, fail = 0;
 const ok = (name, cond) => { cond ? pass++ : (fail++, console.log('FAIL', name)); };
@@ -16,7 +17,7 @@ ok('ngt has 60 steps', sets.items(set('ngt')).length === 60);
 // grading
 const vanc = item('pharm-antibiotics', 'c2');
 ok('cards: both keys = right', grade(vanc, 'check trough, infuse slowly').result === 'right');
-ok('cards: one key = shaky', grade(vanc, 'check the trough').result === 'shaky');
+ok('cards: one key of two = open (D-32 relaxed)', grade(vanc, 'check the trough').result === 'open');
 ok('cards: nothing = missed', grade(vanc, 'give with food').result === 'missed');
 ok('cards: empty = missed', grade(vanc, '   ').result === 'missed');
 ok('numbers: potassium', grade(item('lab-values', 'c1'), '3.5 to 5').result === 'right');
@@ -172,8 +173,8 @@ ok('strict: no step ever grades nearby (neighbour text, both sets)', ['med-admin
 const t17Out = (g) => [g.result, g.share.toFixed(3), g.found.join('|'), g.missing.join('|')].join(' ');
 ok('strict: right unchanged', t17Out(grade(m('26d'), 'inspect skin, masses or tenderness, rotate', medSet)) === 'right 1.000 inspect skin|masses or tenderness|rotate ');
 ok('strict: open unchanged', t17Out(grade(m('26d'), 'inspect skin and rotate', medSet)) === 'open 0.667 inspect skin|rotate masses or tenderness');
-ok('strict: shaky unchanged', t17Out(grade(m('26e'), 'relax', medSet)) === 'shaky 0.500 relax antiseptic swab');
-ok('strict: missed unchanged', t17Out(grade(m('26d'), 'rotate', medSet)) === 'missed 0.333 rotate inspect skin|masses or tenderness');
+ok('relaxed: half = open (D-32)', t17Out(grade(m('26e'), 'relax', medSet)) === 'open 0.500 relax antiseptic swab');
+ok('relaxed: a third = shaky (D-32)', t17Out(grade(m('26d'), 'rotate', medSet)) === 'shaky 0.333 rotate inspect skin|masses or tenderness');
 ok('strict: grading blocks have no order rules', ['med-admin', 'ngt'].every((id) => ['strict', 'before', 'anytime'].every((k) => !(k in (set(id).grading || {})))));
 ok('strict: loose + require kept', Object.keys(medSet.grading.loose).length === 9 && Object.keys(medSet.grading.require).length > 0
   && grade(m('26l'), 'deploy safety cap, sharps container', medSet).result === 'right' && grade(m('23'), 'hand hygiene', medSet).missing.indexOf('clean gloves') >= 0);
@@ -381,6 +382,19 @@ ok('kit: escape and grip helpers are exported', typeof SP.ui.sortBind === 'funct
   ok('scope: a bare number with no step of its own takes its lettered steps', sc.parse('15', [{ id: 'x', num: '15a' }, { id: 'y', num: '15b' }]).join() === 'x,y');
   const d3 = sc.parseDetail('', scItems);
   ok('scope: empty text reads nothing and skips nothing', d3.ids.length === 0 && d3.skipped.length === 0);
+}
+
+// D-32: relaxed grading, Smart as a switch on top of the Scope
+{
+  const ma = set('med-admin'), tip = sets.items(ma).find((i) => i.cue === 'Tip below fluid, fill');
+  ok('d32 screenshot answer is right', grade(tip, 'keep needle below fluid and draw up dosage', ma).result === 'right');
+  ok('d32 unrelated answer still missed', grade(tip, 'wipe the vial top', ma).result === 'missed');
+  ok('d32 smartOn: legacy smart / whole / explicit', rounds.smartOn({ practice: 'smart' }) && !rounds.smartOn({ practice: 'whole' }) && rounds.smartOn({ practice: 'custom', smart: true }) && !rounds.smartOn({ smart: false }));
+  ok('d32 scopeOf: smart reads as whole', rounds.scopeOf({ practice: 'smart' }) === 'whole' && rounds.scopeOf({ practice: 'custom' }) === 'custom');
+  ok('d32 whole + smart = current chunk', t16Ids(rounds.build(t16Items, { practice: 'whole', smart: true }, t16A, t16Proc)) === 'b1,b2,b3');
+  ok('d32 smart off = whole set', t16Ids(rounds.build(t16Items, { practice: 'whole', smart: false }, t16A, t16Proc)) === t16Ids(t16Items));
+  ok('d32 custom + smart = first chunk inside the custom set', t16Ids(rounds.build(t16Items, { practice: 'custom', custom: ['a1', 'b2', 'c1'], smart: true }, {}, t16Proc)) === 'a1');
+  ok('d32 custom + smart, chunks done = run the custom set', (() => { const pl = rounds.plan(t16Items, { practice: 'custom', custom: ['a1', 'c1'], smart: true }, t16Map({ a1: 'familiar', c1: 'familiar' }), t16Proc); return pl.stage === 'run' && pl.ids.join() === 'a1,c1' && pl.label === 'Custom set'; })());
 }
 
 console.log(pass + ' passed, ' + fail + ' failed');

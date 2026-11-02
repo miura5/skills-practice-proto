@@ -36,7 +36,8 @@
       fb = '<li class="sk-row sk-last" data-result="' + last.result + '"><span class="n">' + U.esc(p.num) + '</span>' +
         '<span class="sk-last-body"><span class="sk-last-label">' + U.esc(cards ? p.front : (p.cue || p.answer)) + '</span>' +
         (miss ? '<span class="sk-note sk-clamp">Missing: ' + U.esc(miss) + '</span>' : '') + R.typedLine(last) +
-        '</span><span class="tag">' + TAG[last.result] + R.hintTag(last) + '</span></li>';
+        '</span><span class="tag">' + TAG[last.result] + R.hintTag(last) +
+        (last.result !== 'right' ? '<button data-ui="button" data-kind="ghost" class="sk-overrule" data-act="overrule">I was correct</button>' : '') + '</span></li>';
     }
     var upcoming = r.ids.slice(r.i + 1, r.i + 3).map(function (id, k) {
       var u = app.byId[id];

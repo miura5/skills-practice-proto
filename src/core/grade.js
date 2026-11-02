@@ -20,7 +20,7 @@
     return (x.kind || x.sections || x.cards || x.synonyms || x.grading) ? x : { synonyms: x };
   }
 
-  function band(share) { return share >= 1 ? 'right' : share >= 0.6 ? 'open' : share >= 0.34 ? 'shaky' : 'missed'; }
+  function band(share) { return share >= 1 ? 'right' : share >= 0.5 ? 'open' : share >= 0.25 ? 'shaky' : 'missed'; }
 
   function grade(item, typed, setArg, opts) {
     var set = asSet(setArg), o = opts || {}, lex = K.lexicon(set.synonyms), gr = set.grading || {};

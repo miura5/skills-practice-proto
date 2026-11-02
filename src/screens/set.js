@@ -56,17 +56,17 @@
     var p = SP.store.progress(set.id), n = SP.core.rounds.build(app.items, o, p, set).length;
     // D-22 Scope: Smart (default) / Whole set / Custom (procedures). An old saved section option reads
     // as Custom (rounds.practiceOf), with that section's steps.
-    var cur = SP.core.rounds.practiceOf(o);
+    var cur = SP.core.rounds.scopeOf(o);   // D-32: Whole set / Custom; Smart is a switch below
     var sel = SP.core.scope.selected(o, app.items);
     var customLine = sel.length ? sel.length + ' steps · ' + SP.core.scope.format(sel, app.items) : 'Pick steps';
     var edit = '<button data-ui="button" data-kind="ghost" class="sk-link" data-act="scopeEdit">Edit selection ›</button>';
     var scope = '<section class="stack g0"><h2 class="sk-h2">Scope</h2><div class="sk-radios" role="radiogroup" aria-label="Scope">' +
-      U.radio('practice', 'smart', 'Smart', cards ? '7 at a time, then the whole set' : 'Scene by scene, then the whole set', cur === 'smart') +
       U.radio('practice', 'whole', 'Whole set', '', cur === 'whole') +
       (cards ? '' : U.radio('practice', 'custom', 'Custom', customLine, cur === 'custom', edit)) + '</div></section>';
     return '<div class="sk-scrim" data-act="closeSheet"></div><section class="sk-sheet" role="dialog" aria-label="Options">' +
       '<div class="sk-sheet-h"><h2>Options</h2>' + U.iconBtn('close', 'Close', 'closeSheet') + '</div>' + scope +
       '<div class="stack g0">' +
+      U.toggle('smart', 'Smart', SP.core.rounds.smartOn(o), cards ? '7 at a time, then all of the scope' : 'Scene by scene, then all of the scope') +
       (cards ? '' : U.toggle('starred', 'Starred steps only', o.starred, 'The ones you can’t miss')) +
       U.toggle('weakFirst', 'Weak first', o.weakFirst) +
       U.toggle('skipLearned', 'Skip learned', o.skipLearned) +
@@ -87,6 +87,9 @@
   // Options change live: saved per set, and the current round is rebuilt from them.
   function onOption(app, el) {
     var o = SP.store.settings(app.set.id);
+    // D-32: make the Smart switch explicit before any change; old 'smart' scope becomes Whole set.
+    if (typeof o.smart !== 'boolean') o.smart = SP.core.rounds.smartOn(o);
+    if (o.practice === 'smart') o.practice = 'whole';
     o[el.dataset.opt] = el.type === 'checkbox' ? el.checked : el.value;
     if (el.dataset.opt === 'practice') delete o.section;   // the old section option gives way (D-22)
     SP.store.saveSettings(app.set.id, o);

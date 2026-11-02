@@ -76,15 +76,23 @@
   //   learn: chunk = the first chunk not learned; ids = exactly its ids; next = the label of the following
   //          chunk not learned, or 'Whole set'.
   //   run:   every chunk learned; ids = the whole set in set order; chunk null, index -1, next null.
-  function smart(set, map) {
+  // only (D-32): ids in the scope (Custom); chunks keep only those ids, empty chunks drop. null = whole set.
+  function smart(set, map, only) {
     var chunks = list(set);
+    if (only) {
+      var inS = {};
+      only.forEach(function (id) { inS[id] = 1; });
+      chunks = chunks.map(function (c) { return Object.assign({}, c, { ids: c.ids.filter(function (id) { return inS[id]; }) }); })
+        .filter(function (c) { return c.ids.length; });
+    }
     var index = -1;
     for (var i = 0; i < chunks.length; i++) if (!isLearned(chunks[i], map)) { index = i; break; }
     if (index < 0) {
       var whole = set ? ids(SP.core.sets.items(set)) : [];
-      return { stage: 'run', chunk: null, index: -1, ids: whole, label: WHOLE, next: null };
+      if (only) whole = whole.filter(function (id) { return only.indexOf(id) >= 0; });
+      return { stage: 'run', chunk: null, index: -1, ids: whole, label: only ? 'Custom set' : WHOLE, next: null };
     }
-    var chunk = chunks[index], next = WHOLE;
+    var chunk = chunks[index], next = only ? 'Custom set' : WHOLE;
     for (var j = index + 1; j < chunks.length; j++) if (!isLearned(chunks[j], map)) { next = chunks[j].label; break; }
     return { stage: 'learn', chunk: chunk, index: index, ids: chunk.ids.slice(), label: chunk.label, next: next };
   }

@@ -16,7 +16,7 @@
     'remove gloves': ['take off gloves', 'take gloves off', 'gloves off', 'doff gloves', 'doff', 'remove glove'],
     'gloves': ['put on gloves', 'put gloves on', 'gloves on', 'glove up', 'don gloves', 'don clean gloves', 'clean gloves', 'glove'],
     'accuracy': ['accurate', 'correct', 'correctness', 'right'], 'completeness': ['complete', 'completion', 'full', 'whole'],
-    'dob': ['birth date', 'birthdate', 'date of birth', 'birthday'], 'dose': ['dosage', 'doses', 'amount'],
+    'dob': ['birth date', 'birthdate', 'date of birth', 'birthday'], 'dose': ['dosage', 'doses', 'amount', 'volume', 'ml', 'draw up', 'drawn up'],
     'mrn': ['medical record number', 'record number', 'medical record'], 'time': ['times', 'timing', 'frequency'],
     'allergies': ['allergy', 'allergic'], 'name': ['names', 'full name']
   };
@@ -83,6 +83,13 @@
     if (!r.raw.length) return false;
     if (r.raw.every(function (t) { return hasTok(t, said); })) return true;
     if (r.canon.every(function (t) { return hasTok(t, said); })) return true;
+    // D-32 relaxed: a phrase of 2+ words counts when at least half its words (or their synonyms) were said
+    // ("below fluid level" <- "below fluid"; "correct volume" <- "dosage").
+    if (r.raw.length > 1) {
+      var n = Math.max(r.raw.filter(function (t) { return hasTok(t, said); }).length,
+        r.canon.reduce(function (k, t) { return k + (hasTok(t, said) ? t.split('_').length : 0); }, 0));
+      if (n * 2 >= r.raw.length) return true;
+    }
     if (r.raw.length > 1) {
       var hit = r.canon.filter(function (t) { return lex.isCanon(t) && said.indexOf(t) >= 0; });
       var covered = hit.reduce(function (n, t) { return n + t.split('_').length; }, 0);
