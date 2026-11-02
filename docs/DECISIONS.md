@@ -406,5 +406,5 @@ inputs clip long text.
   (tests/fixtures/).
 - Options: Scope is Whole set / Custom. Smart is its own switch (opts.smart): scene by scene inside the scope,
   then the whole scope ("Whole set" or "Custom set"). Old saves: practice 'smart' = Whole set + Smart on.
-- Home: Reset data (confirm) clears all saved sets, progress, Options, rounds and meta (store.reset).
+- Home: Reset data (second tap confirms on the page; window.confirm is blocked in the artifact frame) clears all saved sets, progress, Options, rounds and meta (store.reset).
 - Built by the build manager alone (small batch, no lanes). Tests 361.

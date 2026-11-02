@@ -34,16 +34,22 @@
       U.carousel('jump', jump.map(function (s) { return slide(app, s); })) + '</section>' +
       '<section class="stack"><div class="row"><h2 class="sk-h2 grow">Recents</h2><button data-ui="button" data-kind="ghost" data-act="tab" data-id="library">See all</button></div>' +
       recents.map(function (s) { return U.setRow(s, app.tally(s)); }).join('') + '</section>' +
-      '<button data-ui="button" data-kind="ghost" data-act="resetData" class="sk-danger sk-tall">Reset data</button>' +
+      (app.state.confirmReset
+        ? '<div class="stack g8"><p class="sk-meta center">This clears all your progress, Options, rounds and edited sets.</p>' +
+          '<button data-ui="button" data-kind="primary" data-act="resetData" class="sk-tall">Tap again to reset all data</button>' +
+          '<button data-ui="button" data-kind="ghost" data-act="cancelReset" class="sk-tall">Cancel</button></div>'
+        : '<button data-ui="button" data-kind="ghost" data-act="resetData" class="sk-danger sk-tall">Reset data</button>') +
       '</main>' + U.tabbar('home');
   }
 
     var actions = {
     // D-32: clears all saved progress, Options, rounds and edits after one confirm.
+    // window.confirm is blocked in the artifact frame, so the confirm is a second tap on the page.
+    cancelReset: function (app) { app.update({ confirmReset: false }); },
     resetData: function (app) {
-      if (!window.confirm('Reset data? This clears all your progress, Options, rounds and edited sets.')) return;
+      if (!app.state.confirmReset) return app.update({ confirmReset: true });
       SP.store.reset();
-      app.update({ screen: 'home', round: null, sheet: null });
+      app.update({ screen: 'home', round: null, sheet: null, confirmReset: false });
       app.toast('Data reset');
     },
     // Open the set, then step straight back into its saved round.
