@@ -408,3 +408,8 @@ inputs clip long text.
   then the whole scope ("Whole set" or "Custom set"). Old saves: practice 'smart' = Whole set + Smart on.
 - Home: Reset data (second tap confirms on the page; window.confirm is blocked in the artifact frame) clears all saved sets, progress, Options, rounds and meta (store.reset).
 - Built by the build manager alone (small batch, no lanes). Tests 361.
+
+## D-33 · Grading: joined/split spellings meet; check = assessment (Matt, 2026-11-02)
+- Adjacent typed words also count joined ("pre administration" = "preadministration"), and a key's
+  adjacent words count when typed as one word. Synonym: assessment = assess / check / evaluate.
+- "I was correct" stays for real edge cases. Tests 363.

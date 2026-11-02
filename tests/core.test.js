@@ -397,5 +397,12 @@ ok('kit: escape and grip helpers are exported', typeof SP.ui.sortBind === 'funct
   ok('d32 custom + smart, chunks done = run the custom set', (() => { const pl = rounds.plan(t16Items, { practice: 'custom', custom: ['a1', 'c1'], smart: true }, t16Map({ a1: 'familiar', c1: 'familiar' }), t16Proc); return pl.stage === 'run' && pl.ids.join() === 'a1,c1' && pl.label === 'Custom set'; })());
 }
 
+// D-33: joined / split spellings, check = assessment
+{
+  const ma = set('med-admin'), pre = sets.items(ma).find((i) => /pre-?admin/i.test(i.text || i.raw || ''));
+  ok('d33 preadministration checks = right', !!pre && grade(pre, 'preadministration checks if not already done', ma).result === 'right');
+  ok('d33 split spelling still right', !!pre && grade(pre, 'pre administration assessment', ma).result === 'right');
+}
+
 console.log(pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);

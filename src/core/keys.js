@@ -18,7 +18,7 @@
     'accuracy': ['accurate', 'correct', 'correctness', 'right'], 'completeness': ['complete', 'completion', 'full', 'whole'],
     'dob': ['birth date', 'birthdate', 'date of birth', 'birthday'], 'dose': ['dosage', 'doses', 'amount', 'volume', 'ml', 'draw up', 'drawn up'],
     'mrn': ['medical record number', 'record number', 'medical record'], 'time': ['times', 'timing', 'frequency'],
-    'allergies': ['allergy', 'allergic'], 'name': ['names', 'full name']
+    'allergies': ['allergy', 'allergic'], 'assessment': ['assess', 'check', 'checks', 'checking', 'evaluate', 'evaluation', 'eval'], 'name': ['names', 'full name']
   };
 
   function seq(s) { return T.tokens(s).join(' '); }
@@ -44,7 +44,10 @@
         if (s.indexOf(p) >= 0) { add.push(r[1]); s = s.split(p).join(' ' + r[1] + ' '); }
       });
       var canon = s.trim().split(' ').filter(Boolean);
-      return { raw: raw, canon: canon, all: uniq(raw.concat(add, canon)) };
+      // D-33: "pre administration" also reads as "preadministration" (joined and split spellings meet).
+      var joins = [];
+      for (var i = 0; i + 1 < raw.length; i++) joins.push(T.stem(raw[i] + raw[i + 1]));
+      return { raw: raw, canon: canon, all: uniq(raw.concat(add, canon, joins)) };
     }
     return { read: read, isCanon: function (t) { return !!canons[t]; } };
   }
@@ -86,7 +89,10 @@
     // D-32 relaxed: a phrase of 2+ words counts when at least half its words (or their synonyms) were said
     // ("below fluid level" <- "below fluid"; "correct volume" <- "dosage").
     if (r.raw.length > 1) {
-      var n = Math.max(r.raw.filter(function (t) { return hasTok(t, said); }).length,
+      var got = r.raw.map(function (t) { return hasTok(t, said); });
+      for (var j = 0; j + 1 < r.raw.length; j++) if (hasTok(T.stem(r.raw[j] + r.raw[j + 1]), said)) got[j] = got[j + 1] = true;
+      if (got.every(Boolean)) return true;
+      var n = Math.max(got.filter(Boolean).length,
         r.canon.reduce(function (k, t) { return k + (hasTok(t, said) ? t.split('_').length : 0); }, 0));
       if (n * 2 >= r.raw.length) return true;
     }
